@@ -92,7 +92,43 @@ neo config auth delete bitbucket
 
 ---
 
-### 2. 🗄️ Repositórios Bitbucket (`neo repo`)
+### 2. 🏢 Workspaces do Bitbucket (`neo workspace`)
+
+Permite listar todos os workspaces acessíveis na conta do Bitbucket Cloud e definir interativamente ou via flag qual deles é o workspace ativo/padrão, persistindo a escolha em `config.toml`.
+
+#### Comandos Disponíveis:
+
+| Comando | Opções | Descrição |
+|---|---|---|
+| `neo workspace list` | — | Lista todos os workspaces aos quais a conta tem acesso, indicando com `[● Ativo]` o workspace padrão. |
+| `neo workspace current` | — | Exibe o workspace atualmente selecionado e sua origem (configuração local ou detecção automática via API). |
+| `neo workspace select` | `[-s, --slug <slug>]` | Seleciona o workspace ativo. Sem flag, abre um menu interativo no terminal; com `--slug`, define diretamente. |
+| `neo workspace set <slug>` | — | Atalho direto para definir o workspace padrão por slug. |
+
+#### Exemplos:
+
+```bash
+# Listar workspaces da conta
+neo workspace list
+
+# Selecionar workspace de forma interativa
+neo workspace select
+
+# Definir workspace diretamente por slug
+neo workspace set ebi_informatica
+# ou
+neo workspace select --slug ebi_informatica
+
+# Verificar qual workspace está ativo
+neo workspace current
+
+# Em formato JSON para scripts
+neo --json workspace list
+```
+
+---
+
+### 3. 🗄️ Repositórios Bitbucket (`neo repo`)
 
 Gerencia e localiza repositórios no Bitbucket Cloud via API REST 2.0.
 
@@ -126,7 +162,7 @@ neo --json repo list > repos.json
 
 ---
 
-### 3. 📜 Histórico & Commits (`neo commits`)
+### 4. 📜 Histórico & Commits (`neo commits`)
 
 Consulta histórico de commits no Bitbucket com suporte a auto-detecção do repositório a partir do diretório Git local.
 
@@ -154,7 +190,7 @@ neo --json commits search --limit 5
 
 ---
 
-### 4. 🎯 Demandas & Stories do Shortcut (`neo story`)
+### 5. 🎯 Demandas & Stories do Shortcut (`neo story`)
 
 Integração direta com a **REST API v3 do Shortcut** (`app.shortcut.com`) para acompanhamento de tarefas, chamados e análise contextual de tickets.
 
@@ -235,7 +271,8 @@ uv run mypy src
 1. [x] **Fundação da CLI e Autenticação Segura** (`specs/0002-fundacao-cli-e-configuracao`)
 2. [x] **Módulo Bitbucket** (`specs/0003-modulo-bitbucket`)
 3. [x] **Módulo Shortcut API v3** (`specs/0004-modulo-shortcut`)
-4. [ ] **Investigação Cruzada de Bugs** (`specs/0005-analise-cruzada-investigacao-bugs`): correlacionar dados do Shortcut com commits e repositórios do Bitbucket via `neo bug investigate <id>`.
+4. [x] **Seleção e Gestão de Workspace do Bitbucket** (`specs/0005-selecao-de-workspace-bitbucket`)
+5. [ ] **Investigação Cruzada de Bugs** (`specs/0006-analise-cruzada-investigacao-bugs`): correlacionar dados do Shortcut com commits e repositórios do Bitbucket via `neo bug investigate <id>`.
 
 ---
 

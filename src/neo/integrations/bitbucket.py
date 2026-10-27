@@ -8,7 +8,11 @@ from typing import Any
 
 import httpx
 
-from neo.integrations.bitbucket_models import BitbucketCommit, BitbucketRepo
+from neo.integrations.bitbucket_models import (
+    BitbucketCommit,
+    BitbucketRepo,
+    BitbucketWorkspace,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -90,22 +94,32 @@ class BitbucketClient:
 
             raise BitbucketError(f"Erro na API do Bitbucket ({response.status_code}): {msg}")
 
-    def get_default_workspace(self) -> str:
-        """Busca o primeiro workspace disponível para a conta autenticada."""
+    def list_workspaces(self) -> list[BitbucketWorkspace]:
+        """Lista todos os workspaces aos quais a conta autenticada tem acesso."""
         url = f"{self.base_url}/user/workspaces"
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.get(url, headers=self._get_headers())
-            self._handle_response_error(resp, "obter workspace do usuário")
+            self._handle_response_error(resp, "listar workspaces do usuário")
             data = resp.json()
-            values = data.get("values", [])
-            if not values:
-                raise BitbucketNotFoundError(
-                    "Nenhum workspace encontrado para a conta autenticada."
-                )
-            workspace_slug = values[0].get("workspace", {}).get("slug")
-            if not workspace_slug:
-                workspace_slug = values[0].get("slug", "")
-            return str(workspace_slug)
+            workspaces: list[BitbucketWorkspace] = []
+            for item in data.get("values", []):
+                if isinstance(item, dict):
+                    workspaces.append(BitbucketWorkspace.from_api_dict(item))
+            return workspaces
+
+    def get_default_workspace(self, ignore_config: bool = False) -> str:
+        """Retorna o workspace padrão (respeitando config local ou fallback para API)."""
+        if not ignore_config:
+            from neo.config import get_default_workspace_config
+
+            cfg_ws = get_default_workspace_config()
+            if cfg_ws:
+                return cfg_ws
+
+        workspaces = self.list_workspaces()
+        if not workspaces:
+            raise BitbucketNotFoundError("Nenhum workspace encontrado para a conta autenticada.")
+        return workspaces[0].slug
 
     def list_repositories(self, workspace: str | None = None) -> list[BitbucketRepo]:
         """Lista os repositórios do workspace."""

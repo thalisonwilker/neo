@@ -128,3 +128,27 @@ class BitbucketCommit(BaseModel):
             date=data.get("date", ""),
             author=BitbucketCommitAuthor(raw=raw_author, display_name=display_name),
         )
+
+
+class BitbucketWorkspace(BaseModel):
+    """Representa um workspace no Bitbucket Cloud."""
+
+    uuid: str = ""
+    name: str = ""
+    slug: str = ""
+    is_admin: bool = False
+
+    @classmethod
+    def from_api_dict(cls, data: dict[str, Any]) -> BitbucketWorkspace:
+        """Constrói o workspace a partir do payload de /user/workspaces ou /workspaces/{slug}."""
+        is_admin = data.get("administrator", False)
+        ws_data = data.get("workspace", data)
+        if not isinstance(ws_data, dict):
+            ws_data = data
+
+        return cls(
+            uuid=ws_data.get("uuid", ""),
+            name=ws_data.get("name") or ws_data.get("slug", ""),
+            slug=ws_data.get("slug", ""),
+            is_admin=bool(is_admin),
+        )

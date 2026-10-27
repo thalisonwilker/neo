@@ -148,3 +148,64 @@ def test_list_commits(bb_client: BitbucketClient):
     assert commits[0].short_hash == "1234567"
     assert commits[0].summary == "feat: adiciona login"
     assert commits[0].author.author_name == "Thalyson"
+
+
+@respx.mock
+def test_list_workspaces(bb_client: BitbucketClient):
+    from neo.integrations.bitbucket_models import BitbucketWorkspace
+
+    respx.get("https://api.bitbucket.org/2.0/user/workspaces").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "values": [
+                    {
+                        "type": "workspace_access",
+                        "administrator": True,
+                        "workspace": {
+                            "name": "EBI Informática",
+                            "slug": "ebi_informatica",
+                            "uuid": "{f39a5585-9c5e-4ff5-a3c3-f799032772f2}",
+                        },
+                    }
+                ]
+            },
+        )
+    )
+
+    workspaces = bb_client.list_workspaces()
+    assert len(workspaces) == 1
+    assert isinstance(workspaces[0], BitbucketWorkspace)
+    assert workspaces[0].name == "EBI Informática"
+    assert workspaces[0].slug == "ebi_informatica"
+    assert workspaces[0].is_admin is True
+
+
+@respx.mock
+def test_get_default_workspace_precedence(bb_client: BitbucketClient):
+    from unittest.mock import patch
+
+    # 1. Com config salvo
+    with patch("neo.config.get_default_workspace_config", return_value="configured-ws"):
+        ws = bb_client.get_default_workspace()
+        assert ws == "configured-ws"
+
+    # 2. Sem config salvo (fallback para API)
+    respx.get("https://api.bitbucket.org/2.0/user/workspaces").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "values": [
+                    {
+                        "workspace": {
+                            "name": "Auto WS",
+                            "slug": "auto-ws",
+                        }
+                    }
+                ]
+            },
+        )
+    )
+    with patch("neo.config.get_default_workspace_config", return_value=None):
+        ws = bb_client.get_default_workspace()
+        assert ws == "auto-ws"

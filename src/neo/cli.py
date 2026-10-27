@@ -11,6 +11,7 @@ from neo.commands.commits import commits_app
 from neo.commands.config import config_app
 from neo.commands.repo import repo_app
 from neo.commands.story import story_app
+from neo.commands.workspace import workspace_app
 
 __version__ = "0.1.0"
 
@@ -36,6 +37,7 @@ investigando dados com autonomia e sem atrito.
 
 # Registra subcomandos
 app.add_typer(config_app, name="config")
+app.add_typer(workspace_app, name="workspace")
 app.add_typer(repo_app, name="repo")
 app.add_typer(commits_app, name="commits")
 app.add_typer(story_app, name="story")

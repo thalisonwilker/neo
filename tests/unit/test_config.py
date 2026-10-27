@@ -128,3 +128,15 @@ def test_get_all_services_status(tmp_path: Path):
         assert statuses["bitbucket"]["source"] == "env"
         assert statuses["bitbucket"]["masked_token"] == "********3456"
         assert statuses["shortcut"]["configured"] is False
+
+
+def test_default_workspace_config(tmp_path: Path):
+    from neo.config import get_default_workspace_config, set_default_workspace_config
+
+    assert get_default_workspace_config(config_dir=tmp_path) is None
+
+    set_default_workspace_config("meu-workspace", config_dir=tmp_path)
+    assert get_default_workspace_config(config_dir=tmp_path) == "meu-workspace"
+
+    with pytest.raises(ValueError, match="não pode ser vazio"):
+        set_default_workspace_config("  ", config_dir=tmp_path)

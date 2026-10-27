@@ -77,17 +77,51 @@ def _read_file_config(config_file: Path) -> dict[str, Any]:
 def _write_file_config(config_file: Path, data: dict[str, Any]) -> None:
     """Escreve as configurações no arquivo TOML garantindo permissões 0600."""
     config_file.parent.mkdir(parents=True, exist_ok=True)
-    lines: list[str] = ["[auth]"]
-    auth_data = data.get("auth", {})
-    for k, v in auth_data.items():
-        lines.append(f'{k} = "{v}"')
-    content = "\n".join(lines) + "\n"
+    lines: list[str] = []
 
+    for section, values in data.items():
+        if isinstance(values, dict) and values:
+            lines.append(f"[{section}]")
+            for k, v in values.items():
+                if isinstance(v, bool):
+                    lines.append(f"{k} = {str(v).lower()}")
+                elif isinstance(v, (int, float)):
+                    lines.append(f"{k} = {v}")
+                else:
+                    lines.append(f'{k} = "{v}"')
+            lines.append("")
+
+    content = "\n".join(lines).strip() + "\n"
     config_file.write_text(content, encoding="utf-8")
     try:
         config_file.chmod(stat.S_IRUSR | stat.S_IWUSR)  # 0600
     except OSError as exc:
         logger.debug("Não foi possível alterar permissões de %s: %s", config_file, exc)
+
+
+def get_default_workspace_config(config_dir: Path | None = None) -> str | None:
+    """Recupera o workspace padrão configurado no arquivo config.toml."""
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    bitbucket_cfg = data.get("bitbucket", {})
+    if isinstance(bitbucket_cfg, dict):
+        ws = bitbucket_cfg.get("default_workspace")
+        if isinstance(ws, str) and ws.strip():
+            return ws.strip()
+    return None
+
+
+def set_default_workspace_config(workspace: str, config_dir: Path | None = None) -> None:
+    """Salva o workspace padrão no arquivo config.toml."""
+    clean_ws = workspace.strip()
+    if not clean_ws:
+        raise ValueError("O slug do workspace não pode ser vazio.")
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    if "bitbucket" not in data or not isinstance(data["bitbucket"], dict):
+        data["bitbucket"] = {}
+    data["bitbucket"]["default_workspace"] = clean_ws
+    _write_file_config(config_file, data)
 
 
 def get_credential_source(service: str, config_dir: Path | None = None) -> str | None:
