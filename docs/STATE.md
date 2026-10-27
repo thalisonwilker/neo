@@ -11,8 +11,8 @@ alwaysApply: true
 **Última atualização:** 2026-10-27 por Antigravity
 
 ## Em andamento / próximo passo
-- **Fase atual:** Onda 1 (MVP). Features concluídas: `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket` e `0004-modulo-shortcut` (46 testes passando, 83.92% de cobertura, gates de ruff e mypy estritos limpos).
-- **Próximo passo concreto:** Implementar a feature `specs/0005-analise-cruzada-investigacao-bugs/` (`neo bug investigate <id>`) correlacionando dados do Shortcut com commits e branches do Bitbucket.
+- **Fase atual:** Onda 1 (MVP). Features concluídas e validadas em ambiente real: `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket` (validado contra Bitbucket Cloud de `ebi_informatica`) e `0004-modulo-shortcut` (validado contra Shortcut `easygestor`) — 46 testes automatizados passando, 83.92% de cobertura, gates de ruff e mypy estritos limpos.
+- **Próximo passo concreto:** Implementar a feature `specs/0005-analise-cruzada-investigacao-bugs/` (`neo bug investigate <id>`) correlacionando dados do Shortcut com commits e repositórios do Bitbucket.
 
 
 
