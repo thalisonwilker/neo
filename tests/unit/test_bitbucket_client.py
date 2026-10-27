@@ -1,0 +1,150 @@
+import httpx
+import pytest
+import respx
+
+from neo.integrations.bitbucket import (
+    BitbucketAuthError,
+    BitbucketClient,
+    BitbucketNotFoundError,
+)
+from neo.integrations.bitbucket_models import BitbucketCommit, BitbucketRepo
+
+
+@pytest.fixture
+def bb_client():
+    return BitbucketClient(token="mock-token", base_url="https://api.bitbucket.org/2.0")
+
+
+@respx.mock
+def test_list_repositories(bb_client: BitbucketClient):
+    respx.get("https://api.bitbucket.org/2.0/repositories/my-workspace").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "values": [
+                    {
+                        "name": "Repo One",
+                        "slug": "repo-one",
+                        "is_private": True,
+                        "description": "Primary backend",
+                        "updated_on": "2026-10-27T10:00:00Z",
+                        "mainbranch": {"name": "main"},
+                        "links": {
+                            "clone": [
+                                {
+                                    "name": "ssh",
+                                    "href": "git@bitbucket.org:my-workspace/repo-one.git",
+                                },
+                                {
+                                    "name": "https",
+                                    "href": "https://bitbucket.org/my-workspace/repo-one.git",
+                                },
+                            ]
+                        },
+                    }
+                ]
+            },
+        )
+    )
+
+    repos = bb_client.list_repositories(workspace="my-workspace")
+    assert len(repos) == 1
+    assert isinstance(repos[0], BitbucketRepo)
+    assert repos[0].name == "Repo One"
+    assert repos[0].slug == "repo-one"
+    assert repos[0].ssh_clone_url == "git@bitbucket.org:my-workspace/repo-one.git"
+    assert repos[0].https_clone_url == "https://bitbucket.org/my-workspace/repo-one.git"
+
+
+@respx.mock
+def test_search_repositories(bb_client: BitbucketClient):
+    respx.get("https://api.bitbucket.org/2.0/repositories/my-workspace").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "values": [
+                    {"name": "Frontend App", "slug": "frontend-app", "is_private": False},
+                    {
+                        "name": "Backend API",
+                        "slug": "backend-api",
+                        "is_private": True,
+                        "description": "Core API",
+                    },
+                ]
+            },
+        )
+    )
+
+    results = bb_client.search_repositories(query="backend", workspace="my-workspace")
+    assert len(results) == 1
+    assert results[0].slug == "backend-api"
+
+
+@respx.mock
+def test_get_repository_not_found(bb_client: BitbucketClient):
+    respx.get("https://api.bitbucket.org/2.0/repositories/my-workspace/repo-inexistente").mock(
+        return_value=httpx.Response(404, json={"error": {"message": "Repository not found"}})
+    )
+
+    with pytest.raises(BitbucketNotFoundError, match="não foi encontrado"):
+        bb_client.get_repository(repo_slug="repo-inexistente", workspace="my-workspace")
+
+
+@respx.mock
+def test_auth_error_401(bb_client: BitbucketClient):
+    respx.get("https://api.bitbucket.org/2.0/repositories/my-workspace").mock(
+        return_value=httpx.Response(401, json={"error": {"message": "Invalid token"}})
+    )
+
+    with pytest.raises(BitbucketAuthError, match="Falha de autenticação"):
+        bb_client.list_repositories(workspace="my-workspace")
+
+
+@respx.mock
+def test_create_repository(bb_client: BitbucketClient):
+    respx.post("https://api.bitbucket.org/2.0/repositories/my-workspace/new-repo").mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "name": "New Repo",
+                "slug": "new-repo",
+                "is_private": True,
+                "description": "Criado via Neo CLI",
+            },
+        )
+    )
+
+    repo = bb_client.create_repository(
+        name="New Repo",
+        workspace="my-workspace",
+        is_private=True,
+        description="Criado via Neo CLI",
+    )
+    assert repo.slug == "new-repo"
+    assert repo.is_private is True
+
+
+@respx.mock
+def test_list_commits(bb_client: BitbucketClient):
+    respx.get("https://api.bitbucket.org/2.0/repositories/my-workspace/my-repo/commits").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "values": [
+                    {
+                        "hash": "1234567890abcdef",
+                        "message": "feat: adiciona login\n\nDetalhes do commit",
+                        "date": "2026-10-27T12:00:00Z",
+                        "author": {"raw": "Thalyson <thalyson@exemplo.com>"},
+                    }
+                ]
+            },
+        )
+    )
+
+    commits = bb_client.list_commits(repo_slug="my-repo", workspace="my-workspace")
+    assert len(commits) == 1
+    assert isinstance(commits[0], BitbucketCommit)
+    assert commits[0].short_hash == "1234567"
+    assert commits[0].summary == "feat: adiciona login"
+    assert commits[0].author.author_name == "Thalyson"

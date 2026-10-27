@@ -7,7 +7,9 @@ from dataclasses import dataclass
 import typer
 from rich import print as rprint
 
+from neo.commands.commits import commits_app
 from neo.commands.config import config_app
+from neo.commands.repo import repo_app
 
 __version__ = "0.1.0"
 
@@ -33,6 +35,8 @@ investigando dados com autonomia e sem atrito.
 
 # Registra subcomandos
 app.add_typer(config_app, name="config")
+app.add_typer(repo_app, name="repo")
+app.add_typer(commits_app, name="commits")
 
 
 def version_callback(value: bool) -> None:

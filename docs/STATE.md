@@ -11,8 +11,10 @@ alwaysApply: true
 **Última atualização:** 2026-10-27 por Antigravity
 
 ## Em andamento / próximo passo
-- **Fase atual:** Onda 1 (MVP). Feature `0002-fundacao-cli-e-configuracao` concluída com sucesso (20 testes passando, 91.42% de cobertura, gates de ruff e mypy estritos limpos).
-- **Próximo passo concreto:** Abrir a feature `specs/0003-modulo-bitbucket/` para implementar os comandos `neo repo list`, `neo repo search`, `neo repo clone` e `neo commits search`.
+- **Fase atual:** Onda 1 (MVP). Features concluídas: `0002-fundacao-cli-e-configuracao` e `0003-modulo-bitbucket` (34 testes passando, 83.22% de cobertura, gates de ruff e mypy estritos limpos).
+- **Próximo passo concreto:** Iniciar a feature `specs/0004-modulo-shortcut/` para implementar os comandos `neo story list [--mine]`, `neo story show <id>` e `neo story analyze <id>`.
+
+
 
 
 
