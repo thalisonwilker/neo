@@ -44,7 +44,8 @@ alwaysApply: false
 > A pasta [`specs/`](../specs/) é a fonte viva; atualize ao criar features com `/nova-feature`.
 - [`specs/0001-exemplo-cota-de-uso/`](../specs/0001-exemplo-cota-de-uso/spec.md) — exemplo de referência da esteira
 - [`specs/0002-fundacao-cli-e-configuracao/`](../specs/0002-fundacao-cli-e-configuracao/spec.md) — fundação da CLI, Rich, flag --json e Keyring (implementada)
-- [`specs/0003-modulo-bitbucket/`](../specs/0003-modulo-bitbucket/spec.md) — repositórios e commits do Bitbucket (ativa)
+- [`specs/0003-modulo-bitbucket/`](../specs/0003-modulo-bitbucket/spec.md) — repositórios e commits do Bitbucket (implementada)
+- [`specs/0004-modulo-shortcut/`](../specs/0004-modulo-shortcut/spec.md) — demandas e stories do Shortcut via REST API v3 (ativa)
 
 ## 📖 Linguagem & convenções
 - **Glossário** (linguagem ubíqua) → [glossary.md](glossary.md)

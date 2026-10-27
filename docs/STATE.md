@@ -11,8 +11,10 @@ alwaysApply: true
 **Última atualização:** 2026-10-27 por Antigravity
 
 ## Em andamento / próximo passo
-- **Fase atual:** Onda 1 (MVP). Features concluídas: `0002-fundacao-cli-e-configuracao` e `0003-modulo-bitbucket` (34 testes passando, 83.22% de cobertura, gates de ruff e mypy estritos limpos).
-- **Próximo passo concreto:** Iniciar a feature `specs/0004-modulo-shortcut/` para implementar os comandos `neo story list [--mine]`, `neo story show <id>` e `neo story analyze <id>`.
+- **Fase atual:** Onda 1 (MVP). Features concluídas: `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket` e `0004-modulo-shortcut` (46 testes passando, 83.92% de cobertura, gates de ruff e mypy estritos limpos).
+- **Próximo passo concreto:** Implementar a feature `specs/0005-analise-cruzada-investigacao-bugs/` (`neo bug investigate <id>`) correlacionando dados do Shortcut com commits e branches do Bitbucket.
+
+
 
 
 
