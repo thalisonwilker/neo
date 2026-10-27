@@ -1,0 +1,79 @@
+site_name: Neo
+site_description: Personal Command Assistant — Compreenda seus sistemas. Seja dono das suas escolhas.
+site_author: Thalyson
+site_url: https://thalyson.github.io/neo/
+repo_url: https://github.com/thalysonwilker/neo
+repo_name: neo
+
+theme:
+  name: material
+  language: pt
+  palette:
+    # Esquema Claro
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Alternar para modo escuro
+    # Esquema Escuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Alternar para modo claro
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+exclude_docs: |
+  **/_templates/**
+  **/*.template.md
+  STATE.md
+  lessons.md
+  README.md
+  architecture/**
+  engineering/**
+  product/**
+
+nav:
+  - Início: index.md
+  - Primeiros Passos: getting-started.md
+  - Configuração: configuration.md
+  - Comandos da CLI:
+      - Visão Geral: cli/index.md
+      - Workspaces: cli/workspace.md
+      - Repositórios: cli/repo.md
+      - Commits: cli/commits.md
+      - Stories & Demandas: cli/story.md
+  - Engenharia & SDD:
+      - Visão Geral: architecture.md
+      - Glossário: glossary.md

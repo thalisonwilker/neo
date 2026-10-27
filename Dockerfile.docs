@@ -1,0 +1,15 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Instalação das dependências do MkDocs Material e extensões
+RUN pip install --no-cache-dir \
+    mkdocs>=1.6.1 \
+    mkdocs-material>=9.6.0 \
+    pymdown-extensions>=10.14.0
+
+# Porta padrão de visualização da documentação
+EXPOSE 8000
+
+# Inicializa o servidor com live-reload apontado para 0.0.0.0
+CMD ["mkdocs", "serve", "--dev-addr", "0.0.0.0:8000"]

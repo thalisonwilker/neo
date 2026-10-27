@@ -44,6 +44,29 @@ uv run neo --help
 
 ---
 
+## 📚 Documentação (MkDocs Material)
+
+O Neo conta com documentação técnica completa estilizada com **Material for MkDocs** (paleta claro/escuro, busca instantânea e navegação em abas inspirada no [HTTPX](https://www.python-httpx.org/)):
+
+### Executar via Docker Compose (Conteinerizado)
+```bash
+# Iniciar o servidor de documentação com live-reload na porta 8000
+docker compose -f docker-compose.docs.yml up
+
+# Acessar no navegador: http://localhost:8000
+```
+
+### Executar Localmente via `uv`
+```bash
+# Iniciar servidor local
+uv run --group docs mkdocs serve
+
+# Compilar build estático (validação estrita)
+uv run --group docs mkdocs build --strict
+```
+
+---
+
 ## 📖 Manual de Comandos da CLI
 
 Todas as saídas do Neo são renderizadas com **Rich** por padrão (tabelas formatadas, cores e painéis contextuais). Adicionalmente, qualquer comando suporta a flag global `--json` para emitir dados estruturados em JSON puro no `stdout`, facilitando integrações com `jq`, scripts bash e automações de CI/CD.

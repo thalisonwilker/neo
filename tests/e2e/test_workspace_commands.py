@@ -193,7 +193,7 @@ def test_AC_5_workspace_precedence_in_repo_list(mock_bitbucket_auth: Path):
         )
     )
 
-    with patch("neo.commands.repo.get_credential", return_value="user:token"):
+    with patch("neo.integrations.resolver.get_credential", return_value="user:token"):
         # 1. Sem flag -> usa configured_ws
         res_default = runner.invoke(app, ["repo", "list"])
         assert res_default.exit_code == 0

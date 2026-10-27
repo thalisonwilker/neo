@@ -48,3 +48,7 @@ cov_html/
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Documentation build
+site/
+

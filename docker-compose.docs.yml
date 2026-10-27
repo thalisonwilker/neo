@@ -1,0 +1,15 @@
+services:
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile.docs
+    image: neo-docs:latest
+    container_name: neo-docs
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./docs:/app/docs:ro
+      - ./mkdocs.yml:/app/mkdocs.yml:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
