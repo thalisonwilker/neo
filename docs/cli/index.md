@@ -34,11 +34,11 @@ uv run neo --json repo list | jq -r '.[].slug'
 
 ```mermaid
 graph LR
-    Neo[neo] --> Workspace[workspace: Gestão de Contas/Organizações]
-    Neo --> Repo[repo: Gestão de Repositórios]
-    Neo --> Commits[commits: Histórico e Pesquisa]
-    Neo --> Story[story: Tarefas e Tickets no Shortcut]
-    Neo --> Config[config: Credenciais e Provedores]
+    Neo["neo"] --> Workspace["workspace: Gestão de Contas/Organizações"]
+    Neo --> Repo["repo: Gestão de Repositórios"]
+    Neo --> Commits["commits: Histórico e Pesquisa"]
+    Neo --> Story["story: Tarefas e Tickets no Shortcut"]
+    Neo --> Config["config: Credenciais e Provedores"]
 ```
 
 - [Workspaces](workspace.md): Alternância e listagem de workspaces/organizações ativas.

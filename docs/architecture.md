@@ -29,9 +29,9 @@ No Neo, o código fonte nunca antecede a especificação. Toda funcionalidade ob
 
 ```mermaid
 graph LR
-    Spec[1. spec.md & tasks.md] --> Testes[2. Testes de Unidade & E2E]
-    Testes --> Codigo[3. Implementação DDD]
-    Codigo --> Gates[4. Gates Estáticos & DoD]
+    Spec["1. spec.md & tasks.md"] --> Testes["2. Testes de Unidade & E2E"]
+    Testes --> Codigo["3. Implementação DDD"]
+    Codigo --> Gates["4. Gates Estáticos & DoD"]
 ```
 
 - **Fonte da Verdade:** As especificações em `specs/NNNN-*/spec.md` contêm os critérios de aceite (Given/When/Then) que servem de oráculo para os testes.

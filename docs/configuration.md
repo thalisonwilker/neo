@@ -16,13 +16,13 @@ Ao buscar um token de API para qualquer serviço (`bitbucket`, `github` ou `shor
 
 ```mermaid
 graph TD
-    A[Chamada de API] --> B{1. Variável de Ambiente?}
-    B -- Sim --> C[Utiliza Token da Env Var]
-    B -- Não --> D{2. Keyring Seguro do SO?}
-    D -- Sim --> E[Recupera Segredo do Keyring]
-    D -- Não --> F{3. Arquivo ~/.config/neo/credentials.toml?}
-    F -- Sim --> G[Recupera Segredo do Arquivo 0600]
-    F -- Não --> H[Erro: Credenciais Não Encontradas]
+    A["Chamada de API"] --> B{"1. Variável de Ambiente?"}
+    B -- "Sim" --> C["Utiliza Token da Env Var"]
+    B -- "Não" --> D{"2. Keyring Seguro do SO?"}
+    D -- "Sim" --> E["Recupera Segredo do Keyring"]
+    D -- "Não" --> F{"3. Arquivo ~/.config/neo/credentials.toml?"}
+    F -- "Sim" --> G["Recupera Segredo do Arquivo 0600"]
+    F -- "Não" --> H["Erro: Credenciais Não Encontradas"]
 ```
 
 1. **Variáveis de Ambiente:**

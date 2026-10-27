@@ -14,7 +14,7 @@ def test_AC_1_mkdocs_config():
     assert mkdocs_file.exists(), "mkdocs.yml deve existir na raiz do projeto"
 
     with open(mkdocs_file, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+        config = yaml.unsafe_load(f)
 
     # Tema Material
     theme = config.get("theme", {})
@@ -38,6 +38,18 @@ def test_AC_1_mkdocs_config():
     assert "pymdownx.superfences" in ext_names
     assert "pymdownx.tabbed" in ext_names
     assert "pymdownx.highlight" in ext_names
+
+    # Suporte a diagramas Mermaid via custom_fences
+    superfences_cfg = next(
+        (
+            e["pymdownx.superfences"]
+            for e in extensions
+            if isinstance(e, dict) and "pymdownx.superfences" in e
+        ),
+        {},
+    )
+    custom_fences = superfences_cfg.get("custom_fences", [])
+    assert any(cf.get("name") == "mermaid" for cf in custom_fences if isinstance(cf, dict))
 
 
 def test_AC_2_docs_structure_and_pages():
