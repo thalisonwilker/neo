@@ -128,15 +128,41 @@ def test_get_all_services_status(tmp_path: Path):
         assert statuses["bitbucket"]["source"] == "env"
         assert statuses["bitbucket"]["masked_token"] == "********3456"
         assert statuses["shortcut"]["configured"] is False
+        assert statuses["github"]["configured"] is False
 
 
 def test_default_workspace_config(tmp_path: Path):
     from neo.config import get_default_workspace_config, set_default_workspace_config
 
-    assert get_default_workspace_config(config_dir=tmp_path) is None
+    assert get_default_workspace_config("bitbucket", config_dir=tmp_path) is None
+    assert get_default_workspace_config("github", config_dir=tmp_path) is None
 
-    set_default_workspace_config("meu-workspace", config_dir=tmp_path)
-    assert get_default_workspace_config(config_dir=tmp_path) == "meu-workspace"
+    set_default_workspace_config("meu-workspace", provider="bitbucket", config_dir=tmp_path)
+    set_default_workspace_config("minha-org", provider="github", config_dir=tmp_path)
+
+    assert get_default_workspace_config("bitbucket", config_dir=tmp_path) == "meu-workspace"
+    assert get_default_workspace_config("github", config_dir=tmp_path) == "minha-org"
 
     with pytest.raises(ValueError, match="não pode ser vazio"):
-        set_default_workspace_config("  ", config_dir=tmp_path)
+        set_default_workspace_config("  ", provider="bitbucket", config_dir=tmp_path)
+
+
+def test_default_provider_config(tmp_path: Path):
+    from neo.config import (
+        get_default_provider_config,
+        set_default_provider_config,
+        validate_git_provider,
+    )
+
+    assert validate_git_provider("github") == "github"
+    assert validate_git_provider("bitbucket") == "bitbucket"
+    with pytest.raises(ValueError, match="Provedor Git não suportado"):
+        validate_git_provider("gitlab")
+
+    assert get_default_provider_config(config_dir=tmp_path) is None
+
+    set_default_provider_config("github", config_dir=tmp_path)
+    assert get_default_provider_config(config_dir=tmp_path) == "github"
+
+    set_default_provider_config("bitbucket", config_dir=tmp_path)
+    assert get_default_provider_config(config_dir=tmp_path) == "bitbucket"

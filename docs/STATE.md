@@ -11,8 +11,8 @@ alwaysApply: true
 **Última atualização:** 2026-10-27 por Antigravity
 
 ## Em andamento / próximo passo
-- **Fase atual:** Onda 1 (MVP). Features concluídas: `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket`, `0004-modulo-shortcut` e `0005-selecao-de-workspace-bitbucket` (gestão e persistência de workspace com precedência e suporte interativo / `--slug`). 55 testes automatizados passando, 86% de cobertura, gates estáticos e de esteira 100% verdes.
-- **Próximo passo concreto:** Implementar a feature `specs/0006-analise-cruzada-investigacao-bugs/` (`neo bug investigate <id>`) correlacionando dados do Shortcut com commits e repositórios do Bitbucket.
+- **Fase atual:** Onda 1 (MVP). Features concluídas: `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket`, `0004-modulo-shortcut`, `0005-selecao-de-workspace-bitbucket` e `0006-modulo-github-e-multi-provedor-git` (suporte ao GitHub via REST v3, arquitetura multi-provedor Ports & Adapters, auto-detecção por remote local git, seleção via flag `-p / --provider`, persistência de provedor padrão e workspaces). 75 testes automatizados passando, 87% de cobertura, gates estáticos (Ruff e Mypy) e de esteira 100% verdes.
+- **Próximo passo concreto:** Implementar a feature de análise cruzada e correlação de investigações (`neo bug investigate <id>`) correlacionando dados do Shortcut com commits e repositórios do Bitbucket ou GitHub.
 
 
 

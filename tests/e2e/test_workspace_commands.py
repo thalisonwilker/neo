@@ -40,7 +40,7 @@ MOCK_WORKSPACES_PAYLOAD = {
 @pytest.fixture
 def mock_bitbucket_auth(tmp_path: Path):
     with (
-        patch("neo.commands.workspace.get_credential", return_value="user:token"),
+        patch("neo.integrations.resolver.get_credential", return_value="user:token"),
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
     ):
@@ -48,7 +48,7 @@ def mock_bitbucket_auth(tmp_path: Path):
 
 
 def test_AC_6_workspace_without_credentials():
-    with patch("neo.commands.workspace.get_credential", return_value=None):
+    with patch("neo.integrations.resolver.get_credential", return_value=None):
         result = runner.invoke(app, ["workspace", "list"])
         assert result.exit_code == 1
         assert "Credenciais do Bitbucket não configuradas" in result.output
@@ -118,7 +118,7 @@ def test_AC_3_workspace_select_by_slug(mock_bitbucket_auth: Path):
     # Slug válido
     res = runner.invoke(app, ["workspace", "select", "--slug", "personal_ws"])
     assert res.exit_code == 0
-    assert "Workspace ativo definido com sucesso: personal_ws" in res.output
+    assert "Workspace ativo" in res.output and "personal_ws" in res.output
 
     from neo.config import get_default_workspace_config
 

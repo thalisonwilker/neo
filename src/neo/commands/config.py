@@ -8,13 +8,17 @@ from typer import Argument, Option
 
 from neo.config import (
     DEFAULT_CONFIG_FILE,
+    SUPPORTED_GIT_PROVIDERS,
     SUPPORTED_SERVICES,
     delete_credential,
     get_all_services_status,
     get_credential,
     get_credential_source,
+    get_default_provider_config,
     mask_token,
     set_credential,
+    set_default_provider_config,
+    validate_git_provider,
     validate_service,
 )
 from neo.output import print_error, print_json, print_panel, print_success, print_table
@@ -158,16 +162,55 @@ def auth_delete(
         raise typer.Exit(code=1)
 
 
+@config_app.command("set-provider")
+def config_set_provider(
+    ctx: typer.Context,
+    provider: str = Argument(
+        ...,
+        help=f"Provedor Git padrão: {', '.join(SUPPORTED_GIT_PROVIDERS)}",
+    ),
+) -> None:
+    """Define o provedor Git padrão ('bitbucket' ou 'github') em config.toml."""
+    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+
+    try:
+        prov = validate_git_provider(provider)
+    except ValueError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+
+    set_default_provider_config(prov)
+    print_success(
+        f"Provedor Git padrão definido com sucesso: [cyan]{prov}[/cyan]",
+        as_json=as_json,
+        json_payload={"status": "success", "default_provider": prov},
+    )
+
+
+@config_app.command("get-provider")
+def config_get_provider(ctx: typer.Context) -> None:
+    """Exibe o provedor Git padrão atualmente configurado."""
+    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    prov = get_default_provider_config() or "bitbucket (padrão implícito)"
+
+    if as_json:
+        print_json({"default_provider": get_default_provider_config()})
+    else:
+        print_panel("Provedor Git Padrão", f"[bold]Provedor:[/bold] [cyan]{prov}[/cyan]")
+
+
 @config_app.command("show")
 def config_show(ctx: typer.Context) -> None:
     """Exibe o status geral das configurações e credenciais do Neo."""
     as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
     statuses = get_all_services_status()
+    default_provider = get_default_provider_config() or "bitbucket"
 
     if as_json:
         print_json(
             {
                 "config_file": str(DEFAULT_CONFIG_FILE),
+                "default_provider": default_provider,
                 "services": statuses,
             }
         )
@@ -185,3 +228,7 @@ def config_show(ctx: typer.Context) -> None:
             rows.append([svc, status_str, source_str, token_str])
 
         print_table("Status de Autenticação do Neo", columns, rows)
+        print_panel(
+            "Provedor Git Ativo",
+            f"[bold]Provedor padrão:[/bold] [cyan]{default_provider}[/cyan]",
+        )

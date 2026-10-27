@@ -1,54 +1,27 @@
-"""Comandos de consulta e histórico de commits no Bitbucket (`neo commits`)."""
+"""Comandos de consulta e histórico de commits Git (Bitbucket e GitHub) (`neo commits`)."""
 
 from __future__ import annotations
-
-import re
-import subprocess
 
 import typer
 from typer import Option
 
-from neo.config import get_credential
-from neo.integrations.bitbucket import (
-    BitbucketClient,
-    BitbucketError,
+from neo.integrations.bitbucket import BitbucketError
+from neo.integrations.resolver import (
+    detect_git_remote_info,
+    resolve_git_provider,
 )
 from neo.output import print_error, print_json, print_panel, print_table
 
 commits_app = typer.Typer(
     name="commits",
-    help="Histórico e pesquisa de commits no Bitbucket.",
+    help="Histórico e pesquisa de commits no Bitbucket e GitHub.",
     no_args_is_help=True,
 )
 
 
 def _infer_repo_slug_from_git() -> str | None:
     """Tenta inferir o slug do repositório a partir do remote origin do diretório local."""
-    try:
-        res = subprocess.run(
-            ["git", "remote", "get-url", "origin"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if res.returncode == 0:
-            url = res.stdout.strip()
-            # Padrões: git@bitbucket.org:workspace/repo.git ou https://bitbucket.org/workspace/repo.git
-            m = re.search(r"bitbucket\.org[:/][^/]+/([^/.]+)(?:\.git)?", url)
-            if m:
-                return m.group(1)
-    except (subprocess.SubprocessError, OSError):
-        return None
-    return None
-
-
-def _get_bitbucket_client(as_json: bool) -> BitbucketClient:
-    token = get_credential("bitbucket")
-    if not token:
-        msg = "Credenciais do Bitbucket não configuradas. Execute `neo config auth set bitbucket`."
-        print_error(msg, as_json=as_json, code=1)
-        raise typer.Exit(code=1)
-    return BitbucketClient(token=token)
+    return detect_git_remote_info()[1]
 
 
 @commits_app.command("search")
@@ -57,16 +30,23 @@ def commits_search(
     repo: str | None = Option(
         None, "--repo", "-r", help="Slug do repositório (inferido do git local se omitido)."
     ),
-    workspace: str | None = Option(None, "--workspace", "-w", help="Workspace do Bitbucket."),
+    workspace: str | None = Option(
+        None, "--workspace", "-w", help="Workspace ou organização/usuário de destino."
+    ),
+    provider: str | None = Option(
+        None, "--provider", "-p", help="Provedor Git: 'bitbucket' ou 'github'."
+    ),
     author: str | None = Option(None, "--author", "-a", help="Filtra por nome ou e-mail do autor."),
     query: str | None = Option(
         None, "--query", "-q", help="Filtra por termo na mensagem do commit."
     ),
     limit: int = Option(20, "--limit", "-l", help="Quantidade máxima de commits a retornar."),
 ) -> None:
-    """Pesquisa commits em um repositório do Bitbucket."""
+    """Pesquisa commits em um repositório no Bitbucket ou GitHub."""
     as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
-    client = _get_bitbucket_client(as_json)
+
+    # Auto-detecta repositório e provedor pelo git local
+    detected_prov, _ = detect_git_remote_info()
 
     target_repo = repo or _infer_repo_slug_from_git()
     if not target_repo:
@@ -76,6 +56,10 @@ def commits_search(
         )
         print_error(msg, as_json=as_json, code=1)
         raise typer.Exit(code=1)
+
+    # Se o usuário não passou flag de provider, mas o git local detectou, usa o do git local
+    target_prov = provider or detected_prov
+    prov_name, client = resolve_git_provider(target_prov, as_json=as_json)
 
     try:
         commits = client.list_commits(
@@ -92,10 +76,11 @@ def commits_search(
     if as_json:
         print_json([c.model_dump() for c in commits])
     else:
+        prov_title = "GitHub" if prov_name == "github" else "Bitbucket"
         if not commits:
             print_panel(
                 "Commits",
-                f"Nenhum commit encontrado para os filtros informados em '{target_repo}'.",
+                f"Nenhum commit encontrado para os filtros informados em '{target_repo}' ({prov_title}).",
             )
             return
 
@@ -112,4 +97,4 @@ def commits_search(
                 ]
             )
 
-        print_table(f"Histórico de Commits ({target_repo})", columns, rows)
+        print_table(f"Histórico de Commits ({target_repo} via {prov_title})", columns, rows)

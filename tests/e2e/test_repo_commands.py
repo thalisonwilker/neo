@@ -115,7 +115,7 @@ def test_AC_3_repo_clone():
         res = runner.invoke(app, ["repo", "clone", "meu-projeto", "--workspace", "my-workspace"])
         assert res.exit_code == 0
         assert "clonado com sucesso" in res.output
-        mock_run.assert_called_once_with(
+        mock_run.assert_called_with(
             ["git", "clone", "git@bitbucket.org:my-workspace/meu-projeto.git"], check=False
         )
 

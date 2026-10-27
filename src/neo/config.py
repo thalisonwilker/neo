@@ -24,12 +24,16 @@ KEYRING_SERVICE_NAME = "neo-cli"
 DEFAULT_CONFIG_DIR = Path.home() / ".config" / "neo"
 DEFAULT_CONFIG_FILE = DEFAULT_CONFIG_DIR / "config.toml"
 
-ServiceType = Literal["bitbucket", "shortcut"]
-SUPPORTED_SERVICES: tuple[ServiceType, ...] = ("bitbucket", "shortcut")
+ServiceType = Literal["bitbucket", "shortcut", "github"]
+SUPPORTED_SERVICES: tuple[ServiceType, ...] = ("bitbucket", "shortcut", "github")
+
+GitProviderType = Literal["bitbucket", "github"]
+SUPPORTED_GIT_PROVIDERS: tuple[GitProviderType, ...] = ("bitbucket", "github")
 
 ENV_VAR_MAPPING: dict[ServiceType, tuple[str, ...]] = {
     "bitbucket": ("BITBUCKET_TOKEN", "BITBUCKET_APP_PASSWORD"),
     "shortcut": ("SHORTCUT_API_TOKEN", "SHORTCUT_TOKEN"),
+    "github": ("GITHUB_TOKEN", "GH_TOKEN"),
 }
 
 
@@ -40,6 +44,17 @@ def validate_service(service: str) -> ServiceType:
         valid_services = ", ".join(SUPPORTED_SERVICES)
         raise ValueError(
             f"Serviço não suportado: '{service}'. Serviços suportados: {valid_services}"
+        )
+    return normalized
+
+
+def validate_git_provider(provider: str) -> GitProviderType:
+    """Valida se o provedor Git informado é suportado."""
+    normalized = provider.strip().lower()
+    if normalized not in SUPPORTED_GIT_PROVIDERS:
+        valid_providers = ", ".join(SUPPORTED_GIT_PROVIDERS)
+        raise ValueError(
+            f"Provedor Git não suportado: '{provider}'. Provedores suportados: {valid_providers}"
         )
     return normalized
 
@@ -99,28 +114,57 @@ def _write_file_config(config_file: Path, data: dict[str, Any]) -> None:
         logger.debug("Não foi possível alterar permissões de %s: %s", config_file, exc)
 
 
-def get_default_workspace_config(config_dir: Path | None = None) -> str | None:
-    """Recupera o workspace padrão configurado no arquivo config.toml."""
+def get_default_provider_config(config_dir: Path | None = None) -> GitProviderType | None:
+    """Recupera o provedor Git padrão configurado em config.toml."""
     config_file = _get_config_path(config_dir)
     data = _read_file_config(config_file)
-    bitbucket_cfg = data.get("bitbucket", {})
-    if isinstance(bitbucket_cfg, dict):
-        ws = bitbucket_cfg.get("default_workspace")
+    git_cfg = data.get("git", {})
+    if isinstance(git_cfg, dict):
+        provider = git_cfg.get("default_provider")
+        if isinstance(provider, str) and provider.strip() in SUPPORTED_GIT_PROVIDERS:
+            return provider.strip()  # type: ignore[return-value]
+    return None
+
+
+def set_default_provider_config(provider: str, config_dir: Path | None = None) -> None:
+    """Salva o provedor Git padrão em config.toml."""
+    prov = validate_git_provider(provider)
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    if "git" not in data or not isinstance(data["git"], dict):
+        data["git"] = {}
+    data["git"]["default_provider"] = prov
+    _write_file_config(config_file, data)
+
+
+def get_default_workspace_config(
+    provider: str = "bitbucket", config_dir: Path | None = None
+) -> str | None:
+    """Recupera o workspace/org padrão configurado para um provedor específico."""
+    prov = validate_git_provider(provider)
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    prov_cfg = data.get(prov, {})
+    if isinstance(prov_cfg, dict):
+        ws = prov_cfg.get("default_workspace")
         if isinstance(ws, str) and ws.strip():
             return ws.strip()
     return None
 
 
-def set_default_workspace_config(workspace: str, config_dir: Path | None = None) -> None:
-    """Salva o workspace padrão no arquivo config.toml."""
+def set_default_workspace_config(
+    workspace: str, provider: str = "bitbucket", config_dir: Path | None = None
+) -> None:
+    """Salva o workspace/org padrão para um provedor específico no arquivo config.toml."""
+    prov = validate_git_provider(provider)
     clean_ws = workspace.strip()
     if not clean_ws:
-        raise ValueError("O slug do workspace não pode ser vazio.")
+        raise ValueError("O slug do workspace/organização não pode ser vazio.")
     config_file = _get_config_path(config_dir)
     data = _read_file_config(config_file)
-    if "bitbucket" not in data or not isinstance(data["bitbucket"], dict):
-        data["bitbucket"] = {}
-    data["bitbucket"]["default_workspace"] = clean_ws
+    if prov not in data or not isinstance(data[prov], dict):
+        data[prov] = {}
+    data[prov]["default_workspace"] = clean_ws
     _write_file_config(config_file, data)
 
 
