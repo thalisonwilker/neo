@@ -11,8 +11,10 @@ alwaysApply: true
 **Última atualização:** 2026-10-27 por Antigravity
 
 ## Em andamento / próximo passo
-- **Fase atual:** Kickoff concluído com sucesso. Constituição gerada e alinhada com a esteira SDD.
-- **Próximo passo concreto:** Abrir a primeira feature do projeto (`0001-fundacao-cli-e-configuracao`) via skill `/nova-feature` para implementar a fundação do Typer, gerenciamento seguro de tokens com Keyring e configuração base.
+- **Fase atual:** Onda 1 (MVP). Feature `0002-fundacao-cli-e-configuracao` concluída com sucesso (20 testes passando, 91.42% de cobertura, gates de ruff e mypy estritos limpos).
+- **Próximo passo concreto:** Abrir a feature `specs/0003-modulo-bitbucket/` para implementar os comandos `neo repo list`, `neo repo search`, `neo repo clone` e `neo commits search`.
+
+
 
 ## Decisões recentes
 - 2026-10-27: Tech stack principal definido como Python >= 3.13, Typer, uv, Rich, httpx e keyring — [ADR-0002](architecture/adr/0002-tech-stack-core.md).

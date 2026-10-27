@@ -43,6 +43,7 @@ alwaysApply: false
 ## 📐 Specs — o contrato de cada feature
 > A pasta [`specs/`](../specs/) é a fonte viva; atualize ao criar features com `/nova-feature`.
 - [`specs/0001-exemplo-cota-de-uso/`](../specs/0001-exemplo-cota-de-uso/spec.md) — exemplo de referência da esteira
+- [`specs/0002-fundacao-cli-e-configuracao/`](../specs/0002-fundacao-cli-e-configuracao/spec.md) — fundação da CLI, Rich, flag --json e Keyring (ativa)
 
 ## 📖 Linguagem & convenções
 - **Glossário** (linguagem ubíqua) → [glossary.md](glossary.md)
