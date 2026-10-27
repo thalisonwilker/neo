@@ -12,10 +12,10 @@ alwaysApply: false
 
 | # | Task | Cobre AC | Depende de | Gate (comando) | Status |
 |---|---|---|---|---|---|
-| 1 | Modelar DTOs tipados da API v3 (`ShortcutMember`, `ShortcutStory`, `StoryAnalysis`) em `src/neo/integrations/shortcut_models.py` | AC-1 a AC-5 | — | `uv run mypy src` | done |
-| 2 | Implementar cliente HTTP v3 em `src/neo/integrations/shortcut.py` com as 5 funções de API | AC-1 a AC-6 | 1 | `uv run pytest tests/unit/test_shortcut_client.py -v` | done |
-| 3 | Implementar subcomando `neo story` (`whoami`, `list`, `search`, `show`, `analyze`) em `src/neo/commands/story.py` | AC-1 a AC-6 | 2 | `uv run pytest tests/e2e/test_story_commands.py -v` | done |
-| 4 | Registrar `story_app` em `src/neo/cli.py` e validação de qualidade estática e cobertura | AC-1 a AC-6 | 3 | `uv run ruff check . && uv run mypy src && uv run pytest --cov=neo` | done |
+| 1 | Modelar DTOs tipados da API v3 (`ShortcutMember`, `ShortcutStory`, `StoryAnalysis`) em `src/neo/integrations/shortcut_models.py` | AC-1, AC-2, AC-3, AC-4, AC-5 | — | `uv run mypy src` | done |
+| 2 | Implementar cliente HTTP v3 em `src/neo/integrations/shortcut.py` com as 5 funções de API | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6 | 1 | `uv run pytest tests/unit/test_shortcut_client.py -v` | done |
+| 3 | Implementar subcomando `neo story` (`whoami`, `list`, `search`, `show`, `analyze`) em `src/neo/commands/story.py` | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6 | 2 | `uv run pytest tests/e2e/test_story_commands.py -v` | done |
+| 4 | Registrar `story_app` em `src/neo/cli.py` e validação de qualidade estática e cobertura | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6 | 3 | `uv run ruff check . && uv run mypy src && uv run pytest --cov=neo` | done |
 
 ## Plano de teste
 - **Unidade:**
