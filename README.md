@@ -1,3 +1,9 @@
+---
+name: README
+description: Visão geral e manual do Neo (Personal Command Assistant) e da esteira SDD.
+alwaysApply: false
+---
+
 # Neo — Personal Command Assistant
 
 > **Compreenda seus sistemas. Seja dono das suas escolhas.**
