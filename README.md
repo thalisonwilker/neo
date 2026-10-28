@@ -12,6 +12,13 @@ alwaysApply: false
   <img src="docs/assets/neo-logo.jpg" alt="Neo CLI Logo" width="260" style="border-radius: 20px;" />
 </p>
 
+<p align="center">
+  <a href="https://github.com/thalysonwilker/neo/actions/workflows/ci.yml"><img src="https://github.com/thalysonwilker/neo/actions/workflows/ci.yml/badge.svg" alt="CI & Deploy" /></a>
+  <a href="https://thalysonwilker.github.io/neo/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-00e5a3?style=flat&logo=materialformkdocs&logoColor=white" alt="Docs" /></a>
+  <img src="https://img.shields.io/badge/coverage-%E2%89%A580%25-brightgreen" alt="Coverage" />
+  <img src="https://img.shields.io/badge/python-3.13+-blue" alt="Python 3.13+" />
+</p>
+
 **Neo** é um assistente pessoal extensível, executado via linha de comando (CLI), desenvolvido em **Python 3.13 com Typer e Rich**. Seu objetivo é eliminar tarefas manuais repetitivas, organizar fluxos de trabalho (Bitbucket, Shortcut), investigar dados com autonomia e apoiar a tomada de decisões com clareza.
 
 Inspirado filosoficamente no personagem Neo, de *Matrix*, o projeto apoia-se em três princípios fundamentais: **compreender antes de executar**, **preservar as escolhas do usuário** e **evoluir por meio de módulos independentes**.
@@ -68,6 +75,14 @@ uv run --group docs mkdocs serve
 # Compilar build estático (validação estrita)
 uv run --group docs mkdocs build --strict
 ```
+
+### Deploy Automatizado no GitHub Pages
+O deploy do portal de documentação é **100% automatizado** via GitHub Actions (`.github/workflows/ci.yml`). A cada push aprovado na branch `main`:
+1. Os **Quality Gates** são validados (Lint, Mypy, Testes e Cobertura $\ge 80\%$).
+2. A documentação é compilada em modo estrito.
+3. O deploy é publicado em: **[thalysonwilker.github.io/neo](https://thalysonwilker.github.io/neo/)**.
+
+> 💡 **Ativação Inicial no GitHub:** No repositório, acesse *Settings > Pages* e certifique-se de que a opção **Build and deployment > Source** esteja configurada como **GitHub Actions**.
 
 ---
 

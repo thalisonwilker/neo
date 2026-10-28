@@ -1,0 +1,113 @@
+name: CI & Deploy
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # 1. Auditoria e Governança SDD
+  audit:
+    name: Auditoria da Esteira SDD
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validar estrutura da esteira
+        run: node scripts/audit-esteira.mjs .
+
+      - name: Validar diagramas Mermaid
+        run: node scripts/validate-mermaid.mjs .
+
+      - name: Avaliar fidelidade das specs (Eval)
+        run: node scripts/eval-spec-fidelity.mjs .
+
+  # 2. Quality Gates: Lint, Tipagem Estática e Testes com Cobertura
+  quality:
+    name: Quality Gates (Lint, Tipos & Testes)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Configurar Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Sincronizar dependências dev
+        run: uv sync --dev
+
+      - name: Linter e formatação (Ruff)
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Checagem estática de tipos (Mypy)
+        run: uv run mypy src
+
+      - name: Testes automatizados e barreira de cobertura (>= 80%)
+        run: uv run pytest --cov=neo --cov-fail-under=80 -v
+
+  # 3. Compilação e Deploy no GitHub Pages
+  deploy-docs:
+    name: Deploy GitHub Pages
+    needs: [audit, quality]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Configurar Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Sincronizar dependências de documentação
+        run: uv sync --group docs
+
+      - name: Compilar documentação MkDocs (--strict)
+        run: uv run --group docs mkdocs build --strict
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Fazer upload do artefato do GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
+
+      - name: Publicar no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
