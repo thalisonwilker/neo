@@ -47,6 +47,7 @@ def parse_github_repo(data: dict[str, Any]) -> BitbucketRepo:
         updated_on=data.get("updated_at", ""),
         main_branch=data.get("default_branch", "main"),
         workspace=owner_slug,
+        web_url=data.get("html_url", ""),
         clone_links=clone_links,
     )
 
@@ -56,7 +57,9 @@ def parse_github_commit(data: dict[str, Any]) -> BitbucketCommit:
     commit_obj = data.get("commit", {})
     author_obj = commit_obj.get("author", {}) if isinstance(commit_obj, dict) else {}
 
-    raw_author = author_obj.get("name", "") if isinstance(author_obj, dict) else ""
+    author_name = author_obj.get("name", "") if isinstance(author_obj, dict) else ""
+    author_email = author_obj.get("email", "") if isinstance(author_obj, dict) else ""
+    raw_author = f"{author_name} <{author_email}>" if author_email else author_name
     date_str = author_obj.get("date", "") if isinstance(author_obj, dict) else ""
     message_str = commit_obj.get("message", "") if isinstance(commit_obj, dict) else ""
 
@@ -64,5 +67,6 @@ def parse_github_commit(data: dict[str, Any]) -> BitbucketCommit:
         hash=data.get("sha", ""),
         message=message_str,
         date=date_str,
-        author=BitbucketCommitAuthor(raw=raw_author, display_name=raw_author),
+        web_url=data.get("html_url", ""),
+        author=BitbucketCommitAuthor(raw=raw_author, display_name=author_name or None),
     )

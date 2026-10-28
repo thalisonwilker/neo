@@ -160,6 +160,32 @@ def test_list_commits(gh_client: GitHubClient):
 
 
 @respx.mock
+def test_get_commit_github(gh_client: GitHubClient):
+    """AC-6 (0014): get_commit individual no GitHub."""
+    respx.get("https://api.github.com/repos/octocat/Hello-World/commits/6dcb09b").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e",
+                "html_url": "https://github.com/octocat/Hello-World/commit/6dcb09b",
+                "commit": {
+                    "message": "fix: resolve timeout bug\n\nDetalhes",
+                    "author": {
+                        "name": "Monalisa Octocat",
+                        "email": "octocat@github.com",
+                        "date": "2026-10-27T12:00:00Z",
+                    },
+                },
+            },
+        )
+    )
+    c = gh_client.get_commit("Hello-World", "6dcb09b", workspace="octocat")
+    assert c.short_hash == "6dcb09b"
+    assert c.web_url == "https://github.com/octocat/Hello-World/commit/6dcb09b"
+    assert "octocat@github.com" in c.author.raw
+
+
+@respx.mock
 def test_github_error_handling(gh_client: GitHubClient):
     respx.get("https://api.github.com/user").mock(
         return_value=httpx.Response(401, json={"message": "Bad credentials"})

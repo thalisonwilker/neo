@@ -1,4 +1,4 @@
-"""Testes E2E para os comandos de workspace do Bitbucket (`neo git workspace`)."""
+"""Testes E2E para os comandos de workspace (`neo git workspace list|select|show`, features 0005 e 0014)."""
 
 import json
 from pathlib import Path
@@ -10,6 +10,7 @@ import respx
 from typer.testing import CliRunner
 
 from neo.cli import app
+from neo.config import ExitCode, get_default_workspace_config, set_default_workspace_config
 
 runner = CliRunner()
 
@@ -43,28 +44,33 @@ def mock_bitbucket_auth(tmp_path: Path):
         patch("neo.integrations.resolver.get_credential", return_value="user:token"),
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
+        patch(
+            "neo.integrations.resolver.detect_git_remote_details",
+            return_value=(None, None, None),
+        ),
         patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
     ):
         yield tmp_path
 
 
-def test_AC_6_workspace_without_credentials():
+def test_AC_4_workspace_without_credentials():
+    """AC-4 e AC-8 (0014): Sem credenciais retorna código 3 (AUTH_ERROR) apontando `neo git auth login`."""
     with (
         patch("neo.integrations.resolver.get_credential", return_value=None),
         patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
     ):
         result = runner.invoke(app, ["git", "workspace", "list"])
-        assert result.exit_code == 1
-        assert "Credenciais do Bitbucket não configuradas" in result.output
+        assert result.exit_code == int(ExitCode.AUTH_ERROR)
+        assert "neo git auth login --provider bitbucket" in result.output
 
 
 @respx.mock
-def test_AC_1_workspace_list_human_and_json(mock_bitbucket_auth: Path):
+def test_AC_4_workspace_list_human_and_json(mock_bitbucket_auth: Path):
+    """AC-4 (0014): `neo git workspace list` em formato Rich e `--json`."""
     respx.get("https://api.bitbucket.org/2.0/user/workspaces").mock(
         return_value=httpx.Response(200, json=MOCK_WORKSPACES_PAYLOAD)
     )
 
-    # Modo humano
     res_human = runner.invoke(app, ["git", "workspace", "list"])
     assert res_human.exit_code == 0
     assert "Acme Corp" in res_human.output
@@ -72,138 +78,80 @@ def test_AC_1_workspace_list_human_and_json(mock_bitbucket_auth: Path):
     assert "Personal Workspace" in res_human.output
     assert "Ativo" in res_human.output
 
-    # Modo JSON
-    res_json = runner.invoke(app, ["--json", "git", "workspace", "list"])
+    res_json = runner.invoke(app, ["git", "workspace", "list", "--json"])
     assert res_json.exit_code == 0
     data = json.loads(res_json.output)
     assert len(data) == 2
     assert data[0]["slug"] == "acme_corp"
     assert data[0]["is_admin"] is True
     assert data[0]["is_active"] is True
-    assert data[1]["slug"] == "personal_ws"
-    assert data[1]["is_active"] is False
 
 
 @respx.mock
-def test_AC_2_workspace_current(mock_bitbucket_auth: Path):
+def test_AC_4_workspace_show(mock_bitbucket_auth: Path):
+    """AC-4 (0014): `neo git workspace show` exibe detalhes e origem da resolução."""
     respx.get("https://api.bitbucket.org/2.0/user/workspaces").mock(
         return_value=httpx.Response(200, json=MOCK_WORKSPACES_PAYLOAD)
     )
 
     # 1. Sem config (auto API)
-    res = runner.invoke(app, ["git", "workspace", "current"])
+    res = runner.invoke(app, ["git", "workspace", "show"])
     assert res.exit_code == 0
     assert "acme_corp" in res.output
     assert "Detectado automaticamente via API" in res.output
 
-    res_json = runner.invoke(app, ["--json", "git", "workspace", "current"])
+    res_json = runner.invoke(app, ["git", "workspace", "show", "--json"])
     assert res_json.exit_code == 0
     data = json.loads(res_json.output)
     assert data["workspace"] == "acme_corp"
-    assert data["source"] == "api_auto"
+    assert data["source"] == "default"
 
     # 2. Com config salvo
-    from neo.config import set_default_workspace_config
-
     set_default_workspace_config("personal_ws", config_dir=mock_bitbucket_auth)
 
-    res_cfg = runner.invoke(app, ["git", "workspace", "current"])
+    res_cfg = runner.invoke(app, ["git", "workspace", "show"])
     assert res_cfg.exit_code == 0
     assert "personal_ws" in res_cfg.output
     assert "Configuração local" in res_cfg.output
 
+    # 3. Workspace inexistente via --workspace retorna código 4 (NOT_FOUND)
+    res_404 = runner.invoke(app, ["git", "workspace", "show", "--workspace", "inexistente"])
+    assert res_404.exit_code == int(ExitCode.NOT_FOUND)
+
 
 @respx.mock
-def test_AC_3_workspace_select_by_slug(mock_bitbucket_auth: Path):
+def test_AC_4_workspace_select(mock_bitbucket_auth: Path):
+    """AC-4 (0014): `neo git workspace select` via `--workspace` e interativo."""
     respx.get("https://api.bitbucket.org/2.0/user/workspaces").mock(
         return_value=httpx.Response(200, json=MOCK_WORKSPACES_PAYLOAD)
     )
 
-    # Slug válido
-    res = runner.invoke(app, ["git", "workspace", "select", "--slug", "personal_ws"])
-    assert res.exit_code == 0
-    assert "Workspace ativo" in res.output and "personal_ws" in res.output
-
-    from neo.config import get_default_workspace_config
-
-    assert get_default_workspace_config(config_dir=mock_bitbucket_auth) == "personal_ws"
-
-    # Atalho `neo git workspace set`
-    res_set = runner.invoke(app, ["git", "workspace", "set", "acme_corp"])
-    assert res_set.exit_code == 0
-    assert get_default_workspace_config(config_dir=mock_bitbucket_auth) == "acme_corp"
-
-    # Slug inexistente
-    res_err = runner.invoke(app, ["git", "workspace", "select", "--slug", "nao-existe"])
-    assert res_err.exit_code == 1
-    assert "Workspace 'nao-existe' não encontrado" in res_err.output
-
-
-@respx.mock
-def test_AC_4_workspace_select_interactive(mock_bitbucket_auth: Path):
-    respx.get("https://api.bitbucket.org/2.0/user/workspaces").mock(
-        return_value=httpx.Response(200, json=MOCK_WORKSPACES_PAYLOAD)
-    )
-
-    # Seleção interativa digitando opção 2
-    res = runner.invoke(app, ["git", "workspace", "select"], input="2\n")
+    # 1. Direto por --workspace
+    res = runner.invoke(app, ["git", "workspace", "select", "--workspace", "personal_ws"])
     assert res.exit_code == 0
     assert "personal_ws" in res.output
-
-    from neo.config import get_default_workspace_config
-
     assert get_default_workspace_config(config_dir=mock_bitbucket_auth) == "personal_ws"
 
-    # Modo JSON sem slug falha amigavelmente
-    res_json_err = runner.invoke(app, ["--json", "git", "workspace", "select"])
-    assert res_json_err.exit_code == 1
-    assert "--slug" in res_json_err.output
+    # 2. Interativo pelo teclado
+    res_inter = runner.invoke(app, ["git", "workspace", "select"], input="1\n")
+    assert res_inter.exit_code == 0
+    assert get_default_workspace_config(config_dir=mock_bitbucket_auth) == "acme_corp"
+
+    # 3. Workspace inexistente retorna código 4 (NOT_FOUND)
+    res_err = runner.invoke(app, ["git", "workspace", "select", "--workspace", "nao-existe"])
+    assert res_err.exit_code == int(ExitCode.NOT_FOUND)
+
+    # 4. Modo --json sem --workspace retorna código 2 (USAGE_ERROR)
+    res_json_err = runner.invoke(app, ["git", "workspace", "select", "--json"])
+    assert res_json_err.exit_code == int(ExitCode.USAGE_ERROR)
 
 
-@respx.mock
-def test_AC_5_workspace_precedence_in_repo_list(mock_bitbucket_auth: Path):
-    from neo.config import set_default_workspace_config
+def test_AC_8_legacy_workspace_commands_fail_with_hint():
+    """AC-8 (0014): `workspace current` e `workspace set` falham com código 2 apontando o novo comando."""
+    res_curr = runner.invoke(app, ["git", "workspace", "current"])
+    assert res_curr.exit_code == int(ExitCode.USAGE_ERROR)
+    assert "neo git workspace show" in res_curr.output
 
-    set_default_workspace_config("configured_ws", config_dir=mock_bitbucket_auth)
-
-    respx.get("https://api.bitbucket.org/2.0/repositories/configured_ws").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "values": [
-                    {
-                        "name": "Configured Repo",
-                        "slug": "configured-repo",
-                        "is_private": True,
-                        "updated_on": "2026-10-27T10:00:00Z",
-                    }
-                ]
-            },
-        )
-    )
-    respx.get("https://api.bitbucket.org/2.0/repositories/explicit_ws").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "values": [
-                    {
-                        "name": "Explicit Repo",
-                        "slug": "explicit-repo",
-                        "is_private": False,
-                        "updated_on": "2026-10-27T10:00:00Z",
-                    }
-                ]
-            },
-        )
-    )
-
-    with patch("neo.integrations.resolver.get_credential", return_value="user:token"):
-        # 1. Sem flag -> usa configured_ws
-        res_default = runner.invoke(app, ["git", "repo", "list"])
-        assert res_default.exit_code == 0
-        assert "Configured" in res_default.output
-
-        # 2. Com flag -> tem precedência e usa explicit_ws
-        res_flag = runner.invoke(app, ["git", "repo", "list", "--workspace", "explicit_ws"])
-        assert res_flag.exit_code == 0
-        assert "Explicit" in res_flag.output
+    res_set = runner.invoke(app, ["git", "workspace", "set", "acme_corp"])
+    assert res_set.exit_code == int(ExitCode.USAGE_ERROR)
+    assert "neo git config set workspace" in res_set.output

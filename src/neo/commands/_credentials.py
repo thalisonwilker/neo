@@ -15,8 +15,10 @@ from neo.config import (
 from neo.output import print_error, print_json, print_panel, print_success
 
 
-def is_json_mode(ctx: typer.Context) -> bool:
-    return getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+def is_json_mode(ctx: typer.Context, json_flag: bool = False) -> bool:
+    if json_flag:
+        return True
+    return bool(getattr(ctx.obj, "json_mode", False)) if ctx.obj else False
 
 
 def save_token(ctx: typer.Context, svc: str, token: str | None) -> None:

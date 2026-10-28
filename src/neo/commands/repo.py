@@ -1,22 +1,24 @@
-"""Comandos de gerenciamento de repositórios Git (Bitbucket e GitHub) (`neo git repo`)."""
+"""Comandos de consulta de repositórios Git (`neo git repo`: `list`, `search`, `show`)."""
 
 from __future__ import annotations
-
-import subprocess
 
 import typer
 from typer import Argument, Option
 
-from neo.integrations.bitbucket import (
-    BitbucketError,
-    BitbucketNotFoundError,
+from neo.commands._credentials import is_json_mode
+from neo.config import ExitCode
+from neo.integrations.bitbucket import BitbucketError
+from neo.integrations.resolver import (
+    detect_git_remote_info,
+    handle_git_provider_error,
+    resolve_git_provider,
+    resolve_git_workspace_and_source,
 )
-from neo.integrations.resolver import resolve_git_provider
-from neo.output import print_error, print_json, print_panel, print_success, print_table
+from neo.output import print_error, print_json, print_panel, print_table
 
 repo_app = typer.Typer(
     name="repo",
-    help="Gerenciamento e busca de repositórios no Bitbucket e GitHub.",
+    help="Lista, pesquisa e exibe detalhes de repositórios no GitHub e Bitbucket Cloud (list, search, show).",
     no_args_is_help=True,
 )
 
@@ -25,21 +27,35 @@ repo_app = typer.Typer(
 def repo_list(
     ctx: typer.Context,
     workspace: str | None = Option(
-        None, "--workspace", "-w", help="Workspace ou organização/usuário de destino."
+        None,
+        "--workspace",
+        help="Slug do workspace ou organização de destino.",
     ),
     provider: str | None = Option(
-        None, "--provider", "-p", help="Provedor Git: 'bitbucket' ou 'github'."
+        None,
+        "--provider",
+        help="Provedor Git: 'github' ou 'bitbucket'.",
+    ),
+    limit: int | None = Option(
+        None,
+        "--limit",
+        help="Quantidade máxima de repositórios a retornar.",
+    ),
+    json_output: bool = Option(
+        False,
+        "--json",
+        help="Emite a saída em formato JSON estruturado no stdout.",
     ),
 ) -> None:
-    """Lista todos os repositórios disponíveis no workspace ou organização."""
-    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    """Lista os repositórios disponíveis no workspace ativo."""
+    as_json = is_json_mode(ctx, json_output)
     prov_name, client = resolve_git_provider(provider, as_json=as_json)
+    resolved_ws, _ = resolve_git_workspace_and_source(prov_name, workspace)
 
     try:
-        repos = client.list_repositories(workspace=workspace)
+        repos = client.list_repositories(workspace=resolved_ws, limit=limit)
     except BitbucketError as e:
-        print_error(str(e), as_json=as_json, code=1)
-        raise typer.Exit(code=1) from e
+        handle_git_provider_error(e, as_json=as_json)
 
     if as_json:
         print_json([r.model_dump() for r in repos])
@@ -62,23 +78,49 @@ def repo_list(
 @repo_app.command("search")
 def repo_search(
     ctx: typer.Context,
-    query: str = Argument(..., help="Termo de pesquisa (nome, slug ou descrição)."),
+    query: str | None = Option(
+        None,
+        "--query",
+        help="Termo de pesquisa (nome, slug ou descrição do repositório).",
+    ),
     workspace: str | None = Option(
-        None, "--workspace", "-w", help="Workspace ou organização/usuário de destino."
+        None,
+        "--workspace",
+        help="Slug do workspace ou organização de destino.",
     ),
     provider: str | None = Option(
-        None, "--provider", "-p", help="Provedor Git: 'bitbucket' ou 'github'."
+        None,
+        "--provider",
+        help="Provedor Git: 'github' ou 'bitbucket'.",
+    ),
+    limit: int | None = Option(
+        None,
+        "--limit",
+        help="Quantidade máxima de repositórios a retornar.",
+    ),
+    json_output: bool = Option(
+        False,
+        "--json",
+        help="Emite a saída em formato JSON estruturado no stdout.",
     ),
 ) -> None:
-    """Pesquisa repositórios por nome, slug ou descrição."""
-    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    """Pesquisa repositórios por nome, slug ou descrição usando --query."""
+    as_json = is_json_mode(ctx, json_output)
+    if not query or not query.strip():
+        print_error(
+            "A opção `--query <termo>` é obrigatória em `neo git repo search`.",
+            as_json=as_json,
+            code=int(ExitCode.USAGE_ERROR),
+        )
+        raise typer.Exit(code=int(ExitCode.USAGE_ERROR))
+
     prov_name, client = resolve_git_provider(provider, as_json=as_json)
+    resolved_ws, _ = resolve_git_workspace_and_source(prov_name, workspace)
 
     try:
-        repos = client.search_repositories(query=query, workspace=workspace)
+        repos = client.search_repositories(query=query, workspace=resolved_ws, limit=limit)
     except BitbucketError as e:
-        print_error(str(e), as_json=as_json, code=1)
-        raise typer.Exit(code=1) from e
+        handle_git_provider_error(e, as_json=as_json)
 
     if as_json:
         print_json([r.model_dump() for r in repos])
@@ -100,115 +142,109 @@ def repo_search(
         print_table(f"Repositórios no {prov_title} encontrados para '{query}'", columns, rows)
 
 
-@repo_app.command("clone")
-def repo_clone(
+@repo_app.command("show")
+def repo_show(
     ctx: typer.Context,
-    slug: str = Argument(..., help="Slug ou nome do repositório a clonar."),
+    slug: str | None = Argument(
+        None,
+        help="Slug do repositório (ou informe via --repo ou auto-detecte pelo diretório Git local).",
+    ),
+    repo: str | None = Option(
+        None,
+        "--repo",
+        help="Slug do repositório a inspecionar.",
+    ),
     workspace: str | None = Option(
-        None, "--workspace", "-w", help="Workspace ou organização/usuário de destino."
+        None,
+        "--workspace",
+        help="Slug do workspace ou organização de destino.",
     ),
     provider: str | None = Option(
-        None, "--provider", "-p", help="Provedor Git: 'bitbucket' ou 'github'."
+        None,
+        "--provider",
+        help="Provedor Git: 'github' ou 'bitbucket'.",
     ),
-    use_ssh: bool = Option(False, "--ssh", help="Força clonagem via protocolo SSH."),
-    use_https: bool = Option(False, "--https", help="Força clonagem via protocolo HTTPS."),
+    json_output: bool = Option(
+        False,
+        "--json",
+        help="Emite a saída em formato JSON estruturado no stdout.",
+    ),
 ) -> None:
-    """Clona um repositório para o diretório atual."""
-    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    """Exibe os detalhes completos de um repositório."""
+    as_json = is_json_mode(ctx, json_output)
+    target_repo = (repo or slug or detect_git_remote_info()[1] or "").strip()
+    if not target_repo:
+        print_error(
+            "Repositório não informado e não foi possível detectar pelo Git local. "
+            "Use `--repo <slug>` para especificar o repositório.",
+            as_json=as_json,
+            code=int(ExitCode.NOT_FOUND),
+        )
+        raise typer.Exit(code=int(ExitCode.NOT_FOUND))
+
     prov_name, client = resolve_git_provider(provider, as_json=as_json)
+    resolved_ws, _ = resolve_git_workspace_and_source(prov_name, workspace)
 
     try:
-        repo = client.get_repository(repo_slug=slug, workspace=workspace)
-    except BitbucketNotFoundError as e:
-        print_error(f"Repositório '{slug}' não encontrado: {e}", as_json=as_json, code=1)
-        raise typer.Exit(code=1) from e
+        repo_obj = client.get_repository(repo_slug=target_repo, workspace=resolved_ws)
     except BitbucketError as e:
-        print_error(str(e), as_json=as_json, code=1)
-        raise typer.Exit(code=1) from e
+        handle_git_provider_error(e, as_json=as_json)
 
-    # Resolução de URL
-    clone_url: str | None = None
-    if use_ssh:
-        clone_url = repo.ssh_clone_url
-    elif use_https:
-        clone_url = repo.https_clone_url
-    else:
-        clone_url = repo.ssh_clone_url or repo.https_clone_url
-
-    if not clone_url:
-        print_error(
-            f"Não foi possível obter uma URL de clone válida para o repositório '{slug}'.",
-            as_json=as_json,
-            code=1,
-        )
-        raise typer.Exit(code=1)
-
-    prov_title = "GitHub" if prov_name == "github" else "Bitbucket"
     if as_json:
-        print_json(
-            {
-                "status": "cloning",
-                "provider": prov_name,
-                "repo": repo.slug,
-                "clone_url": clone_url,
-            }
-        )
+        payload = repo_obj.model_dump()
+        payload["ssh_clone_url"] = repo_obj.ssh_clone_url
+        payload["https_clone_url"] = repo_obj.https_clone_url
+        payload["provider"] = prov_name
+        print_json(payload)
     else:
-        print_success(
-            f"Iniciando clone de [bold]{repo.name}[/bold] ({prov_title}) via [cyan]{clone_url}[/cyan]..."
+        prov_title = "GitHub" if prov_name == "github" else "Bitbucket"
+        vis_str = "[red]Privado[/red]" if repo_obj.is_private else "[green]Público[/green]"
+        updated = (
+            repo_obj.updated_on.split("T")[0]
+            if "T" in repo_obj.updated_on
+            else (repo_obj.updated_on or "-")
+        )
+        print_panel(
+            f"Repositório: {repo_obj.name} ({prov_title})",
+            f"[bold]Nome:[/bold] {repo_obj.name}\n"
+            f"[bold]Slug:[/bold] [cyan]{repo_obj.slug}[/cyan]\n"
+            f"[bold]Workspace:[/bold] {repo_obj.workspace or resolved_ws or '-'}\n"
+            f"[bold]Visibilidade:[/bold] {vis_str}\n"
+            f"[bold]Branch Padrão:[/bold] [cyan]{repo_obj.main_branch}[/cyan]\n"
+            f"[bold]Descrição:[/bold] {repo_obj.description or '-'}\n"
+            f"[bold]Clone SSH:[/bold] {repo_obj.ssh_clone_url or '-'}\n"
+            f"[bold]Clone HTTPS:[/bold] {repo_obj.https_clone_url or '-'}\n"
+            f"[bold]Atualizado em:[/bold] {updated}",
         )
 
-    proc = subprocess.run(["git", "clone", clone_url], check=False)
-    if proc.returncode != 0:
-        print_error(
-            f"Falha ao executar git clone (código {proc.returncode}).",
-            as_json=as_json,
-            code=proc.returncode,
-        )
-        raise typer.Exit(code=proc.returncode)
 
-    print_success(f"Repositório '{repo.slug}' clonado com sucesso!", as_json=as_json)
+# Bloqueios orientativos para comandos movidos para o backlog planejado
+@repo_app.command(
+    "clone",
+    hidden=True,
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+)
+def _legacy_repo_clone(ctx: typer.Context) -> None:
+    as_json = is_json_mode(ctx)
+    print_error(
+        "O comando `neo git repo clone` está no backlog planejado desta versão. "
+        "Use `neo git repo show --repo <slug>` para consultar as URLs de clone.",
+        as_json=as_json,
+        code=int(ExitCode.USAGE_ERROR),
+    )
+    raise typer.Exit(code=int(ExitCode.USAGE_ERROR))
 
 
-@repo_app.command("create")
-def repo_create(
-    ctx: typer.Context,
-    name: str = Argument(..., help="Nome do repositório a ser criado."),
-    workspace: str | None = Option(
-        None, "--workspace", "-w", help="Workspace ou organização/usuário de destino."
-    ),
-    provider: str | None = Option(
-        None, "--provider", "-p", help="Provedor Git: 'bitbucket' ou 'github'."
-    ),
-    is_private: bool = Option(
-        True, "--private/--public", help="Define se o repositório é privado ou público."
-    ),
-    description: str | None = Option(None, "--description", "-d", help="Descrição do repositório."),
-    yes: bool = Option(False, "--yes", "-y", help="Pula confirmação interativa."),
-) -> None:
-    """Cria um novo repositório no provedor Git (Bitbucket ou GitHub)."""
-    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
-    prov_name, client = resolve_git_provider(provider, as_json=as_json)
-
-    prov_title = "GitHub" if prov_name == "github" else "Bitbucket"
-    if not yes and not as_json:
-        confirmed = typer.confirm(f"Deseja criar o repositório '{name}' no {prov_title}?")
-        if not confirmed:
-            print_error("Operação cancelada pelo usuário.", as_json=as_json, code=1)
-            raise typer.Exit(code=1)
-
-    try:
-        repo = client.create_repository(
-            name=name,
-            workspace=workspace,
-            is_private=is_private,
-            description=description,
-        )
-        print_success(
-            f"Repositório '{repo.name}' criado com sucesso no {prov_title} ({repo.workspace})!",
-            as_json=as_json,
-            json_payload=repo.model_dump(),
-        )
-    except BitbucketError as e:
-        print_error(f"Falha ao criar repositório: {e}", as_json=as_json, code=1)
-        raise typer.Exit(code=1) from e
+@repo_app.command(
+    "create",
+    hidden=True,
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+)
+def _legacy_repo_create(ctx: typer.Context) -> None:
+    as_json = is_json_mode(ctx)
+    print_error(
+        "O comando `neo git repo create` está no backlog planejado desta versão.",
+        as_json=as_json,
+        code=int(ExitCode.USAGE_ERROR),
+    )
+    raise typer.Exit(code=int(ExitCode.USAGE_ERROR))

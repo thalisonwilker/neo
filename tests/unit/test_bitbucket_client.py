@@ -151,6 +151,48 @@ def test_list_commits(bb_client: BitbucketClient):
 
 
 @respx.mock
+def test_get_commit_and_pagination(bb_client: BitbucketClient):
+    """AC-5 e AC-6 (0014): get_commit individual e paginação em list_repositories."""
+    respx.get(
+        "https://api.bitbucket.org/2.0/repositories/my-workspace/my-repo/commit/1234567"
+    ).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "hash": "1234567890abcdef",
+                "message": "feat: detalhe de commit",
+                "date": "2026-10-27T12:00:00Z",
+                "author": {"raw": "Thalyson <thalyson@exemplo.com>"},
+                "links": {
+                    "html": {"href": "https://bitbucket.org/my-workspace/my-repo/commits/1234567"}
+                },
+            },
+        )
+    )
+    commit = bb_client.get_commit(repo_slug="my-repo", sha="1234567", workspace="my-workspace")
+    assert commit.hash == "1234567890abcdef"
+    assert commit.web_url == "https://bitbucket.org/my-workspace/my-repo/commits/1234567"
+
+    respx.get("https://api.bitbucket.org/2.0/repositories/my-workspace").mock(
+        side_effect=[
+            httpx.Response(
+                200,
+                json={
+                    "values": [{"name": "R1", "slug": "r1", "is_private": True}],
+                    "next": "https://api.bitbucket.org/2.0/repositories/my-workspace?page=2",
+                },
+            ),
+            httpx.Response(
+                200,
+                json={"values": [{"name": "R2", "slug": "r2", "is_private": False}]},
+            ),
+        ]
+    )
+    repos = bb_client.list_repositories(workspace="my-workspace")
+    assert [r.slug for r in repos] == ["r1", "r2"]
+
+
+@respx.mock
 def test_list_workspaces(bb_client: BitbucketClient):
     from neo.integrations.bitbucket_models import BitbucketWorkspace
 

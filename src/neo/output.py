@@ -11,7 +11,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 console = Console()
-error_console = Console(stderr=True)
+error_console = Console(stderr=True, soft_wrap=True)
 
 
 def print_json(data: Any) -> None:
@@ -36,7 +36,9 @@ def print_error(
     """Emite mensagem de erro no formato apropriado."""
     if as_json:
         payload = (
-            json_payload if json_payload is not None else {"status": "error", "message": message}
+            json_payload
+            if json_payload is not None
+            else {"status": "error", "code": code, "message": message}
         )
         print_json(payload)
     else:

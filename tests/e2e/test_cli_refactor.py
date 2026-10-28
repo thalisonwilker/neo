@@ -27,17 +27,17 @@ def isolated_config(tmp_path: Path):
 
 
 def test_AC_1_git_help_lists_subgroups():
-    """0009 AC-1: `neo git --help` lista config, workspace, repo e commits."""
+    """0009 AC-1 / 0014 AC-1: `neo git --help` lista config, auth, workspace, repo, commits e status."""
     res = runner.invoke(app, ["git", "--help"])
     assert res.exit_code == 0
-    for sub in ("config", "workspace", "repo", "commits"):
+    for sub in ("config", "auth", "workspace", "repo", "commits", "status"):
         assert sub in res.output
 
 
-def test_AC_2_git_config_rejects_shortcut_with_hint():
-    """0009 AC-2: `neo git config auth set shortcut` falha e orienta `neo tasks config`."""
-    res = runner.invoke(app, ["git", "config", "auth", "set", "shortcut", "--token", "x"])
-    assert res.exit_code == 1
+def test_AC_2_git_auth_rejects_shortcut_with_hint():
+    """0009 AC-2 / 0014 AC-3: `neo git auth login --provider shortcut` falha (código 2) e orienta `neo tasks config`."""
+    res = runner.invoke(app, ["git", "auth", "login", "--provider", "shortcut"])
+    assert res.exit_code == 2
     assert "neo tasks config" in " ".join(res.output.split())
 
 

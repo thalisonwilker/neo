@@ -18,7 +18,7 @@ from neo.output import print_json, print_panel, print_table
 
 config_app = typer.Typer(
     name="config",
-    help="Visão geral das configurações do Neo (credenciais: `neo git config` e `neo tasks config`).",
+    help="Visão geral das configurações do Neo (`neo git` e `neo tasks`).",
     no_args_is_help=True,
 )
 

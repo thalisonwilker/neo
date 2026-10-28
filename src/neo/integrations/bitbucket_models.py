@@ -15,7 +15,7 @@ class CloneLink(BaseModel):
 
 
 class BitbucketRepo(BaseModel):
-    """Representa um repositório no Bitbucket Cloud."""
+    """Representa um repositório Git (Bitbucket Cloud ou GitHub)."""
 
     name: str
     slug: str
@@ -24,6 +24,7 @@ class BitbucketRepo(BaseModel):
     updated_on: str = ""
     main_branch: str = "main"
     workspace: str = ""
+    web_url: str = ""
     clone_links: list[CloneLink] = Field(default_factory=list)
 
     @property
@@ -47,9 +48,14 @@ class BitbucketRepo(BaseModel):
         """Constrói uma instância a partir do payload JSON da API 2.0 do Bitbucket."""
         clone_links: list[CloneLink] = []
         links_data = data.get("links", {})
-        for link_obj in links_data.get("clone", []):
-            if isinstance(link_obj, dict) and "name" in link_obj and "href" in link_obj:
-                clone_links.append(CloneLink(name=link_obj["name"], href=link_obj["href"]))
+        if isinstance(links_data, dict):
+            for link_obj in links_data.get("clone", []):
+                if isinstance(link_obj, dict) and "name" in link_obj and "href" in link_obj:
+                    clone_links.append(CloneLink(name=link_obj["name"], href=link_obj["href"]))
+            html_obj = links_data.get("html", {})
+            web_url = html_obj.get("href", "") if isinstance(html_obj, dict) else ""
+        else:
+            web_url = ""
 
         main_branch = "main"
         mainbranch_obj = data.get("mainbranch")
@@ -69,6 +75,7 @@ class BitbucketRepo(BaseModel):
             updated_on=data.get("updated_on", ""),
             main_branch=main_branch,
             workspace=workspace_slug,
+            web_url=web_url,
             clone_links=clone_links,
         )
 
@@ -90,11 +97,12 @@ class BitbucketCommitAuthor(BaseModel):
 
 
 class BitbucketCommit(BaseModel):
-    """Representa um commit no Bitbucket Cloud."""
+    """Representa um commit em um repositório Git."""
 
     hash: str
     message: str = ""
     date: str = ""
+    web_url: str = ""
     author: BitbucketCommitAuthor = Field(default_factory=BitbucketCommitAuthor)
 
     @property
@@ -122,16 +130,21 @@ class BitbucketCommit(BaseModel):
             if isinstance(user_obj, dict):
                 display_name = user_obj.get("display_name")
 
+        links_data = data.get("links", {})
+        html_obj = links_data.get("html", {}) if isinstance(links_data, dict) else {}
+        web_url = html_obj.get("href", "") if isinstance(html_obj, dict) else ""
+
         return cls(
             hash=data.get("hash", ""),
             message=data.get("message", ""),
             date=data.get("date", ""),
+            web_url=web_url,
             author=BitbucketCommitAuthor(raw=raw_author, display_name=display_name),
         )
 
 
 class BitbucketWorkspace(BaseModel):
-    """Representa um workspace no Bitbucket Cloud."""
+    """Representa um workspace (Bitbucket) ou organização/usuário (GitHub)."""
 
     uuid: str = ""
     name: str = ""

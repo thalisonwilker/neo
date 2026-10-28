@@ -13,6 +13,7 @@ from neo.integrations.bitbucket import (
     BitbucketError,
     BitbucketNotFoundError,
     BitbucketRateLimitError,
+    UnsupportedProviderOperationError,
 )
 from neo.integrations.bitbucket_models import (
     BitbucketCommit,
@@ -32,6 +33,7 @@ GitHubError = BitbucketError
 GitHubAuthError = BitbucketAuthError
 GitHubNotFoundError = BitbucketNotFoundError
 GitHubRateLimitError = BitbucketRateLimitError
+GitHubUnsupportedError = UnsupportedProviderOperationError
 
 
 class GitHubClient:
@@ -59,11 +61,14 @@ class GitHubClient:
         if response.status_code == 401:
             raise GitHubAuthError(
                 "Falha de autenticação no GitHub (401). "
-                "Verifique seu token executando `neo git config auth set github`."
+                "Execute `neo git auth login --provider github` para atualizar seu Personal Access Token."
             )
         if response.status_code == 403:
-            raise GitHubRateLimitError(
-                f"Acesso negado ou limite de requisições atingido no GitHub ({context})."
+            if "rate limit" in response.text.lower():
+                raise GitHubRateLimitError(f"Limite de requisições atingido no GitHub ({context}).")
+            raise GitHubAuthError(
+                f"Acesso negado no GitHub (403 em {context}). "
+                "Verifique os escopos do seu Personal Access Token com `neo git auth login --provider github`."
             )
         if response.status_code == 404:
             raise GitHubNotFoundError(
@@ -129,7 +134,9 @@ class GitHubClient:
         user = self.get_current_user()
         return user.login
 
-    def list_repositories(self, workspace: str | None = None) -> list[BitbucketRepo]:
+    def list_repositories(
+        self, workspace: str | None = None, limit: int | None = None
+    ) -> list[BitbucketRepo]:
         """Lista os repositórios do usuário ou organização."""
         target_ws = workspace or self.get_default_workspace()
         user = self.get_current_user()
@@ -138,31 +145,42 @@ class GitHubClient:
         with httpx.Client(timeout=self.timeout) as client:
             if target_ws.lower() == user.login.lower():
                 url = f"{self.base_url}/user/repos"
-                params = {
+                params: dict[str, Any] = {
                     "affiliation": "owner,collaborator,organization_member",
                     "sort": "updated",
+                    "per_page": 100,
                 }
                 resp = client.get(url, headers=self._get_headers(), params=params)
             else:
                 url = f"{self.base_url}/orgs/{target_ws}/repos"
-                params = {"sort": "updated"}
+                params = {"sort": "updated", "per_page": 100}
                 resp = client.get(url, headers=self._get_headers(), params=params)
 
             self._handle_response_error(resp, f"repositórios de '{target_ws}'")
             for item in resp.json():
                 if isinstance(item, dict):
                     repos.append(parse_github_repo(item))
+                    if limit is not None and len(repos) >= limit:
+                        return repos[:limit]
 
         return repos
 
-    def search_repositories(self, query: str, workspace: str | None = None) -> list[BitbucketRepo]:
-        """Pesquisa repositórios pelo nome ou descrição."""
+    def search_repositories(
+        self, query: str, workspace: str | None = None, limit: int | None = None
+    ) -> list[BitbucketRepo]:
+        """Pesquisa repositórios pelo nome, slug ou descrição."""
         all_repos = self.list_repositories(workspace=workspace)
         q = query.strip().lower()
         matched: list[BitbucketRepo] = []
         for r in all_repos:
-            if q in r.name.lower() or (r.description and q in r.description.lower()):
+            if (
+                q in r.name.lower()
+                or q in r.slug.lower()
+                or (r.description and q in r.description.lower())
+            ):
                 matched.append(r)
+                if limit is not None and len(matched) >= limit:
+                    break
         return matched
 
     def get_repository(self, repo_slug: str, workspace: str | None = None) -> BitbucketRepo:
@@ -214,7 +232,7 @@ class GitHubClient:
         """Lista histórico de commits no GitHub."""
         ws = workspace or self.get_default_workspace()
         url = f"{self.base_url}/repos/{ws}/{repo_slug}/commits"
-        params: dict[str, Any] = {"per_page": limit}
+        params: dict[str, Any] = {"per_page": max(limit, 20)}
         if author:
             params["author"] = author
 
@@ -228,5 +246,17 @@ class GitHubClient:
                     if query and query.lower() not in c.message.lower():
                         continue
                     commits.append(c)
+                    if len(commits) >= limit:
+                        break
 
         return commits
+
+    def get_commit(self, repo_slug: str, sha: str, workspace: str | None = None) -> BitbucketCommit:
+        """Obtém os detalhes de um commit específico pelo hash/SHA no GitHub."""
+        ws = workspace or self.get_default_workspace()
+        url = f"{self.base_url}/repos/{ws}/{repo_slug}/commits/{sha}"
+
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(url, headers=self._get_headers())
+            self._handle_response_error(resp, f"commit '{sha}' em '{ws}/{repo_slug}'")
+            return parse_github_commit(resp.json())
