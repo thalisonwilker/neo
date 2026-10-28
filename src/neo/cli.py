@@ -11,7 +11,7 @@ from neo.commands.config import config_app
 from neo.commands.git import git_app
 from neo.commands.tasks import tasks_app
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 @dataclass
@@ -22,11 +22,11 @@ class AppContext:
 
 app = typer.Typer(
     name="neo",
-    help="""[bold cyan]Neo — Personal Command Assistant[/bold cyan]
+    help="""[bold cyan]Neo — Sua vida organizada, a um comando de distância.[/bold cyan]
 
 Compreenda seus sistemas. Seja dono das suas escolhas.
 
-Centraliza operações de trabalho (Bitbucket, Shortcut) e vida pessoal,
+Centraliza operações de trabalho (GitHub, Bitbucket, Shortcut) e vida pessoal,
 investigando dados com autonomia e sem atrito.
 """,
     no_args_is_help=True,

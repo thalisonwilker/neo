@@ -8,7 +8,7 @@ runner = CliRunner()
 def test_cli_help():
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    assert "Neo — Personal Command Assistant" in result.output
+    assert "Neo — Sua vida organizada, a um comando de distância." in result.output
     assert "config" in result.output
 
 

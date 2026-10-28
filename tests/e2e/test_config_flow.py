@@ -14,11 +14,11 @@ def test_AC_1_help_and_version():
     """AC-1: neo --help exibe descrição e comandos; neo --version exibe versão."""
     res_help = runner.invoke(app, ["--help"])
     assert res_help.exit_code == 0
-    assert "Neo — Personal Command Assistant" in res_help.output
+    assert "Neo — Sua vida organizada, a um comando de distância." in res_help.output
 
     res_ver = runner.invoke(app, ["--version"])
     assert res_ver.exit_code == 0
-    assert "0.1.0" in res_ver.output
+    assert "0.1.1" in res_ver.output
 
 
 def test_AC_2_and_AC_3_auth_set_and_get(tmp_path: Path):
