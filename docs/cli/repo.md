@@ -6,35 +6,43 @@ alwaysApply: false
 
 # `neo git repo`
 
-O módulo `repo` permite listar, pesquisar, clonar e criar repositórios no **GitHub** e **Bitbucket Cloud**.
+Lista, busca, clona e cria repositórios remotos no **GitHub** e no **Bitbucket Cloud** sem abrir o navegador.
 
 ---
 
 ## Comandos
 
 ### `neo git repo list`
-Lista os repositórios disponíveis no workspace ativo.
+Lista os repositórios do workspace ativo com visibilidade, linguagem/descrição e data de atualização:
 
 ```bash
+# Usa o provedor e workspace padrão configurados
 neo git repo list
-# Forçando provedor ou workspace específico
+
+# Consulta um provedor e organização específicos
 neo git repo list --provider github --workspace minha-org
+
+# Exporta lista em JSON para scripts
+neo --json git repo list
 ```
 
 ---
 
 ### `neo git repo search <termo>`
-Pesquisa repositórios por nome, slug ou palavras-chave na descrição.
+Filtra repositórios por nome, slug ou descrição:
 
 ```bash
+# Busca repositórios contendo "auth" no provedor ativo
 neo git repo search auth
+
+# Busca no Bitbucket Cloud
 neo git repo search api --provider bitbucket
 ```
 
 ---
 
 ### `neo git repo clone <slug>`
-Clona um repositório resolvendo automaticamente a URL remota via API:
+Resolve a URL remota na API do provedor e executa o `git clone` no diretório atual:
 
 === "SSH (Padrão)"
     ```bash
@@ -49,14 +57,14 @@ Clona um repositório resolvendo automaticamente a URL remota via API:
 ---
 
 ### `neo git repo create <nome>`
-Cria um novo repositório com confirmação interativa de segurança.
+Cria um repositório remoto no workspace ativo. Por segurança, pede confirmação interativa antes de criar (use `-y` em scripts de automação):
 
-=== "Com Confirmação Interativa"
+=== "Com Confirmação no Terminal"
     ```bash
     neo git repo create servico-pagamento --private
     ```
 
-=== "Sem Prompt (CI / Scripts)"
+=== "Sem Prompt (Scripts / CI)"
     ```bash
     neo git repo create servico-pagamento --private -d "API de pagamentos" -y
     ```

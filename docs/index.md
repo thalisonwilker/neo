@@ -1,16 +1,16 @@
 ---
 name: index
-description: Página inicial da documentação do Neo (Personal Command Assistant).
+description: Página inicial da documentação do Neo (Um assistente pessoal via linha de comando para organizar a vida de um dev).
 alwaysApply: false
 ---
 
-# <center>Neo — Personal Command Assistant</center>
+# <center>Trabalho, estudos, lazer e finanças. Sua vida organizada, a um comando de distância.</center>
 <div class="hero-container">
-  <img style="width: 240px" src="assets/neo-logo.jpg" alt="Neo CLI — Personal Command Assistant" class="hero-logo" />
+  <img style="width: 240px" src="assets/neo-logo.jpg" alt="Neo CLI — Um assistente pessoal via linha de comando para organizar a vida de um dev" class="hero-logo" />
 </div>
 
 <p align="center" class="hero-subtitle">
-  <em>Assistente pessoal de linha de comando, alta produtividade, modular, seguro e pronto para automação</em>
+  <em>Um assistente pessoal para quem prefere o terminal à interface gráfica. Comece hoje pelo fluxo de desenvolvimento e escale suas automações em uma linha.</em>
 </p>
 
 <p align="center" class="hero-badges">
@@ -20,8 +20,8 @@ alwaysApply: false
   <a href="https://thalisonwilker.github.io/neo/" target="_blank">
     <img src="https://img.shields.io/endpoint?url=https://thalisonwilker.github.io/neo/coverage-badge.json" alt="Coverage">
   </a>
-  <a href="https://github.com/thalisonwilker/neo" target="_blank">
-    <img src="https://img.shields.io/badge/version-v0.1.0-34D058" alt="Version">
+  <a href="https://pypi.org/project/neo-cmd/" target="_blank">
+    <img src="https://img.shields.io/badge/version-v0.1.1-34D058" alt="Version">
   </a>
   <a href="https://www.python.org/" target="_blank">
     <img src="https://img.shields.io/badge/python-3.13+-34D058" alt="Python 3.13+">
@@ -31,35 +31,38 @@ alwaysApply: false
   </a>
 </p>
 
-O **Neo** é um assistente pessoal de linha de comando de alta produtividade construído em **Python 3.13**, utilizando **Typer** e **Rich**. Ele centraliza e automatiza operações técnicas de trabalho — integrando-se nativamente com **GitHub**, **Bitbucket Cloud** e **Shortcut** — investigando informações com autonomia e fornecendo interfaces ricas no terminal.
+O **Neo** é um assistente pessoal de linha de comando feito por dev, para devs que resolvem tudo pelo teclado. Sem abrir abas no navegador, você consulta tarefas, investiga commits e gerencia repositórios direto do terminal.
+
+- **Disponível hoje:** integração unificada com **GitHub**, **Bitbucket Cloud** e **Shortcut** (`neo git` e `neo tasks`), saída estruturada via `--json` e credenciais protegidas no Keyring do sistema operacional.
+- **No roadmap:** módulos para organizar estudos, hobbies, lazer, finanças pessoais (receitas e despesas) e uma API para conectar qualquer ferramenta ao seu fluxo.
 
 ---
 
-## ⚡ Recursos Principais
+## Por que usar o Neo
 
-=== "Multi-Provedor Git"
-    Suporte unificado a **GitHub** e **Bitbucket**. Resolução transparente por flag explícita (`--provider / -p`), auto-detecção via remote do repositório local ou preferência configurada em `config.toml`.
+=== "Linha de Comando por Escolha"
+    Troque cliques e trocas de aba por comandos curtos e previsíveis. O Neo detecta o repositório Git atual automaticamente e responde no terminal em segundos, com tabelas formatadas via **Rich**.
 
-=== "Segurança Nativa"
-    Armazenamento seguro de credenciais via **Keyring do SO** (macOS Keychain, Linux Secret Service, Windows Credential Manager) com fallback inteligente para arquivo restrito (`0600`) e variáveis de ambiente.
+=== "GitHub, Bitbucket e Shortcut em um Lugar"
+    Use a mesma sintaxe para listar, buscar e clonar repositórios no **GitHub** ou no **Bitbucket Cloud** (`--provider / -p` ou detecção automática pelo `remote`) e acompanhe suas demandas do **Shortcut** sem sair do código.
 
-=== "Terminal Moderno & Rico"
-    Interfaces visuais modernas estilizadas com **Rich** (tabelas, alertas, painéis) e suporte à flag global `--json` para integração transparente com `jq`, pipelines de CI e scripts de automação.
+=== "Pronto para Scripts e CI (`--json`)"
+    Todo comando aceita a flag global `--json`. Combine o Neo com `jq`, scripts shell e pipelines de CI/CD para transformar consultas manuais em automações reprodutíveis.
 
-=== "Análise de Contexto"
-    Investigação contextual de tickets e chamados do Shortcut (`neo tasks analyze`), sugerindo branches, padrões de commit e critérios de aceite automaticamente.
+=== "Credenciais Fora de Texto Puro"
+    Seus tokens ficam no **Keyring nativo do SO** (macOS Keychain, Linux Secret Service, Windows Credential Manager), com fallback para arquivo local restrito (`0600`) ou variáveis de ambiente em servidores de CI.
 
 ---
 
-## 🚀 Instalação Rápida
+## Instalação Rápida
 
 === "Via PyPI (Recomendado)"
     ```bash
-    # Instalar como CLI global com uv ou pip
+    # Instale globalmente com uv ou pip
     uv tool install neo-cmd
     # ou: pip install neo-cmd
 
-    # Executar diretamente de qualquer diretório
+    # Confirme a instalação
     neo --help
     ```
 
@@ -71,40 +74,49 @@ O **Neo** é um assistente pessoal de linha de comando de alta produtividade con
 
 ---
 
-## 🛠️ Exemplo de Uso
+## Veja na Prática
 
-=== "Quadro Kanban (Resume)"
+=== "Quadro Kanban no Terminal"
     ```bash
-    # Exibe o quadro A fazer | Fazendo | Feito (configura as colunas no 1º uso)
+    # Veja suas tarefas em A fazer | Fazendo | Feito sem abrir o navegador
     neo tasks resume
     ```
 
-=== "Consultar Stories"
+=== "Contexto para Começar a Codar"
     ```bash
-    # Listar apenas as stories atribuídas a você
-    neo tasks list --mine
+    # Analise uma story do Shortcut e receba sugestões de branch, commits e critérios de aceite
+    neo tasks analyze 12345
     ```
 
-=== "Navegar em Repositórios"
+=== "Suas Demandas da Iteração"
     ```bash
-    # Listar repositórios do provedor ativo (GitHub ou Bitbucket)
+    # Liste apenas as stories atribuídas a você na iteração atual
+    neo tasks list --mine --iteration current
+    ```
+
+=== "Busca de Commits e Repositórios"
+    ```bash
+    # Liste repositórios do provedor ativo (GitHub ou Bitbucket)
     neo git repo list
+
+    # Busque os últimos 5 commits com "fix" no repositório atual
+    neo git commits search --query "fix" --limit 5
     ```
 
-=== "Pesquisar Commits"
+=== "Automação com `--json` e `jq`"
     ```bash
-    # Busca commits auto-detectando o repositório git atual
-    neo git commits search --query "fix" --limit 5
+    # Extraia os IDs e nomes das suas stories em andamento direto para um script
+    neo --json tasks list --mine | jq '.[] | {id, name, state}'
     ```
 
 === "Alternar Workspace"
     ```bash
-    # Selecionar workspace ativo interativamente
+    # Selecione o workspace ou organização ativa pelo teclado
     neo git workspace select
     ```
 
 ---
 
-## 🧭 Metodologia Spec-Driven Development
+## Construído com Spec-Driven Development
 
-O Neo é concebido sob rigoroso **Spec-Driven Development (SDD)**. Cada recurso, decisão arquitetural e modelo de dados é rastreável ponta a ponta desde as especificações de negócio até a suíte de testes automatizados com cobertura garantida $\ge 80\%$.
+O Neo é desenvolvido em **Python 3.13** e **Typer** seguindo **Spec-Driven Development (SDD)**. Nenhuma funcionalidade vai para o código sem uma especificação aprovada, critérios de aceite determinísticos e cobertura de testes automatizados `>= 80%`.

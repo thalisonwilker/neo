@@ -4,7 +4,7 @@ description: Canvas do MVP do Neo — proposta, personas, jornadas, funcionalida
 alwaysApply: false
 ---
 
-# MVP Canvas — Neo (Personal Command Assistant)
+# MVP Canvas — Neo (Um assistente pessoal via linha de comando para organizar a vida de um dev)
 
 > Lean Inception (Paulo Caroli). O MVP é a menor coisa que gera aprendizado validado, não a versão "pequena" do produto final.
 

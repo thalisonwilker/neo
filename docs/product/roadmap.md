@@ -4,7 +4,7 @@ description: Prioridades do Neo em horizontes Now/Next/Later.
 alwaysApply: true
 ---
 
-# Roadmap — Neo (Personal Command Assistant)
+# Roadmap — Neo (Um assistente pessoal via linha de comando para organizar a vida de um dev)
 
 > Plano incremental para implementar com o time. Gerado no kickoff.
 > Princípio: **quick wins de baixo risco primeiro** para gerar tração e confiança.

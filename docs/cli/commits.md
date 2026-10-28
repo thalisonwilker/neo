@@ -6,38 +6,50 @@ alwaysApply: false
 
 # `neo git commits`
 
-O módulo `commits` investiga o histórico de versões nos repositórios remotos.
+Investiga o histórico de commits direto na API do **GitHub** ou do **Bitbucket Cloud**, útil para rastrear quando uma alteração entrou ou cruzar commits com IDs de tarefas.
 
 ---
 
-## Auto-Detecção Inteligente
+## Detecção Automática pelo Repositório Local
 
-Quando executado dentro de uma pasta de projeto Git local, o Neo inspeciona automaticamente a URL do remote `origin` para determinar o provedor (**GitHub** ou **Bitbucket**), o workspace/organização e o slug do repositório, dispensando o preenchimento manual das flags.
+Se você rodar `neo git commits search` dentro de uma pasta com Git inicializado, o Neo lê a URL do remote `origin` e descobre sozinho:
+
+- o provedor (`github` ou `bitbucket`),
+- o workspace/organização,
+- o slug do repositório.
+
+Fora de um repositório Git (ou para consultar outro projeto), basta informar `--repo` e, se necessário, `--provider` e `--workspace`.
 
 ---
 
 ## Comandos
 
 ### `neo git commits search`
-Pesquisa commits com filtros opcionais de autor, termo de mensagem e quantidade máxima:
+Lista e filtra commits por termo na mensagem, autor e limite de resultados:
 
-=== "No Diretório Atual"
+=== "No Repositório Atual"
     ```bash
-    # Detecta automaticamente o repositório atual
+    # Detecta provedor, workspace e repo via git remote origin
     neo git commits search
     ```
 
-=== "Filtrando por Autor"
+=== "Por Mensagem ou ID de Card (`--query`)"
+    ```bash
+    # Encontra commits que mencionam um ticket específico
+    neo git commits search --query "sc-2108" --limit 10
+    ```
+
+=== "Por Autor (`--author`)"
     ```bash
     neo git commits search --author "Thalyson"
     ```
 
-=== "Filtrando por Palavra-chave ou Ticket"
-    ```bash
-    neo git commits search --query "sc-2108" --limit 10
-    ```
-
-=== "Em Repositório Específico"
+=== "Em Outro Repositório (`--repo`)"
     ```bash
     neo git commits search --provider github --repo neo --limit 5
+    ```
+
+=== "Em JSON para Auditoria (`--json`)"
+    ```bash
+    neo --json git commits search --query "fix" --limit 5 | jq '.[] | {hash, author, message}'
     ```

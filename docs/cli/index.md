@@ -4,39 +4,43 @@ description: Visão geral da interface de linha de comando e opções globais do
 alwaysApply: false
 ---
 
-# Guia de Comandos da CLI
+# Visão Geral da CLI
 
-A interface de linha de comando do Neo foi projetada para ser rápida, visualmente agradável com **Rich** e totalmente integrável a pipelines de automação.
+Os comandos do Neo seguem o padrão `neo <domínio> <recurso> <ação>`. Você recebe tabelas formatadas com **Rich** para leitura rápida no terminal ou JSON puro com `--json` para alimentar scripts, `jq` e pipelines de CI/CD.
 
 ---
 
-## Opções Globais
+## Flags Globais
 
-Todas as invocações aceitam as seguintes opções no início do comando:
+Passe as flags globais logo após `neo`, antes do subcomando:
 
-| Flag | Descrição |
+| Flag | O que faz |
 |---|---|
-| `--help` | Exibe a mensagem de ajuda contextual do comando. |
-| `--version`, `-V` | Exibe a versão atual instalada do Neo. |
-| `--json` | Emite a saída em formato JSON estrito no `stdout`, suprimindo formatação visual. |
-| `-v`, `--verbose` | Habilita logs detalhados de requisições HTTP e depuração interna. |
+| `--help` | Exibe a ajuda rápida do comando ou subcomando atual. |
+| `--version`, `-V` | Imprime a versão instalada do Neo e encerra. |
+| `--json` | Emite JSON puro no `stdout` e desativa cores/tabelas visuais. |
+| `-v`, `--verbose` | Exibe detalhes de chamadas HTTP e diagnóstico em caso de falha. |
 
-### Exemplo de Uso com `--json` e `jq`
+### Compondo Comandos no Terminal (`--json` + `jq`)
 
 ```bash
-# Filtrar nomes de repositórios diretamente com jq
+# Extrair apenas os slugs dos seus repositórios no provedor ativo
 neo --json git repo list | jq -r '.[].slug'
+
+# Contar quantas tasks estão na coluna "Fazendo" na sprint atual
+neo --json tasks resume | jq '.doing | length'
+
+# Clonar todos os repositórios que contêm "service" no nome
+neo --json git repo search service | jq -r '.[].slug' | xargs -I {} neo git repo clone {}
 ```
 
 ---
 
-## Módulos Disponíveis
+## Mapa de Comandos Hoje
 
-Os comandos do Neo são organizados em módulos independentes por categoria de serviço:
+### 1. `neo git` (GitHub & Bitbucket Cloud)
 
-### 1. Mapa do Módulo `neo git` (Bitbucket & GitHub)
-
-Centraliza autenticação, seleção de workspaces/organizações, gestão de repositórios e histórico de commits:
+Gerencia credenciais, organizações/workspaces, repositórios e busca de commits nos dois provedores com a mesma sintaxe:
 
 ```mermaid
 flowchart LR
@@ -53,16 +57,16 @@ flowchart LR
     Commits --> CCmds["search"]
 ```
 
-- [Configuração Git](../configuration.md) (`neo git config`): Credenciais e provedor padrão (`bitbucket` ou `github`).
-- [Workspaces](workspace.md) (`neo git workspace`): Alternância e listagem de workspaces/organizações ativas.
-- [Repositórios](repo.md) (`neo git repo`): Listagem, busca, clonagem e criação de repositórios.
-- [Commits](commits.md) (`neo git commits`): Investigação de histórico com auto-detecção do repositório Git local.
+- [Configuração Git](../configuration.md) (`neo git config`): salve tokens no Keyring e escolha seu provedor padrão (`github` ou `bitbucket`).
+- [Workspaces](workspace.md) (`neo git workspace`): alterne entre organizações ou contas sem precisar passar flags em todo comando.
+- [Repositórios](repo.md) (`neo git repo`): liste, filtre, crie e clone repositórios via SSH ou HTTPS.
+- [Commits](commits.md) (`neo git commits`): pesquise commits por autor ou mensagem com detecção automática do repositório local.
 
 ---
 
-### 2. Mapa do Módulo `neo tasks` (Shortcut)
+### 2. `neo tasks` (Shortcut)
 
-Centraliza a gestão de credenciais, consulta de stories/chamados e análise contextual de demandas (com seletor `--service`):
+Conecta seu terminal ao **Shortcut** para visualizar quadros Kanban, filtrar sprints e preparar o contexto antes de abrir uma branch:
 
 ```mermaid
 flowchart LR
@@ -78,16 +82,16 @@ flowchart LR
     TConfig --> TAuth["set | get | delete | columns"]
 ```
 
-- [Configuração de Tasks](../configuration.md) (`neo tasks config`): Armazenamento seguro do token e mapeamento das colunas do board (`columns`).
-- [Tasks & Demandas](tasks.md) (`neo tasks`): Iterações (`iterations`), quadro Kanban (`resume`), consulta de stories (`whoami`, `list`, `search`, `show`) e análise automática de contexto (`analyze`).
+- [Configuração de Tasks](../configuration.md) (`neo tasks config`): configure o token do Shortcut e mapeie as colunas do seu workflow.
+- [Tasks & Demandas](tasks.md) (`neo tasks`): veja o quadro Kanban (`resume`), liste sprints (`iterations`), filtre stories (`list`, `search`, `show`) e gere sugestões de branch e commit (`analyze`).
 
 ---
 
-### 3. Visão Geral de Configuração (`neo config`)
+### 3. `neo config` (Diagnóstico Geral)
 
 ```mermaid
 flowchart LR
     Neo["neo config"] --> Show["show (Status geral: Git + Tasks)"]
 ```
 
-- [Visão Geral](../configuration.md) (`neo config show`): Painel consolidado com o status de todas as integrações e provedor Git padrão.
+- [Diagnóstico de Configuração](../configuration.md) (`neo config show`): confira em uma tabela quais tokens estão ativos, de onde vêm (Keyring, variável de ambiente ou arquivo) e qual provedor Git é o padrão.

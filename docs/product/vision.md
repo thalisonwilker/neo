@@ -4,7 +4,7 @@ description: Visão do produto — problema, personas, North Star do Neo.
 alwaysApply: true
 ---
 
-# Visão do Produto — Neo (Personal Command Assistant)
+# Visão do Produto — Neo (Um assistente pessoal via linha de comando para organizar a vida de um dev)
 
 > "Compreenda seus sistemas. Seja dono das suas escolhas."
 > Gerado no kickoff (Lean Inception). Documento vivo: revisar a cada pivô relevante.
