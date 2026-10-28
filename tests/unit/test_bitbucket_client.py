@@ -163,8 +163,8 @@ def test_list_workspaces(bb_client: BitbucketClient):
                         "type": "workspace_access",
                         "administrator": True,
                         "workspace": {
-                            "name": "EBI Informática",
-                            "slug": "ebi_informatica",
+                            "name": "Acme Corp",
+                            "slug": "acme_corp",
                             "uuid": "{f39a5585-9c5e-4ff5-a3c3-f799032772f2}",
                         },
                     }
@@ -176,8 +176,8 @@ def test_list_workspaces(bb_client: BitbucketClient):
     workspaces = bb_client.list_workspaces()
     assert len(workspaces) == 1
     assert isinstance(workspaces[0], BitbucketWorkspace)
-    assert workspaces[0].name == "EBI Informática"
-    assert workspaces[0].slug == "ebi_informatica"
+    assert workspaces[0].name == "Acme Corp"
+    assert workspaces[0].slug == "acme_corp"
     assert workspaces[0].is_admin is True
 
 

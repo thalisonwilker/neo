@@ -3,12 +3,19 @@ import os
 from unittest.mock import patch
 
 import httpx
+import pytest
 import respx
 from typer.testing import CliRunner
 
 from neo.cli import app
 
 runner = CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def isolate_git_remote():
+    with patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)):
+        yield
 
 
 def test_AC_6_repo_without_credentials():

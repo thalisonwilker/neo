@@ -19,8 +19,8 @@ MOCK_WORKSPACES_PAYLOAD = {
             "type": "workspace_access",
             "administrator": True,
             "workspace": {
-                "name": "EBI Informática",
-                "slug": "ebi_informatica",
+                "name": "Acme Corp",
+                "slug": "acme_corp",
                 "uuid": "{uuid-1}",
             },
         },
@@ -43,12 +43,16 @@ def mock_bitbucket_auth(tmp_path: Path):
         patch("neo.integrations.resolver.get_credential", return_value="user:token"),
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
+        patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
     ):
         yield tmp_path
 
 
 def test_AC_6_workspace_without_credentials():
-    with patch("neo.integrations.resolver.get_credential", return_value=None):
+    with (
+        patch("neo.integrations.resolver.get_credential", return_value=None),
+        patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
+    ):
         result = runner.invoke(app, ["workspace", "list"])
         assert result.exit_code == 1
         assert "Credenciais do Bitbucket não configuradas" in result.output
@@ -63,8 +67,8 @@ def test_AC_1_workspace_list_human_and_json(mock_bitbucket_auth: Path):
     # Modo humano
     res_human = runner.invoke(app, ["workspace", "list"])
     assert res_human.exit_code == 0
-    assert "EBI Informática" in res_human.output
-    assert "ebi_informatica" in res_human.output
+    assert "Acme Corp" in res_human.output
+    assert "acme_corp" in res_human.output
     assert "Personal Workspace" in res_human.output
     assert "Ativo" in res_human.output
 
@@ -73,7 +77,7 @@ def test_AC_1_workspace_list_human_and_json(mock_bitbucket_auth: Path):
     assert res_json.exit_code == 0
     data = json.loads(res_json.output)
     assert len(data) == 2
-    assert data[0]["slug"] == "ebi_informatica"
+    assert data[0]["slug"] == "acme_corp"
     assert data[0]["is_admin"] is True
     assert data[0]["is_active"] is True
     assert data[1]["slug"] == "personal_ws"
@@ -89,13 +93,13 @@ def test_AC_2_workspace_current(mock_bitbucket_auth: Path):
     # 1. Sem config (auto API)
     res = runner.invoke(app, ["workspace", "current"])
     assert res.exit_code == 0
-    assert "ebi_informatica" in res.output
+    assert "acme_corp" in res.output
     assert "Detectado automaticamente via API" in res.output
 
     res_json = runner.invoke(app, ["--json", "workspace", "current"])
     assert res_json.exit_code == 0
     data = json.loads(res_json.output)
-    assert data["workspace"] == "ebi_informatica"
+    assert data["workspace"] == "acme_corp"
     assert data["source"] == "api_auto"
 
     # 2. Com config salvo
@@ -125,9 +129,9 @@ def test_AC_3_workspace_select_by_slug(mock_bitbucket_auth: Path):
     assert get_default_workspace_config(config_dir=mock_bitbucket_auth) == "personal_ws"
 
     # Atalho `neo workspace set`
-    res_set = runner.invoke(app, ["workspace", "set", "ebi_informatica"])
+    res_set = runner.invoke(app, ["workspace", "set", "acme_corp"])
     assert res_set.exit_code == 0
-    assert get_default_workspace_config(config_dir=mock_bitbucket_auth) == "ebi_informatica"
+    assert get_default_workspace_config(config_dir=mock_bitbucket_auth) == "acme_corp"
 
     # Slug inexistente
     res_err = runner.invoke(app, ["workspace", "select", "--slug", "nao-existe"])

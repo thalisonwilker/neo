@@ -45,9 +45,6 @@ def commits_search(
     """Pesquisa commits em um repositório no Bitbucket ou GitHub."""
     as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
 
-    # Auto-detecta repositório e provedor pelo git local
-    detected_prov, _ = detect_git_remote_info()
-
     target_repo = repo or _infer_repo_slug_from_git()
     if not target_repo:
         msg = (
@@ -57,9 +54,7 @@ def commits_search(
         print_error(msg, as_json=as_json, code=1)
         raise typer.Exit(code=1)
 
-    # Se o usuário não passou flag de provider, mas o git local detectou, usa o do git local
-    target_prov = provider or detected_prov
-    prov_name, client = resolve_git_provider(target_prov, as_json=as_json)
+    prov_name, client = resolve_git_provider(provider, as_json=as_json)
 
     try:
         commits = client.list_commits(

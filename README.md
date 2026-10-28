@@ -156,7 +156,7 @@ neo workspace list --provider github
 neo workspace select
 
 # Definir workspace do Bitbucket
-neo workspace set ebi_informatica --provider bitbucket
+neo workspace set acme_corp --provider bitbucket
 
 # Definir organização ativa no GitHub
 neo workspace set minha-organizacao --provider github

@@ -41,7 +41,7 @@ A CLI Neo permitirá ao usuário listar seus workspaces acessíveis no Bitbucket
 - **E** se o modo `--json` estiver ativo sem `--slug`, emite erro orientando o uso obrigatório da flag `--slug`.
 
 ### AC-5: Precedência de workspace nos comandos de repositórios e commits
-- **Dado** um workspace salvo em `config.toml` (ex: `ebi_informatica`);
+- **Dado** um workspace salvo em `config.toml` (ex: `acme_corp`);
 - **Quando** o usuário executa comandos como `neo repo list`, `neo repo search`, `neo repo clone`, `neo repo create` ou `neo commits search`:
   - Se a flag `--workspace <ws>` for fornecida explicitamente, ela tem precedência máxima;
   - Se `--workspace` for omitida, utiliza automaticamente o workspace salvo em `config.toml`;

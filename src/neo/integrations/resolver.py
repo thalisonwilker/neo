@@ -109,7 +109,14 @@ def resolve_git_provider(
     else:
         # 2. Auto-detecção via git local
         detected_prov, _ = detect_git_remote_info()
-        if detected_prov:
+        has_github = get_credential("github") is not None
+        has_bitbucket = get_credential("bitbucket") is not None
+
+        if detected_prov and (
+            (detected_prov == "github" and has_github)
+            or (detected_prov == "bitbucket" and has_bitbucket)
+            or (not has_github and not has_bitbucket)
+        ):
             provider_name = detected_prov
         else:
             # 3. Configuração salva em config.toml
@@ -118,8 +125,6 @@ def resolve_git_provider(
                 provider_name = cfg_prov
             else:
                 # 4. Fallback para quem tiver token configurado ou bitbucket
-                has_github = get_credential("github") is not None
-                has_bitbucket = get_credential("bitbucket") is not None
                 if has_github and not has_bitbucket:
                     provider_name = "github"
                 else:

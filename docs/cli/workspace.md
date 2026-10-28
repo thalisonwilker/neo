@@ -12,7 +12,7 @@ O comando `workspace` gerencia a conta ou organização ativa nos provedores Git
 
 ## Conceitos por Provedor
 
-- **Bitbucket:** Corresponde a um Workspace (ex: `ebi_informatica`, `minha-empresa`).
+- **Bitbucket:** Corresponde a um Workspace (ex: `acme_corp`, `minha-empresa`).
 - **GitHub:** Corresponde ao usuário logado ou a qualquer organização à qual o token tem acesso.
 
 ---
@@ -54,7 +54,7 @@ Abre um menu interativo com navegação por teclado no terminal para seleção v
 
 === "Por Slug Direto"
     ```bash
-    uv run neo workspace select --slug ebi_informatica
+    uv run neo workspace select --slug acme_corp
     ```
 
 ---
