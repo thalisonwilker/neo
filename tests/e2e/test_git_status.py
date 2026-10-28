@@ -81,4 +81,3 @@ def test_AC_8_unsupported_provider_operation_exit_code_5():
     with pytest.raises(typer.Exit) as exc_info:
         handle_git_provider_error(exc, as_json=True)
     assert exc_info.value.exit_code == int(ExitCode.UNSUPPORTED)
-
