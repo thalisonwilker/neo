@@ -166,3 +166,33 @@ def test_default_provider_config(tmp_path: Path):
 
     set_default_provider_config("bitbucket", config_dir=tmp_path)
     assert get_default_provider_config(config_dir=tmp_path) == "bitbucket"
+
+
+def test_task_columns_config(tmp_path: Path):
+    from neo.config import get_task_columns_config, set_task_columns_config
+
+    assert get_task_columns_config("shortcut", config_dir=tmp_path) is None
+
+    set_task_columns_config(
+        todo=["📝 - Backlog de Sprint", "🚨 - Bug"],
+        doing=["🚧 - Em Progresso"],
+        done=["✅ - Finalizado"],
+        service="shortcut",
+        config_dir=tmp_path,
+    )
+
+    cfg = get_task_columns_config("shortcut", config_dir=tmp_path)
+    assert cfg == {
+        "todo": ["📝 - Backlog de Sprint", "🚨 - Bug"],
+        "doing": ["🚧 - Em Progresso"],
+        "done": ["✅ - Finalizado"],
+    }
+
+    with pytest.raises(ValueError, match="devem ter pelo menos uma coluna"):
+        set_task_columns_config(
+            todo=[],
+            doing=["🚧 - Em Progresso"],
+            done=["✅ - Finalizado"],
+            service="shortcut",
+            config_dir=tmp_path,
+        )

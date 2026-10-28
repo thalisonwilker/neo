@@ -42,10 +42,17 @@ alwaysApply: false
 
 ## 📐 Specs — o contrato de cada feature
 > A pasta [`specs/`](../specs/) é a fonte viva; atualize ao criar features com `/nova-feature`.
-- [`specs/0001-exemplo-cota-de-uso/`](../specs/0001-exemplo-cota-de-uso/spec.md) — exemplo de referência da esteira
-- [`specs/0002-fundacao-cli-e-configuracao/`](../specs/0002-fundacao-cli-e-configuracao/spec.md) — fundação da CLI, Rich, flag --json e Keyring (implementada)
-- [`specs/0003-modulo-bitbucket/`](../specs/0003-modulo-bitbucket/spec.md) — repositórios e commits do Bitbucket (implementada)
-- [`specs/0004-modulo-shortcut/`](../specs/0004-modulo-shortcut/spec.md) — demandas e stories do Shortcut via REST API v3 (ativa)
+- [`specs/0002-fundacao-cli-e-configuracao/`](../specs/0002-fundacao-cli-e-configuracao/spec.md) — fundação da CLI, Rich, flag `--json` e Keyring
+- [`specs/0003-modulo-bitbucket/`](../specs/0003-modulo-bitbucket/spec.md) — repositórios e commits do Bitbucket
+- [`specs/0004-modulo-shortcut/`](../specs/0004-modulo-shortcut/spec.md) — demandas e stories do Shortcut via REST API v3
+- [`specs/0005-selecao-de-workspace-bitbucket/`](../specs/0005-selecao-de-workspace-bitbucket/spec.md) — seleção e gestão de workspaces
+- [`specs/0006-modulo-github-e-multi-provedor-git/`](../specs/0006-modulo-github-e-multi-provedor-git/spec.md) — suporte multi-provedor Git (GitHub & Bitbucket)
+- [`specs/0007-documentacao-mkdocs-conteinerizada/`](../specs/0007-documentacao-mkdocs-conteinerizada/spec.md) — documentação Material for MkDocs
+- [`specs/0008-ci-cd-e-deploy-github-actions/`](../specs/0008-ci-cd-e-deploy-github-actions/spec.md) — CI/CD e deploy automático no GitHub Pages
+- [`specs/0009-refactor-cli-git-e-tasks/`](../specs/0009-refactor-cli-git-e-tasks/spec.md) — unificação dos comandos em `neo git` e `neo tasks`
+- [`specs/0011-tasks-resume-board/`](../specs/0011-tasks-resume-board/spec.md) — quadro Kanban `neo tasks resume` e configuração de colunas
+- [`specs/0012-filtro-iteracao-tasks/`](../specs/0012-filtro-iteracao-tasks/spec.md) — filtro por iteração em tasks (`neo tasks iterations`)
+- [`specs/0013-publicacao-pacote-pypi/`](../specs/0013-publicacao-pacote-pypi/spec.md) — pacote PyPI (`neo-cmd`) e publicação via GitHub Actions
 
 ## 📖 Linguagem & convenções
 - **Glossário** (linguagem ubíqua) → [glossary.md](glossary.md)

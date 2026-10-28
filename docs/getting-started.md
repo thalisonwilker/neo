@@ -23,20 +23,30 @@ Este guia orienta a instalação do Neo, configuração das ferramentas de desen
 
 ---
 
-## Instalação do Projeto
+## Instalação
 
-Clone o repositório e sincronize o ambiente virtual:
+=== "Via PyPI (`pip` ou `uv`)"
+    Instale o pacote **`neo-cmd`** para disponibilizar o comando `neo` globalmente no seu terminal:
+    ```bash
+    # Com uv (recomendado — ambiente isolado)
+    uv tool install neo-cmd
+
+    # Ou com pip / pipx
+    pip install neo-cmd
+    ```
+
+=== "A partir do Código-Fonte"
+    Clone o repositório e sincronize o ambiente virtual:
+    ```bash
+    git clone https://github.com/thalisonwilker/neo.git
+    cd neo
+    uv sync
+    ```
+
+Para verificar se o comando `neo` está pronto para uso:
 
 ```bash
-git clone https://github.com/thalisonwilker/neo.git
-cd neo
-uv sync
-```
-
-Para verificar se tudo está funcionando corretamente:
-
-```bash
-uv run neo --version
+neo --version
 ```
 
 A saída exibirá a versão atual do Neo (`v0.1.0`).
@@ -50,25 +60,25 @@ Antes de interagir com o GitHub, Bitbucket ou Shortcut, configure suas chaves de
 === "GitHub"
     Crie um **Personal Access Token** (Classic com escopo `repo` ou Fine-grained):
     ```bash
-    uv run neo git config auth set github --token "ghp_seu_token_aqui"
+    neo git config auth set github --token "ghp_seu_token_aqui"
     ```
 
 === "Bitbucket Cloud"
     Utilize um **API Token** ou App Password com permissões de repositórios:
     ```bash
-    uv run neo git config auth set bitbucket --token "usuario:token"
+    neo git config auth set bitbucket --token "usuario:token"
     ```
 
 === "Shortcut"
     Gere um token em *User Settings > API Tokens*:
     ```bash
-    uv run neo tasks config set --token "seu_token_shortcut"
+    neo tasks config set --token "seu_token_shortcut"
     ```
 
 Verifique o status das integrações:
 
 ```bash
-uv run neo config show
+neo config show
 ```
 
 ---

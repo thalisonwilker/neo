@@ -1,0 +1,72 @@
+name: Publish to PyPI
+
+"on":
+  release:
+    types: [published]
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & Quality Gates (sdist + wheel)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Configurar Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Sincronizar dependências de desenvolvimento
+        run: uv sync --dev
+
+      - name: Validar lint e tipos (Ruff & Mypy)
+        run: |
+          uv run ruff check .
+          uv run mypy src
+
+      - name: Executar suíte de testes e cobertura (>= 80%)
+        run: uv run pytest --cov=neo --cov-fail-under=80 -q
+
+      - name: Construir pacote PyPI (sdist e wheel)
+        run: uv build
+
+      - name: Enviar artefatos de distribuição (dist/)
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish-pypi:
+    name: Publicar pacote neo-cmd no PyPI
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/neo-cmd
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Baixar artefatos de distribuição (dist/)
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publicar no PyPI via Trusted Publishing (OIDC)
+        uses: pypa/gh-action-pypi-publish@release/v1
+

@@ -142,3 +142,85 @@ def test_shortcut_auth_error_401(sc_client: ShortcutClient):
 
     with pytest.raises(ShortcutAuthError, match="Falha de autenticação no Shortcut"):
         sc_client.get_current_member()
+
+
+@respx.mock
+def test_list_workflows_and_states(sc_client: ShortcutClient):
+    respx.get("https://api.app.shortcut.com/api/v3/workflows").mock(
+        return_value=httpx.Response(
+            200,
+            json=[
+                {
+                    "id": 500001,
+                    "name": "Atual",
+                    "states": [
+                        {"id": 500010, "name": "📝 - Backlog de Sprint", "type": "unstarted"},
+                        {"id": 500011, "name": "🚨 - Bug", "type": "unstarted"},
+                        {"id": 500012, "name": "🚧 - Em Progresso", "type": "started"},
+                        {"id": 500013, "name": "✅ - Finalizado", "type": "done"},
+                    ],
+                }
+            ],
+        )
+    )
+
+    workflows = sc_client.list_workflows()
+    assert len(workflows) == 1
+    assert workflows[0].name == "Atual"
+    assert len(workflows[0].states) == 4
+
+    states = sc_client.list_workflow_states()
+    assert [s.name for s in states] == [
+        "📝 - Backlog de Sprint",
+        "🚨 - Bug",
+        "🚧 - Em Progresso",
+        "✅ - Finalizado",
+    ]
+    assert states[0].workflow_name == "Atual"
+
+
+@respx.mock
+def test_list_and_resolve_iterations(sc_client: ShortcutClient):
+    respx.get("https://api.app.shortcut.com/api/v3/iterations").mock(
+        return_value=httpx.Response(
+            200,
+            json=[
+                {
+                    "id": 21001,
+                    "name": "Sprint 70",
+                    "status": "done",
+                    "start_date": "2026-10-01",
+                    "end_date": "2026-10-14",
+                },
+                {
+                    "id": 21002,
+                    "name": "Sprint 71",
+                    "status": "started",
+                    "start_date": "2026-10-15",
+                    "end_date": "2026-10-29",
+                },
+            ],
+        )
+    )
+
+    iterations = sc_client.list_iterations()
+    assert len(iterations) == 2
+    # Ordenado da mais recente para a mais antiga
+    assert iterations[0].name == "Sprint 71"
+    assert iterations[1].name == "Sprint 70"
+
+    latest = sc_client.get_latest_iteration()
+    assert latest is not None
+    assert latest.id == 21002
+
+    # resolve_iteration(None) -> última
+    assert sc_client.resolve_iteration(None) == latest
+    # resolve_iteration("all") -> None
+    assert sc_client.resolve_iteration("all") is None
+    # resolve por ID, nome exato e substring
+    assert sc_client.resolve_iteration("21001").name == "Sprint 70"
+    assert sc_client.resolve_iteration("sprint 70").id == 21001
+    assert sc_client.resolve_iteration("71").id == 21002
+
+    with pytest.raises(ShortcutNotFoundError, match="não encontrada"):
+        sc_client.resolve_iteration("Sprint 999")

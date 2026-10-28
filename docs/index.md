@@ -53,40 +53,54 @@ O **Neo** é um assistente pessoal de linha de comando de alta produtividade con
 
 ## 🚀 Instalação Rápida
 
-```bash
-# Sincronizar o ambiente com uv
-uv sync
+=== "Via PyPI (Recomendado)"
+    ```bash
+    # Instalar como CLI global com uv ou pip
+    uv tool install neo-cmd
+    # ou: pip install neo-cmd
 
-# Executar a CLI localmente
-uv run neo --help
-```
+    # Executar diretamente de qualquer diretório
+    neo --help
+    ```
+
+=== "Desenvolvimento Local"
+    ```bash
+    uv sync
+    uv run neo --help
+    ```
 
 ---
 
 ## 🛠️ Exemplo de Uso
 
+=== "Quadro Kanban (Resume)"
+    ```bash
+    # Exibe o quadro A fazer | Fazendo | Feito (configura as colunas no 1º uso)
+    neo tasks resume
+    ```
+
 === "Consultar Stories"
     ```bash
     # Listar apenas as stories atribuídas a você
-    uv run neo tasks list --mine
+    neo tasks list --mine
     ```
 
 === "Navegar em Repositórios"
     ```bash
     # Listar repositórios do provedor ativo (GitHub ou Bitbucket)
-    uv run neo git repo list
+    neo git repo list
     ```
 
 === "Pesquisar Commits"
     ```bash
     # Busca commits auto-detectando o repositório git atual
-    uv run neo git commits search --query "fix" --limit 5
+    neo git commits search --query "fix" --limit 5
     ```
 
 === "Alternar Workspace"
     ```bash
     # Selecionar workspace ativo interativamente
-    uv run neo git workspace select
+    neo git workspace select
     ```
 
 ---

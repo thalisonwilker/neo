@@ -962,7 +962,7 @@ wheels = [
 ]
 
 [[package]]
-name = "neo"
+name = "neo-cmd"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

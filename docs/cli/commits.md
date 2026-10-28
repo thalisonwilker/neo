@@ -24,20 +24,20 @@ Pesquisa commits com filtros opcionais de autor, termo de mensagem e quantidade 
 === "No Diretório Atual"
     ```bash
     # Detecta automaticamente o repositório atual
-    uv run neo git commits search
+    neo git commits search
     ```
 
 === "Filtrando por Autor"
     ```bash
-    uv run neo git commits search --author "Thalyson"
+    neo git commits search --author "Thalyson"
     ```
 
 === "Filtrando por Palavra-chave ou Ticket"
     ```bash
-    uv run neo git commits search --query "sc-2108" --limit 10
+    neo git commits search --query "sc-2108" --limit 10
     ```
 
 === "Em Repositório Específico"
     ```bash
-    uv run neo git commits search --provider github --repo neo --limit 5
+    neo git commits search --provider github --repo neo --limit 5
     ```

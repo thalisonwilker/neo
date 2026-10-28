@@ -117,6 +117,11 @@ def _write_file_config(config_file: Path, data: dict[str, Any]) -> None:
                     lines.append(f"{k} = {str(v).lower()}")
                 elif isinstance(v, (int, float)):
                     lines.append(f"{k} = {v}")
+                elif isinstance(v, list):
+                    escaped_items = [
+                        f'"{str(item).replace(chr(34), chr(92) + chr(34))}"' for item in v
+                    ]
+                    lines.append(f"{k} = [{', '.join(escaped_items)}]")
                 else:
                     lines.append(f'{k} = "{v}"')
             lines.append("")
@@ -180,6 +185,69 @@ def set_default_workspace_config(
     if prov not in data or not isinstance(data[prov], dict):
         data[prov] = {}
     data[prov]["default_workspace"] = clean_ws
+    _write_file_config(config_file, data)
+
+
+def get_task_columns_config(
+    service: str = DEFAULT_TASK_SERVICE, config_dir: Path | None = None
+) -> dict[str, list[str]] | None:
+    """Recupera o mapeamento de colunas (todo, doing, done) configurado para o serviço de tasks."""
+    svc = validate_task_service(service)
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    svc_cfg = data.get(svc, {})
+    if not isinstance(svc_cfg, dict):
+        return None
+
+    todo = svc_cfg.get("todo_columns")
+    doing = svc_cfg.get("doing_columns")
+    done = svc_cfg.get("done_columns")
+
+    if (
+        isinstance(todo, list)
+        and isinstance(doing, list)
+        and isinstance(done, list)
+        and len(todo) > 0
+        and len(doing) > 0
+        and len(done) > 0
+    ):
+        clean_todo = [str(x).strip() for x in todo if str(x).strip()]
+        clean_doing = [str(x).strip() for x in doing if str(x).strip()]
+        clean_done = [str(x).strip() for x in done if str(x).strip()]
+        if clean_todo and clean_doing and clean_done:
+            return {
+                "todo": clean_todo,
+                "doing": clean_doing,
+                "done": clean_done,
+            }
+    return None
+
+
+def set_task_columns_config(
+    todo: list[str],
+    doing: list[str],
+    done: list[str],
+    service: str = DEFAULT_TASK_SERVICE,
+    config_dir: Path | None = None,
+) -> None:
+    """Salva o mapeamento de colunas (A fazer, Fazendo, Feito) de um serviço de tasks em config.toml."""
+    svc = validate_task_service(service)
+    clean_todo = [c.strip() for c in todo if c and c.strip()]
+    clean_doing = [c.strip() for c in doing if c and c.strip()]
+    clean_done = [c.strip() for c in done if c and c.strip()]
+
+    if not clean_todo or not clean_doing or not clean_done:
+        raise ValueError(
+            "As colunas 'A fazer', 'Fazendo' e 'Feito' devem ter pelo menos uma coluna mapeada cada."
+        )
+
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    if svc not in data or not isinstance(data[svc], dict):
+        data[svc] = {}
+    data[svc]["todo_columns"] = clean_todo
+    data[svc]["doing_columns"] = clean_doing
+    data[svc]["done_columns"] = clean_done
     _write_file_config(config_file, data)
 
 

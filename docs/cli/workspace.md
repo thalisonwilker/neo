@@ -24,13 +24,13 @@ Lista todos os workspaces/organizações disponíveis, marcando com `[● Ativo]
 
 === "Exemplo Padrão"
     ```bash
-    uv run neo git workspace list
+    neo git workspace list
     ```
 
 === "Especificando Provedor"
     ```bash
-    uv run neo git workspace list --provider github
-    uv run neo git workspace list -p bitbucket
+    neo git workspace list --provider github
+    neo git workspace list -p bitbucket
     ```
 
 ---
@@ -39,7 +39,7 @@ Lista todos os workspaces/organizações disponíveis, marcando com `[● Ativo]
 Exibe o workspace atualmente selecionado e sua origem (configuração local persistida ou detecção remota).
 
 ```bash
-uv run neo git workspace current
+neo git workspace current
 ```
 
 ---
@@ -49,12 +49,12 @@ Abre um menu interativo com navegação por teclado no terminal para seleção v
 
 === "Interativo"
     ```bash
-    uv run neo git workspace select
+    neo git workspace select
     ```
 
 === "Por Slug Direto"
     ```bash
-    uv run neo git workspace select --slug acme_corp
+    neo git workspace select --slug acme_corp
     ```
 
 ---
@@ -63,5 +63,5 @@ Abre um menu interativo com navegação por teclado no terminal para seleção v
 Atalho conveniente para definir o workspace ativo:
 
 ```bash
-uv run neo git workspace set meu-time --provider github
+neo git workspace set meu-time --provider github
 ```

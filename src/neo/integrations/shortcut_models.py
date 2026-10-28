@@ -27,6 +27,71 @@ class ShortcutMember(BaseModel):
         )
 
 
+class ShortcutWorkflowState(BaseModel):
+    """Representa uma coluna/estado de um Workflow no Shortcut."""
+
+    id: int
+    name: str
+    type: str = "unstarted"  # unstarted, started, done
+    workflow_id: int | None = None
+    workflow_name: str = ""
+
+    @classmethod
+    def from_api_dict(
+        cls,
+        data: dict[str, Any],
+        workflow_id: int | None = None,
+        workflow_name: str = "",
+    ) -> ShortcutWorkflowState:
+        return cls(
+            id=int(data.get("id", 0)),
+            name=str(data.get("name", "")),
+            type=str(data.get("type", "unstarted")),
+            workflow_id=workflow_id,
+            workflow_name=workflow_name,
+        )
+
+
+class ShortcutWorkflow(BaseModel):
+    """Representa um Workflow (board) no Shortcut e suas colunas (states)."""
+
+    id: int
+    name: str
+    states: list[ShortcutWorkflowState] = Field(default_factory=list)
+
+    @classmethod
+    def from_api_dict(cls, data: dict[str, Any]) -> ShortcutWorkflow:
+        wf_id = int(data.get("id", 0))
+        wf_name = str(data.get("name", ""))
+        raw_states = data.get("states", [])
+        states = [
+            ShortcutWorkflowState.from_api_dict(s, workflow_id=wf_id, workflow_name=wf_name)
+            for s in raw_states
+            if isinstance(s, dict)
+        ]
+        return cls(id=wf_id, name=wf_name, states=states)
+
+
+class ShortcutIteration(BaseModel):
+    """Representa uma Iteração (Sprint) no Shortcut."""
+
+    id: int
+    name: str
+    status: str = "started"  # unstarted, started, done
+    start_date: str = ""
+    end_date: str = ""
+
+    @classmethod
+    def from_api_dict(cls, data: dict[str, Any]) -> ShortcutIteration:
+        return cls(
+            id=int(data.get("id", 0)),
+            name=str(data.get("name", "")),
+            status=str(data.get("status", "started")),
+            start_date=str(data.get("start_date", "") or ""),
+            end_date=str(data.get("end_date", "") or ""),
+        )
+
+
 class ShortcutStory(BaseModel):
     """Representa uma Story no Shortcut."""
 
@@ -39,6 +104,7 @@ class ShortcutStory(BaseModel):
     completed: bool = False
     workflow_state_id: int | None = None
     workflow_state_name: str = "Em andamento"
+    iteration_id: int | None = None
     owner_ids: list[str] = Field(default_factory=list)
     labels: list[str] = Field(default_factory=list)
     estimate: float | None = None
@@ -55,6 +121,7 @@ class ShortcutStory(BaseModel):
             archived=data.get("archived", False),
             completed=data.get("completed", False),
             workflow_state_id=data.get("workflow_state_id"),
+            iteration_id=data.get("iteration_id"),
             owner_ids=data.get("owner_ids", []),
             labels=label_names,
             estimate=data.get("estimate"),

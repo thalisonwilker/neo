@@ -14,7 +14,7 @@ const IGNORE_DIRS = new Set([
   ".agents", ".cursor", ".gemini", ".windsurf",
   ".venv", "venv", ".pytest_cache", ".ruff_cache", ".mypy_cache",
 ]);
-const NO_FRONTMATTER_OK = new Set(["RELEASING.md", "CHANGELOG.md"]);
+const NO_FRONTMATTER_OK = new Set(["RELEASING.md", "CHANGELOG.md", "README.md"]);
 // Arquivos de instruções gerados (fora de um dir próprio) que também são views derivadas.
 const isGenerated = (f) => {
   const r = relative(ROOT, f).replace(/\\/g, "/");

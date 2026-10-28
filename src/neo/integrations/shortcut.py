@@ -7,8 +7,11 @@ import logging
 import httpx
 
 from neo.integrations.shortcut_models import (
+    ShortcutIteration,
     ShortcutMember,
     ShortcutStory,
+    ShortcutWorkflow,
+    ShortcutWorkflowState,
     StoryAnalysis,
 )
 
@@ -81,13 +84,22 @@ class ShortcutClient:
             return ShortcutMember.from_api_dict(resp.json())
 
     # 2. Função 2: Listar stories
-    def list_stories(self, owner_id: str | None = None) -> list[ShortcutStory]:
+    def list_stories(
+        self,
+        owner_id: str | None = None,
+        iteration_id: int | None = None,
+    ) -> list[ShortcutStory]:
         """Lista stories ativas no workspace (GET /api/v3/search/stories)."""
         query = "!is:archived"
         if owner_id:
             query += f" owner:{owner_id}"
+        if iteration_id is not None:
+            query += f" iteration:{iteration_id}"
 
-        return self.search_stories(query)
+        stories = self.search_stories(query)
+        if iteration_id is not None and any(s.iteration_id is not None for s in stories):
+            stories = [s for s in stories if s.iteration_id == iteration_id]
+        return stories
 
     # 3. Função 3: Buscar stories por query
     def search_stories(self, query: str) -> list[ShortcutStory]:
@@ -121,3 +133,78 @@ class ShortcutClient:
         """Obtém a story e gera um relatório heurístico de contexto para branch e commits."""
         story = self.get_story(story_id)
         return StoryAnalysis.from_story(story)
+
+    # 6. Função 6: Listar workflows e estados (colunas do board)
+    def list_workflows(self) -> list[ShortcutWorkflow]:
+        """Lista todos os workflows e seus estados configurados no Shortcut (GET /api/v3/workflows)."""
+        url = f"{self.base_url}/workflows"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(url, headers=self._get_headers())
+            self._handle_response_error(resp, "listar workflows")
+            data = resp.json()
+            workflows: list[ShortcutWorkflow] = []
+            if isinstance(data, list):
+                for item in data:
+                    if isinstance(item, dict):
+                        workflows.append(ShortcutWorkflow.from_api_dict(item))
+            return workflows
+
+    def list_workflow_states(self) -> list[ShortcutWorkflowState]:
+        """Retorna a lista achatada de todas as colunas/estados disponíveis nos workflows."""
+        states: list[ShortcutWorkflowState] = []
+        for wf in self.list_workflows():
+            states.extend(wf.states)
+        return states
+
+    # 7. Função 7: Listar e resolver Iterações (Sprints)
+    def list_iterations(self) -> list[ShortcutIteration]:
+        """Lista todas as iterações do Shortcut ordenadas da mais recente para a mais antiga."""
+        url = f"{self.base_url}/iterations"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(url, headers=self._get_headers())
+            self._handle_response_error(resp, "listar iterações")
+            data = resp.json()
+            iterations: list[ShortcutIteration] = []
+            if isinstance(data, list):
+                for item in data:
+                    if isinstance(item, dict):
+                        iterations.append(ShortcutIteration.from_api_dict(item))
+            iterations.sort(key=lambda it: (it.start_date, it.id), reverse=True)
+            return iterations
+
+    def get_latest_iteration(self) -> ShortcutIteration | None:
+        """Retorna a última iteração (atual) cadastrada no Shortcut, ou None se não houver."""
+        iterations = self.list_iterations()
+        return iterations[0] if iterations else None
+
+    def resolve_iteration(self, term: str | None = None) -> ShortcutIteration | None:
+        """Resolve a iteração alvo: última iteração se None, None se 'all', ou busca por ID/nome."""
+        if term is not None and term.strip().lower() == "all":
+            return None
+
+        iterations = self.list_iterations()
+        if term is None:
+            return iterations[0] if iterations else None
+
+        clean = term.strip()
+        clean_lower = clean.lower()
+
+        # 1. Match por ID exato
+        for it in iterations:
+            if str(it.id) == clean:
+                return it
+
+        # 2. Match por nome exato (case-insensitive)
+        for it in iterations:
+            if it.name.lower() == clean_lower:
+                return it
+
+        # 3. Match por substring no nome (ex: '71' -> 'Sprint 71')
+        for it in iterations:
+            if clean_lower in it.name.lower():
+                return it
+
+        raise ShortcutNotFoundError(
+            f"Iteração '{clean}' não encontrada. "
+            "Execute `neo tasks iterations` para ver as iterações disponíveis."
+        )

@@ -1,5 +1,5 @@
 [project]
-name = "neo"
+name = "neo-cmd"
 version = "0.1.0"
 description = "Personal Command Assistant — Compreenda seus sistemas. Seja dono das suas escolhas."
 readme = "README.md"
@@ -9,6 +9,27 @@ authors = [
     { name = "Thalyson", email = "thalison.wilker@gmail.com" }
 ]
 requires-python = ">=3.13"
+keywords = [
+    "cli",
+    "assistant",
+    "github",
+    "bitbucket",
+    "shortcut",
+    "kanban",
+    "productivity",
+    "typer",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
 dependencies = [
     "httpx>=0.28.1",
     "keyring>=25.7.0",
@@ -17,9 +38,18 @@ dependencies = [
     "typer>=0.27.3",
 ]
 
+[project.urls]
+Homepage = "https://github.com/thalisonwilker/neo"
+Documentation = "https://thalisonwilker.github.io/neo/"
+Repository = "https://github.com/thalisonwilker/neo"
+Issues = "https://github.com/thalisonwilker/neo/issues"
+
 [build-system]
 requires = ["uv_build>=0.13.5,<0.14.0"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "neo"
 
 [dependency-groups]
 dev = [
@@ -52,4 +82,7 @@ warn_unused_configs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.coverage.run]
+data_file = ".pytest_cache/.coverage"
 

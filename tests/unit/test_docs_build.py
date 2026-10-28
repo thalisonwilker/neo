@@ -119,10 +119,21 @@ def test_AC_5_pyproject_docs_dependency_group():
     assert "pymdown-extensions" in content
 
 
-def test_AC_6_mkdocs_strict_build():
+def test_AC_6_mkdocs_strict_build(tmp_path: Path):
     """Valida AC-6: Compilação estrita da documentação sem links quebrados."""
+    site_dir = tmp_path / "site"
     res = subprocess.run(
-        ["uv", "run", "--group", "docs", "mkdocs", "build", "--strict"],
+        [
+            "uv",
+            "run",
+            "--group",
+            "docs",
+            "mkdocs",
+            "build",
+            "--strict",
+            "--site-dir",
+            str(site_dir),
+        ],
         cwd=PROJECT_ROOT,
         check=False,
         capture_output=True,

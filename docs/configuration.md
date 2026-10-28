@@ -45,54 +45,85 @@ Cada categoria de serviço configura as próprias credenciais: **`neo git config
 
 ### Visualizar Status das Integrações (`neo config`)
 ```bash
-uv run neo config show
+neo config show
 ```
 
 ### Credenciais Git (`neo git config auth`)
 === "Interativo (Oculto)"
     ```bash
-    uv run neo git config auth set github
+    neo git config auth set github
     # O terminal solicitará o token com digitação oculta
     ```
 
 === "Via Flag Direta"
     ```bash
-    uv run neo git config auth set github --token "ghp_meu_token"
+    neo git config auth set github --token "ghp_meu_token"
     ```
 
 === "Consultar Token Mascarado"
     ```bash
-    uv run neo git config auth get github
+    neo git config auth get github
     ```
 
 === "Remover Credencial"
     ```bash
-    uv run neo git config auth delete bitbucket
+    neo git config auth delete bitbucket
     ```
 
 ### Credenciais de Tasks (`neo tasks config`)
 === "Interativo (Oculto)"
     ```bash
-    uv run neo tasks config set
+    neo tasks config set
     ```
 
 === "Via Flag Direta"
     ```bash
-    uv run neo tasks config set --service shortcut --token "seu_token"
+    neo tasks config set --service shortcut --token "seu_token"
     ```
 
 === "Consultar Token Mascarado"
     ```bash
-    uv run neo tasks config get
+    neo tasks config get
     ```
 
 === "Remover Credencial"
     ```bash
-    uv run neo tasks config delete
+    neo tasks config delete
+    ```
+
+=== "Mapear Colunas do Board"
+    ```bash
+    # Assistente interativo (busca colunas na API do serviço)
+    neo tasks config columns
+
+    # Ou diretamente via flags (suporta múltiplas colunas separadas por vírgula)
+    neo tasks config columns \
+      --todo "📝 - Backlog de Sprint, 🚨 - Bug" \
+      --doing "🚧 - Em Progresso" \
+      --done "✅ - Finalizado"
     ```
 
 !!! warning "Mudança de comandos"
     Os comandos antigos (`neo config auth`, `neo repo`, `neo workspace`, `neo commits`, `neo story`) foram removidos. Use `neo git ...` e `neo tasks ...`.
+
+---
+
+## Configuração das Colunas do Board (`A fazer`, `Fazendo`, `Feito`)
+
+Para organizar o quadro do comando `neo tasks resume`, o Neo armazena quais colunas (estados do workflow) do serviço correspondem às três etapas do quadro:
+
+- **A fazer (`todo_columns`)**: ex.: `📝 - Backlog de Sprint`, `🚨 - Bug`
+- **Fazendo (`doing_columns`)**: ex.: `🚧 - Em Progresso`
+- **Feito (`done_columns`)**: ex.: `✅ - Finalizado`
+
+Se você executar `neo tasks resume` e as colunas ainda não estiverem configuradas para o serviço ativo, o próprio comando consultará a API do serviço e abrirá o assistente interativo automaticamente, gravando a escolha em `~/.config/neo/config.toml`:
+
+```toml
+[shortcut]
+todo_columns = ["📝 - Backlog de Sprint", "🚨 - Bug"]
+doing_columns = ["🚧 - Em Progresso"]
+done_columns = ["✅ - Finalizado"]
+```
 
 ---
 
@@ -102,13 +133,13 @@ Se você trabalha simultaneamente com repositórios no **GitHub** e no **Bitbuck
 
 ```bash
 # Definir GitHub como padrão
-uv run neo git config set-provider github
+neo git config set-provider github
 
 # Definir Bitbucket como padrão
-uv run neo git config set-provider bitbucket
+neo git config set-provider bitbucket
 
 # Consultar provedor padrão atual
-uv run neo git config get-provider
+neo git config get-provider
 ```
 
 Essa configuração é salva no arquivo `~/.config/neo/config.toml`.

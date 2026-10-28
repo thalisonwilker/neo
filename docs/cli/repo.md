@@ -16,9 +16,9 @@ O módulo `repo` permite listar, pesquisar, clonar e criar repositórios no **Gi
 Lista os repositórios disponíveis no workspace ativo.
 
 ```bash
-uv run neo git repo list
+neo git repo list
 # Forçando provedor ou workspace específico
-uv run neo git repo list --provider github --workspace minha-org
+neo git repo list --provider github --workspace minha-org
 ```
 
 ---
@@ -27,8 +27,8 @@ uv run neo git repo list --provider github --workspace minha-org
 Pesquisa repositórios por nome, slug ou palavras-chave na descrição.
 
 ```bash
-uv run neo git repo search auth
-uv run neo git repo search api --provider bitbucket
+neo git repo search auth
+neo git repo search api --provider bitbucket
 ```
 
 ---
@@ -38,12 +38,12 @@ Clona um repositório resolvendo automaticamente a URL remota via API:
 
 === "SSH (Padrão)"
     ```bash
-    uv run neo git repo clone core-backend --ssh
+    neo git repo clone core-backend --ssh
     ```
 
 === "HTTPS"
     ```bash
-    uv run neo git repo clone core-backend --https
+    neo git repo clone core-backend --https
     ```
 
 ---
@@ -53,10 +53,10 @@ Cria um novo repositório com confirmação interativa de segurança.
 
 === "Com Confirmação Interativa"
     ```bash
-    uv run neo git repo create servico-pagamento --private
+    neo git repo create servico-pagamento --private
     ```
 
 === "Sem Prompt (CI / Scripts)"
     ```bash
-    uv run neo git repo create servico-pagamento --private -d "API de pagamentos" -y
+    neo git repo create servico-pagamento --private -d "API de pagamentos" -y
     ```
