@@ -17,6 +17,7 @@ alwaysApply: false
   <a href="https://thalisonwilker.github.io/neo/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-00e5a3?style=flat&logo=materialformkdocs&logoColor=white" alt="Docs" /></a>
   <img src="https://img.shields.io/badge/coverage-%E2%89%A580%25-brightgreen" alt="Coverage" />
   <img src="https://img.shields.io/badge/python-3.13+-blue" alt="Python 3.13+" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT" /></a>
 </p>
 
 **Neo** é um assistente pessoal extensível, executado via linha de comando (CLI), desenvolvido em **Python 3.13 com Typer e Rich**. Seu objetivo é eliminar tarefas manuais repetitivas, organizar fluxos de trabalho (Bitbucket, Shortcut), investigar dados com autonomia e apoiar a tomada de decisões com clareza.
@@ -342,6 +343,12 @@ uv run mypy src
 3. [x] **Módulo Shortcut API v3** (`specs/0004-modulo-shortcut`)
 4. [x] **Seleção e Gestão de Workspace do Bitbucket** (`specs/0005-selecao-de-workspace-bitbucket`)
 5. [ ] **Investigação Cruzada de Bugs** (`specs/0006-analise-cruzada-investigacao-bugs`): correlacionar dados do Shortcut com commits e repositórios do Bitbucket via `neo bug investigate <id>`.
+
+---
+
+## 📄 Licença
+
+Este projeto é distribuído sob a licença livre **MIT**. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
