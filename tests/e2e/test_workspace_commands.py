@@ -53,9 +53,11 @@ def mock_bitbucket_auth(tmp_path: Path):
         yield tmp_path
 
 
-def test_AC_4_workspace_without_credentials():
+def test_AC_4_workspace_without_credentials(tmp_path: Path):
     """AC-4 e AC-8 (0014): Sem credenciais retorna código 3 (AUTH_ERROR) apontando `neo git auth login`."""
     with (
+        patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
+        patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
         patch("neo.integrations.resolver.get_credential", return_value=None),
         patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
     ):

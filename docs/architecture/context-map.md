@@ -16,6 +16,7 @@ alwaysApply: false
 | **Analysis & Correlation** | Core | Regras de correlação cruzada entre bugs/demandas e commits/branches | `services/` |
 | **Bitbucket Integration** | Supporting | Comunicação HTTP com API do Bitbucket, paginação e mapeamento para modelos do domínio | `integrations/bitbucket.py` |
 | **Shortcut Integration** | Supporting | Comunicação HTTP com API do Shortcut, busca de stories e conversão para modelos do domínio | `integrations/shortcut.py` |
+| **Agent & SDD Orchestration** | Supporting | Gerenciamento e invocação de agentes de codificação (Antigravity) e esteiras SDD (spec-driven / spec-kit) | `services/agent_service.py` |
 | **Configuration & Secrets** | Generic | Leitura de configurações, perfis de ambiente e persistência segura em Keyring | `config.py` |
 
 ## Relações entre contextos
@@ -27,6 +28,11 @@ alwaysApply: false
       │                         │
       │                         ├──(ACL)──► [Bitbucket Integration]
       │                         └──(ACL)──► [Shortcut Integration]
+      │
+      ├──(Dependency)──► [Agent & SDD Orchestration]
+      │                         │
+      │                         ├──(Port/Adapter)──► [Antigravity CLI (agy)]
+      │                         └──(Port/Adapter)──► [SDD Providers]
       │
       └──(Dependency)──► [Configuration & Secrets]
 ```

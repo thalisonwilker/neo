@@ -88,5 +88,7 @@ neo git status --json | jq -e '.authenticated'
   - [Status Git (`neo git status`)](status.md): diagnóstico de contexto e recursos planejados (`branch`, `pr`, `tag`, `release`).
 - **Módulo de Demandas (`neo tasks`):**
   - [Tasks & Demandas (`neo tasks`)](tasks.md): integração com o Shortcut (`resume`, `list`, `search`, `show`, `analyze`, `iterations`, `whoami`).
+- **Módulo de Agente & SDD (`neo agent` / `neo config agent`):**
+  - [Agente & SDD (`neo agent`)](agent.md): configuração unificada (`neo config agent set|get|list|unset`), diagnóstico (`neo agent status`), preparação SDD (`neo agent setup`) e execução do Antigravity CLI (`neo agent run`).
 - **Migração:**
   - [Guia de Migração](../migration.md): equivalência entre comandos antigos e novos.

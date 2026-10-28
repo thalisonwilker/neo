@@ -66,6 +66,7 @@ As decisões estruturais do projeto são imutáveis e ficam registradas em `docs
 - **ADR-0004 (Gestão de Credenciais e Segurança):** Keyring do SO como armazenamento primário, fallback `0600` (`credentials.toml`) e variáveis de ambiente para CI/CD.
 - **ADR-0005 (Padrões de Qualidade e Testes):** Ruff, Mypy em modo `strict`, Pytest com `respx` (sem chamadas de rede real) e cobertura `>= 80%`.
 - **ADR-0006 (Observabilidade e UX na CLI):** Dupla saída (Rich para humanos, `--json` estrito no `stdout` para automação) e códigos de saída semânticos.
+- **ADR-0007 (Integração de Agentes de Codificação e Provedores SDD):** Interface unificada `neo config agent` e `neo agent`, adaptador para Google Antigravity CLI (`agy`), suporte aos provedores `spec-driven` e `spec-kit` e execução segura de subprocesso (`shell=False`) com repasse de sinais.
 
 ---
 

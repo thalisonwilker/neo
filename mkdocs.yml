@@ -86,6 +86,7 @@ nav:
       - Commits: cli/commits.md
       - Status Git: cli/status.md
       - Tasks & Demandas: cli/tasks.md
+      - Agente & SDD: cli/agent.md
   - Engenharia & SDD:
       - Visão Geral: architecture.md
       - Glossário: glossary.md

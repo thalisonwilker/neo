@@ -82,6 +82,45 @@ TaskServiceType = Literal["shortcut"]
 SUPPORTED_TASK_SERVICES: tuple[TaskServiceType, ...] = ("shortcut",)
 DEFAULT_TASK_SERVICE: TaskServiceType = "shortcut"
 
+AgentAdapterType = Literal["antigravity"]
+SUPPORTED_AGENT_ADAPTERS: tuple[AgentAdapterType, ...] = ("antigravity",)
+DEFAULT_AGENT_ADAPTER: AgentAdapterType = "antigravity"
+DEFAULT_AGENT_COMMAND = "agy"
+
+SDDProviderType = Literal["spec-driven", "spec-kit"]
+SUPPORTED_SDD_PROVIDERS: tuple[SDDProviderType, ...] = ("spec-driven", "spec-kit")
+DEFAULT_SDD_PROVIDER: SDDProviderType = "spec-driven"
+
+AgentConfigKey = Literal["command", "model", "sdd-provider", "adapter"]
+SUPPORTED_AGENT_CONFIG_KEYS: tuple[AgentConfigKey, ...] = (
+    "command",
+    "model",
+    "sdd-provider",
+    "adapter",
+)
+AGENT_CONFIG_KEY_ALIASES: dict[str, AgentConfigKey] = {
+    "agent-code": "command",
+    "executable": "command",
+    "sdd": "sdd-provider",
+    "sdd-lib": "sdd-provider",
+}
+FORBIDDEN_AGENT_CONFIG_KEYS: frozenset[str] = frozenset(
+    {"token", "api-key", "api_key", "secret", "password", "auth", "credentials"}
+)
+DEFAULT_AGENT_CONFIG_VALUES: dict[AgentConfigKey, str | None] = {
+    "command": DEFAULT_AGENT_COMMAND,
+    "model": None,
+    "sdd-provider": DEFAULT_SDD_PROVIDER,
+    "adapter": DEFAULT_AGENT_ADAPTER,
+}
+
+AGENT_ENV_VAR_MAPPING: dict[AgentConfigKey, str] = {
+    "command": "NEO_AGENT_CODE",
+    "model": "NEO_AGENT_MODEL",
+    "sdd-provider": "NEO_SDD_PROVIDER",
+    "adapter": "NEO_AGENT_ADAPTER",
+}
+
 ENV_VAR_MAPPING: dict[ServiceType, tuple[str, ...]] = {
     "bitbucket": ("NEO_BITBUCKET_TOKEN", "BITBUCKET_TOKEN", "BITBUCKET_APP_PASSWORD"),
     "shortcut": ("SHORTCUT_API_TOKEN", "SHORTCUT_TOKEN"),
@@ -135,6 +174,47 @@ def validate_task_service(service: str) -> TaskServiceType:
         valid_services = ", ".join(SUPPORTED_TASK_SERVICES)
         raise ValueError(
             f"Serviço de tasks não suportado: '{service}'. Serviços suportados: {valid_services}"
+        )
+    return normalized
+
+
+def validate_agent_adapter(adapter: str) -> AgentAdapterType:
+    """Valida se o adaptador de agente informado é suportado."""
+    normalized = adapter.strip().lower()
+    if normalized not in SUPPORTED_AGENT_ADAPTERS:
+        valid_adapters = ", ".join(SUPPORTED_AGENT_ADAPTERS)
+        raise ValueError(
+            f"Adaptador de agente não suportado: '{adapter}'. Adaptadores suportados: {valid_adapters}"
+        )
+    return normalized
+
+
+def validate_sdd_provider(provider: str) -> SDDProviderType:
+    """Valida se o provedor SDD informado é suportado ('spec-driven' ou 'spec-kit')."""
+    normalized = provider.strip().lower()
+    if normalized not in SUPPORTED_SDD_PROVIDERS:
+        valid_providers = ", ".join(SUPPORTED_SDD_PROVIDERS)
+        raise ValueError(
+            f"Provedor SDD não suportado: '{provider}'. Provedores SDD suportados: {valid_providers}"
+        )
+    return normalized
+
+
+def validate_agent_config_key(key: str) -> AgentConfigKey:
+    """Valida se a chave de `neo config agent` é suportada (com suporte aos aliases documentados)."""
+    normalized = key.strip().lower()
+    if normalized in FORBIDDEN_AGENT_CONFIG_KEYS:
+        raise ValueError(
+            f"A chave '{normalized}' não é permitida em `neo config agent`. "
+            "O Neo nunca armazena credenciais ou tokens de agentes de IA em `config.toml`; "
+            "o Antigravity gerencia sua própria autenticação localmente."
+        )
+    if normalized in AGENT_CONFIG_KEY_ALIASES:
+        return AGENT_CONFIG_KEY_ALIASES[normalized]
+    if normalized not in SUPPORTED_AGENT_CONFIG_KEYS:
+        valid_keys = ", ".join(SUPPORTED_AGENT_CONFIG_KEYS)
+        raise ValueError(
+            f"Chave de configuração de agente desconhecida: '{key}'. Chaves válidas: {valid_keys}"
         )
     return normalized
 
@@ -289,6 +369,101 @@ def unset_git_config_value(key: str, config_dir: Path | None = None) -> bool:
     if valid_key == "provider" and "default_provider" in git_cfg:
         del git_cfg["default_provider"]
         existed = True
+
+    if existed:
+        _write_file_config(config_file, data)
+    return existed
+
+
+def set_agent_config_value(
+    key: str, value: str, config_dir: Path | None = None
+) -> tuple[AgentConfigKey, str]:
+    """Define uma chave na seção `[agent]` de `config.toml`."""
+    valid_key = validate_agent_config_key(key)
+    clean_val = value.strip()
+    if not clean_val:
+        raise ValueError(f"O valor para '{valid_key}' não pode ser vazio.")
+
+    if valid_key == "sdd-provider":
+        clean_val = validate_sdd_provider(clean_val)
+    elif valid_key == "adapter":
+        clean_val = validate_agent_adapter(clean_val)
+
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    if "agent" not in data or not isinstance(data["agent"], dict):
+        data["agent"] = {}
+
+    data["agent"][valid_key] = clean_val
+    _write_file_config(config_file, data)
+    return valid_key, clean_val
+
+
+def get_agent_config_value(
+    key: str, config_dir: Path | None = None
+) -> tuple[AgentConfigKey, str | None, str]:
+    """Recupera o valor efetivo de uma chave de `neo config agent` e sua fonte ('env', 'config', 'default')."""
+    valid_key = validate_agent_config_key(key)
+
+    env_var = AGENT_ENV_VAR_MAPPING[valid_key]
+    env_val = os.environ.get(env_var, "").strip()
+    if env_val:
+        if valid_key == "sdd-provider":
+            return valid_key, validate_sdd_provider(env_val), "env"
+        if valid_key == "adapter":
+            return valid_key, validate_agent_adapter(env_val), "env"
+        return valid_key, env_val, "env"
+
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    agent_cfg = data.get("agent", {})
+    if isinstance(agent_cfg, dict):
+        raw = agent_cfg.get(valid_key)
+        if isinstance(raw, str) and raw.strip():
+            val_str = raw.strip()
+            if valid_key == "sdd-provider":
+                return valid_key, validate_sdd_provider(val_str), "config"
+            if valid_key == "adapter":
+                return valid_key, validate_agent_adapter(val_str), "config"
+            return valid_key, val_str, "config"
+
+    # Suporte à seção [sdd] caso presente manualmente no TOML
+    if valid_key == "sdd-provider":
+        sdd_cfg = data.get("sdd", {})
+        if isinstance(sdd_cfg, dict):
+            sdd_raw = sdd_cfg.get("provider")
+            if isinstance(sdd_raw, str) and sdd_raw.strip():
+                return valid_key, validate_sdd_provider(sdd_raw.strip()), "config"
+
+    return valid_key, DEFAULT_AGENT_CONFIG_VALUES[valid_key], "default"
+
+
+def list_agent_config_values(config_dir: Path | None = None) -> dict[str, dict[str, str | None]]:
+    """Lista todas as chaves suportadas de `neo config agent` com valor e fonte."""
+    result: dict[str, dict[str, str | None]] = {}
+    for k in SUPPORTED_AGENT_CONFIG_KEYS:
+        _, val, source = get_agent_config_value(k, config_dir=config_dir)
+        result[k] = {"value": val, "source": source}
+    return result
+
+
+def unset_agent_config_value(key: str, config_dir: Path | None = None) -> bool:
+    """Remove uma chave da seção `[agent]` do `config.toml`. Retorna True se existia."""
+    valid_key = validate_agent_config_key(key)
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    agent_cfg = data.get("agent", {})
+
+    existed = False
+    if isinstance(agent_cfg, dict) and valid_key in agent_cfg:
+        del agent_cfg[valid_key]
+        existed = True
+
+    if valid_key == "sdd-provider":
+        sdd_cfg = data.get("sdd", {})
+        if isinstance(sdd_cfg, dict) and "provider" in sdd_cfg:
+            del sdd_cfg["provider"]
+            existed = True
 
     if existed:
         _write_file_config(config_file, data)

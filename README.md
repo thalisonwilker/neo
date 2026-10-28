@@ -67,7 +67,15 @@ neo git commits search --query "fix" --limit 5
 neo tasks resume
 neo tasks analyze 2108
 
-# 5. Combine com --json e jq para criar scripts e automações
+# 5. Configure e inicie o agente de codificação (Google Antigravity CLI) e provedores SDD
+neo config agent set command agy
+neo config agent set model "Gemini 3.8 Flash"
+neo config agent set sdd-provider spec-driven
+neo agent status
+neo agent setup --yes
+neo agent run
+
+# 6. Combine com --json e jq para criar scripts e automações
 neo git repo list --json | jq '.[] | {slug, main_branch}'
 ```
 

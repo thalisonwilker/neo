@@ -102,6 +102,9 @@ Em pipelines de CI/CD ou scripts automatizados, defina as variáveis de ambiente
 | **Bitbucket Cloud** | `NEO_BITBUCKET_TOKEN` | `BITBUCKET_TOKEN` | API Token do Bitbucket Cloud. |
 | **Contexto Git** | `NEO_GIT_PROVIDER` | — | Força o provedor padrão (`github` ou `bitbucket`). |
 | **Contexto Git** | `NEO_GIT_WORKSPACE` | — | Força o workspace ou organização padrão. |
+| **Agente de IA** | `NEO_AGENT_CODE` | — | Força o executável do agente (ex.: `agy`). |
+| **Agente de IA** | `NEO_AGENT_MODEL` | — | Força o identificador de modelo repassado ao agente (ex.: `"Gemini 3.8 Flash"`). |
+| **Provedor SDD** | `NEO_SDD_PROVIDER` | — | Força a ferramenta SDD (`spec-driven` ou `spec-kit`). |
 | **Shortcut (Tasks)** | `SHORTCUT_API_TOKEN` | `SHORTCUT_TOKEN` | Token da API v3 do Shortcut para `neo tasks`. |
 
 ```bash
@@ -128,3 +131,27 @@ neo tasks config set
 # Mapear colunas A fazer | Fazendo | Feito do comando neo tasks resume
 neo tasks config columns
 ```
+
+---
+
+## Seção `[agent]` do `config.toml` (`neo config agent`)
+
+As preferências do agente de codificação (**Google Antigravity CLI**) e do provedor de Spec-Driven Development ficam na seção `[agent]` de `~/.config/neo/config.toml`:
+
+```toml
+[agent]
+adapter = "antigravity"
+command = "agy"
+model = "Gemini 3.8 Flash"
+sdd-provider = "spec-driven"
+```
+
+```bash
+# Validar e salvar executável, modelo e provedor SDD
+neo config agent set command agy
+neo config agent set model "Gemini 3.8 Flash"
+neo config agent set sdd-provider spec-driven
+neo config agent list
+```
+
+Consulte a referência completa em [`neo agent` & `neo config agent`](cli/agent.md).

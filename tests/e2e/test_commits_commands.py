@@ -2,6 +2,7 @@
 
 import json
 import os
+from pathlib import Path
 from unittest.mock import patch
 
 import httpx
@@ -16,8 +17,10 @@ runner = CliRunner()
 
 
 @pytest.fixture(autouse=True)
-def isolate_git_remote():
+def isolate_git_remote(tmp_path: Path):
     with (
+        patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
+        patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
         patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
         patch(
             "neo.integrations.resolver.detect_git_remote_details",

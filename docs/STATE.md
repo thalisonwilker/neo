@@ -11,10 +11,11 @@ alwaysApply: true
 **Última atualização:** 2026-10-28 por Antigravity
 
 ## Em andamento / próximo passo
-- **Fase atual:** Onda 1 (MVP). Features concluídas: `0014-gramatica-cli-git`, `0013-publicacao-pacote-pypi`, `0012-filtro-iteracao-tasks`, `0011-tasks-resume-board`, `0009-refactor-cli-git-e-tasks`, `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket`, `0004-modulo-shortcut`, `0005-selecao-de-workspace-bitbucket`, `0006-modulo-github-e-multi-provedor-git`, `0007-documentacao-mkdocs-conteinerizada` e `0008-ci-cd-e-deploy-github-actions`. Feature de backlog planejada: `0010-branches-prs-e-detalhes-repo` (`branch`, `pr`, `tag`, `release`, `repo open/clone/create`, `commits diff`).
-- **Próximo passo concreto:** Implementar `0010-branches-prs-e-detalhes-repo` ou iniciar os módulos da Onda 2.
+- **Fase atual:** Onda 1 (MVP). Features concluídas: `0015-integracao-antigravity-e-provedores-sdd`, `0014-gramatica-cli-git`, `0013-publicacao-pacote-pypi`, `0012-filtro-iteracao-tasks`, `0011-tasks-resume-board`, `0009-refactor-cli-git-e-tasks`, `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket`, `0004-modulo-shortcut`, `0005-selecao-de-workspace-bitbucket`, `0006-modulo-github-e-multi-provedor-git`, `0007-documentacao-mkdocs-conteinerizada` e `0008-ci-cd-e-deploy-github-actions`. Backlog planejado: `0010-branches-prs-e-detalhes-repo`.
+- **Próximo passo concreto:** Aguardar aprovação final do usuário para commit e push da feature `0015-integracao-antigravity-e-provedores-sdd` ou iniciar `0010-branches-prs-e-detalhes-repo`.
 
 ## Decisões recentes
+- 2026-10-28: Integração de agentes de codificação (Antigravity CLI) e seleção de provedores SDD (`spec-driven` e `spec-kit`) — [ADR-0007](architecture/adr/0007-integracao-agente-antigravity-e-sdd.md).
 - 2026-10-27: Tech stack principal definido como Python >= 3.13, Typer, uv, Rich, httpx e keyring — [ADR-0002](architecture/adr/0002-tech-stack-core.md).
 - 2026-10-27: Arquitetura em Monolito Modular (DDD) com isolamento de integrações em `integrations/` (ACL) e lógica em `services/analysis.py` — [ADR-0003](architecture/adr/0003-arquitetura-modular-e-integracoes.md).
 - 2026-10-27: Gestão segura de credenciais via Keyring nativo de SO com fallback para arquivo com permissões restritas e variáveis de ambiente — [ADR-0004](architecture/adr/0004-gestao-de-credenciais-e-seguranca.md).

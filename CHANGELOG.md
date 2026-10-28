@@ -5,6 +5,11 @@ Todas as mudanças relevantes deste projeto são documentadas neste arquivo.
 ## [0.2.0] — 2026-10-28
 
 ### Added
+- **Integração com Google Antigravity CLI (`agy`) e Provedores SDD (`0015`):**
+  - `neo config agent set | get | list | unset` para configurar `command`, `model`, `sdd-provider` (`spec-driven` e `spec-kit`) e `adapter` na seção `[agent]` de `~/.config/neo/config.toml`, validando disponibilidade no `PATH` e `--version` com timeout de 3s.
+  - `neo agent status` para diagnóstico completo de binários, versão, modelo e integridade de `AGENTS.md` e `.agents/skills/`.
+  - `neo agent setup` para preparação idempotente das esteiras `spec-driven` e `spec-kit` sem sobrescrever personalizações.
+  - `neo agent run` para iniciar sessões interativas com repasse de `--model`, overrides locais e encaminhamento de sinais `SIGINT`/`SIGTERM`.
 - **Nova gramática `neo git <recurso> <ação> [--opções]`:**
   - `neo git config set | get | list | unset` para gerenciar as chaves `provider`, `workspace`, `default-branch`, `branch-pattern` e `commit-format` na seção `[git]` de `~/.config/neo/config.toml`.
   - `neo git auth login | status | logout` para autenticação com entrada oculta, armazenamento no Keyring do SO e fallback em `~/.config/neo/credentials.toml` (`0600`).

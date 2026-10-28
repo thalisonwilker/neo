@@ -81,6 +81,7 @@ def test_AC_2_docs_structure_and_pages():
     assert (docs_dir / "cli" / "commits.md").exists()
     assert (docs_dir / "cli" / "status.md").exists()
     assert (docs_dir / "cli" / "tasks.md").exists()
+    assert (docs_dir / "cli" / "agent.md").exists()
     assert (docs_dir / "migration.md").exists()
     assert (docs_dir / "architecture.md").exists()
     assert (docs_dir / "assets" / "neo-logo.jpg").exists()
@@ -121,6 +122,24 @@ def test_AC_9_docs_no_legacy_git_commands():
     migration_content = (docs_dir / "migration.md").read_text(encoding="utf-8")
     assert "neo git auth login" in migration_content
     assert "neo git workspace select" in migration_content
+
+
+def test_AC_16_agent_and_sdd_docs_consistency():
+    """Valida AC-16 (0015): Documentação consistente com neo config agent e neo agent."""
+    agent_doc = (PROJECT_ROOT / "docs" / "cli" / "agent.md").read_text(encoding="utf-8")
+    for expected in (
+        "neo config agent set",
+        "neo config agent get",
+        "neo config agent list",
+        "neo config agent unset",
+        "neo agent status",
+        "neo agent setup",
+        "neo agent run",
+        "spec-driven",
+        "spec-kit",
+        "agy",
+    ):
+        assert expected in agent_doc
 
 
 def test_AC_3_dockerfile_docs():
