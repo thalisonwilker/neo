@@ -9,6 +9,28 @@ alwaysApply: false
   <img style="width: 140px" src="assets/neo-logo.jpg" alt="Neo CLI — Personal Command Assistant" class="hero-logo" />
 </div>
 
+<p align="center" class="hero-subtitle">
+  <em>Assistente pessoal de linha de comando, alta produtividade, modular, seguro e pronto para automação</em>
+</p>
+
+<p align="center" class="hero-badges">
+  <a href="https://github.com/thalisonwilker/neo/actions/workflows/ci.yml?query=branch%3Amain" target="_blank">
+    <img src="https://github.com/thalisonwilker/neo/actions/workflows/ci.yml/badge.svg?event=push&branch=main" alt="CI & Deploy">
+  </a>
+  <a href="https://thalisonwilker.github.io/neo/" target="_blank">
+    <img src="https://img.shields.io/endpoint?url=https://thalisonwilker.github.io/neo/coverage-badge.json" alt="Coverage">
+  </a>
+  <a href="https://github.com/thalisonwilker/neo" target="_blank">
+    <img src="https://img.shields.io/badge/version-v0.1.0-34D058" alt="Version">
+  </a>
+  <a href="https://www.python.org/" target="_blank">
+    <img src="https://img.shields.io/badge/python-3.13+-34D058" alt="Python 3.13+">
+  </a>
+  <a href="https://github.com/thalisonwilker/neo/blob/main/LICENSE" target="_blank">
+    <img src="https://img.shields.io/badge/license-MIT-34D058" alt="License MIT">
+  </a>
+</p>
+
 O **Neo** é um assistente pessoal de linha de comando de alta produtividade construído em **Python 3.13**, utilizando **Typer** e **Rich**. Ele centraliza e automatiza operações técnicas de trabalho — integrando-se nativamente com **GitHub**, **Bitbucket Cloud** e **Shortcut** — investigando informações com autonomia e fornecendo interfaces ricas no terminal.
 
 ---

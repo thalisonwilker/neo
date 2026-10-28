@@ -64,7 +64,25 @@ jobs:
         run: uv run mypy src
 
       - name: Testes automatizados e barreira de cobertura (>= 80%)
-        run: uv run pytest --cov=neo --cov-fail-under=80 -v
+        run: uv run pytest --cov=neo --cov-fail-under=80 --cov-report=json:coverage.json -v
+
+      - name: Gerar JSON do badge de cobertura (Shields.io Endpoint)
+        run: |
+          uv run python -c '
+          import json
+          from pathlib import Path
+          data = json.loads(Path("coverage.json").read_text())
+          pct = round(data["totals"]["percent_covered"])
+          badge = {"schemaVersion": 1, "label": "coverage", "message": f"{pct}%", "color": "34D058"}
+          Path("coverage-badge.json").write_text(json.dumps(badge))
+          '
+
+      - name: Salvar artefato do badge de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-badge
+          path: coverage-badge.json
+          retention-days: 5
 
   # 3. Compilação e Deploy no GitHub Pages
   deploy-docs:
@@ -99,6 +117,12 @@ jobs:
 
       - name: Compilar documentação MkDocs (--strict)
         run: uv run --group docs mkdocs build --strict
+
+      - name: Baixar badge dinâmico de cobertura para o site
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-badge
+          path: ./site
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5

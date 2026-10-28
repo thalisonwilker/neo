@@ -25,7 +25,19 @@
 /* Imagem Hero no Centro da Página Inicial */
 .hero-container {
   text-align: center;
-  margin: 2rem 0 2.5rem 0;
+  margin: 2rem 0 1.2rem 0;
+}
+
+.hero-subtitle {
+  color: var(--md-default-fg-color--light);
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+.hero-badges a {
+  text-decoration: none;
+  display: inline-block;
+  margin: 0 2px;
 }
 
 .hero-logo {

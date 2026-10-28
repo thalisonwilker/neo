@@ -13,11 +13,15 @@ alwaysApply: false
 </p>
 
 <p align="center">
-  <a href="https://github.com/thalisonwilker/neo/actions/workflows/ci.yml"><img src="https://github.com/thalisonwilker/neo/actions/workflows/ci.yml/badge.svg" alt="CI & Deploy" /></a>
-  <a href="https://thalisonwilker.github.io/neo/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-00e5a3?style=flat&logo=materialformkdocs&logoColor=white" alt="Docs" /></a>
-  <img src="https://img.shields.io/badge/coverage-%E2%89%A580%25-brightgreen" alt="Coverage" />
-  <img src="https://img.shields.io/badge/python-3.13+-blue" alt="Python 3.13+" />
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT" /></a>
+  <em>Assistente pessoal de linha de comando, alta produtividade, modular, seguro e pronto para automação</em>
+</p>
+
+<p align="center">
+  <a href="https://github.com/thalisonwilker/neo/actions/workflows/ci.yml?query=branch%3Amain"><img src="https://github.com/thalisonwilker/neo/actions/workflows/ci.yml/badge.svg?event=push&branch=main" alt="CI & Deploy" /></a>
+  <a href="https://thalisonwilker.github.io/neo/"><img src="https://img.shields.io/endpoint?url=https://thalisonwilker.github.io/neo/coverage-badge.json" alt="Coverage" /></a>
+  <a href="https://github.com/thalisonwilker/neo"><img src="https://img.shields.io/badge/version-v0.1.0-34D058" alt="Version" /></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.13+-34D058" alt="Python 3.13+" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-34D058" alt="License: MIT" /></a>
 </p>
 
 **Neo** é um assistente pessoal extensível, executado via linha de comando (CLI), desenvolvido em **Python 3.13 com Typer e Rich**. Seu objetivo é eliminar tarefas manuais repetitivas, organizar fluxos de trabalho (Bitbucket, Shortcut), investigar dados com autonomia e apoiar a tomada de decisões com clareza.
