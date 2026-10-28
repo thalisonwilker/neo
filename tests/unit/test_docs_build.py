@@ -19,6 +19,9 @@ def test_AC_1_mkdocs_config():
     # Tema Material
     theme = config.get("theme", {})
     assert theme.get("name") == "material"
+    assert theme.get("logo") == "assets/neo-logo.jpg"
+    assert theme.get("favicon") == "assets/neo-logo.jpg"
+    assert "stylesheets/extra.css" in config.get("extra_css", [])
     features = theme.get("features", [])
     assert "navigation.tabs" in features
     assert "navigation.sections" in features
@@ -64,6 +67,8 @@ def test_AC_2_docs_structure_and_pages():
     assert (docs_dir / "cli" / "commits.md").exists()
     assert (docs_dir / "cli" / "story.md").exists()
     assert (docs_dir / "architecture.md").exists()
+    assert (docs_dir / "assets" / "neo-logo.jpg").exists()
+    assert (docs_dir / "stylesheets" / "extra.css").exists()
 
 
 def test_AC_3_dockerfile_docs():

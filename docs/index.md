@@ -8,6 +8,10 @@ alwaysApply: false
 
 > **Compreenda seus sistemas. Seja dono das suas escolhas.**
 
+<div class="hero-container">
+  <img src="assets/neo-logo.jpg" alt="Neo CLI — Personal Command Assistant" class="hero-logo" />
+</div>
+
 O **Neo** é um assistente pessoal de linha de comando de alta produtividade construído em **Python 3.13**, utilizando **Typer** e **Rich**. Ele centraliza e automatiza operações técnicas de trabalho — integrando-se nativamente com **GitHub**, **Bitbucket Cloud** e **Shortcut** — investigando informações com autonomia e fornecendo interfaces ricas no terminal.
 
 ---

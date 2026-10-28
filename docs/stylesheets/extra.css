@@ -1,0 +1,39 @@
+/* Customização de Cores Inspirada na Identidade Visual Pixel Matrix do Neo */
+
+:root {
+  --md-primary-fg-color: #008765;
+  --md-primary-fg-color--light: #00b386;
+  --md-primary-fg-color--dark: #005c45;
+  --md-accent-fg-color: #00e5a3;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #00e5a3;
+  --md-primary-fg-color--light: #34d399;
+  --md-primary-fg-color--dark: #059669;
+  --md-accent-fg-color: #00ffaa;
+  --md-default-bg-color: #0b1114;
+  --md-default-bg-color--light: #10181c;
+  --md-default-bg-color--lighter: #162227;
+  --md-code-bg-color: #070d10;
+}
+
+/* Imagem Hero no Centro da Página Inicial */
+.hero-container {
+  text-align: center;
+  margin: 2rem 0 2.5rem 0;
+}
+
+.hero-logo {
+  max-width: 280px;
+  width: 100%;
+  border-radius: 24px;
+  box-shadow: 0 0 40px rgba(0, 229, 163, 0.3);
+  border: 1px solid rgba(0, 229, 163, 0.25);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.hero-logo:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 0 60px rgba(0, 229, 163, 0.5);
+}

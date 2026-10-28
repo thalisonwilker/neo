@@ -8,6 +8,10 @@ alwaysApply: false
 
 > **Compreenda seus sistemas. Seja dono das suas escolhas.**
 
+<p align="center">
+  <img src="docs/assets/neo-logo.jpg" alt="Neo CLI Logo" width="260" style="border-radius: 20px;" />
+</p>
+
 **Neo** é um assistente pessoal extensível, executado via linha de comando (CLI), desenvolvido em **Python 3.13 com Typer e Rich**. Seu objetivo é eliminar tarefas manuais repetitivas, organizar fluxos de trabalho (Bitbucket, Shortcut), investigar dados com autonomia e apoiar a tomada de decisões com clareza.
 
 Inspirado filosoficamente no personagem Neo, de *Matrix*, o projeto apoia-se em três princípios fundamentais: **compreender antes de executar**, **preservar as escolhas do usuário** e **evoluir por meio de módulos independentes**.
