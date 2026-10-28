@@ -8,13 +8,25 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
+class MkDocsLoader(yaml.SafeLoader):
+    """SafeLoader customizado que ignora tags python do mkdocs sem tentar importá-las."""
+
+
+MkDocsLoader.add_multi_constructor(
+    "tag:yaml.org,2002:python/",
+    lambda loader, suffix, node: (
+        loader.construct_scalar(node) if isinstance(node, yaml.ScalarNode) else None
+    ),
+)
+
+
 def test_AC_1_mkdocs_config():
     """Valida AC-1: Configuração do MkDocs com tema Material, paleta e extensões PyMdown."""
     mkdocs_file = PROJECT_ROOT / "mkdocs.yml"
     assert mkdocs_file.exists(), "mkdocs.yml deve existir na raiz do projeto"
 
     with open(mkdocs_file, "r", encoding="utf-8") as f:
-        config = yaml.unsafe_load(f)
+        config = yaml.load(f, Loader=MkDocsLoader)
 
     # Tema Material
     theme = config.get("theme", {})

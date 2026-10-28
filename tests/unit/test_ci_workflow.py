@@ -72,11 +72,23 @@ def test_AC_2_deploy_docs_job():
     assert "mkdocs build --strict" in step_runs_str
 
 
+class MkDocsLoader(yaml.SafeLoader):
+    """SafeLoader customizado que ignora tags python do mkdocs sem tentar importá-las."""
+
+
+MkDocsLoader.add_multi_constructor(
+    "tag:yaml.org,2002:python/",
+    lambda loader, suffix, node: (
+        loader.construct_scalar(node) if isinstance(node, yaml.ScalarNode) else None
+    ),
+)
+
+
 def test_AC_3_mkdocs_site_url():
     """Valida AC-3: Configuração do site_url canônico do GitHub Pages no mkdocs.yml."""
     mkdocs_file = PROJECT_ROOT / "mkdocs.yml"
     with open(mkdocs_file, "r", encoding="utf-8") as f:
-        config = yaml.unsafe_load(f)
+        config = yaml.load(f, Loader=MkDocsLoader)
 
     site_url = config.get("site_url", "")
     assert site_url == "https://thalisonwilker.github.io/neo/"
