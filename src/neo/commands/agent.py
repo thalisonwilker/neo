@@ -188,7 +188,7 @@ def agent_status(
             if issue["suggestion"]:
                 lines.append(f"  [dim]→ {issue['suggestion']}[/dim]")
 
-    print_panel("Diagnóstico do Agente & SDD", "\n".join(lines))
+    print_panel("Agente & SDD", "\n".join(lines))
 
 
 @agent_app.command("setup")

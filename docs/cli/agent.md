@@ -89,7 +89,7 @@ neo agent status [--dir <caminho>] [--json]
     neo agent status
     ```
     ```text
-    ╭─────────────────── Diagnóstico do Agente & SDD ───────────────────╮
+    ╭─────────────────── Agente & SDD ───────────────────╮
     │ Adaptador: antigravity (default)                                  │
     │ Executável: agy (config) — Disponível (/usr/local/bin/agy — v2.0) │
     │ Modelo: Gemini 3.8 Flash (config)                                 │
