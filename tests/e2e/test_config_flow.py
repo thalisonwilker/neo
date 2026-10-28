@@ -200,6 +200,16 @@ def test_AC_4_and_AC_5_tasks_and_global_config_show():
     assert "services" in show_data
     assert "bitbucket" in show_data["services"]
     assert "shortcut" in show_data["services"]
+    assert "git" in show_data
+    assert "tasks" in show_data
+    assert show_data["tasks"]["service"] == "shortcut"
+
+    res_show_human = runner.invoke(app, ["config", "show"])
+    assert res_show_human.exit_code == 0
+    assert "Status de Git & Tasks" in res_show_human.output
+    assert "Provedor de Git (git):" in res_show_human.output
+    assert "Gerenciador de Tarefas (tasks):" in res_show_human.output
+    assert "shortcut" in res_show_human.output
 
 
 def test_AC_8_legacy_git_config_commands_fail_with_hint():

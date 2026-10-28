@@ -11,6 +11,7 @@ import typer
 from neo.commands._credentials import is_json_mode
 from neo.config import (
     DEFAULT_CONFIG_FILE,
+    DEFAULT_TASK_SERVICE,
     get_all_services_status,
     get_default_provider_config,
 )
@@ -24,17 +25,37 @@ config_app = typer.Typer(
 
 
 @config_app.command("show")
-def config_show(ctx: typer.Context) -> None:
+def config_show(
+    ctx: typer.Context,
+    json_flag: bool = typer.Option(
+        False,
+        "--json",
+        help="Emite a saída em formato JSON estruturado no stdout.",
+    ),
+) -> None:
     """Exibe o status geral das configurações e credenciais do Neo."""
-    as_json = is_json_mode(ctx)
+    as_json = is_json_mode(ctx, json_flag)
     statuses = get_all_services_status()
     default_provider = get_default_provider_config() or "bitbucket"
+    tasks_service = DEFAULT_TASK_SERVICE
+
+    git_configured = bool(statuses.get(default_provider, {}).get("configured"))
+    tasks_configured = bool(statuses.get(tasks_service, {}).get("configured"))
 
     if as_json:
         print_json(
             {
                 "config_file": str(DEFAULT_CONFIG_FILE),
                 "default_provider": default_provider,
+                "default_task_service": tasks_service,
+                "git": {
+                    "provider": default_provider,
+                    "configured": git_configured,
+                },
+                "tasks": {
+                    "service": tasks_service,
+                    "configured": tasks_configured,
+                },
                 "services": statuses,
             }
         )
@@ -51,8 +72,20 @@ def config_show(ctx: typer.Context) -> None:
             token_str = str(info["masked_token"]) if info["masked_token"] else "-"
             rows.append([svc, status_str, source_str, token_str])
 
+        git_state = (
+            "[bold green]Configurado[/bold green]"
+            if git_configured
+            else "[dim]Não configurado[/dim]"
+        )
+        tasks_state = (
+            "[bold green]Configurado[/bold green]"
+            if tasks_configured
+            else "[dim]Não configurado[/dim]"
+        )
+
         print_table("Status de Autenticação do Neo", columns, rows)
         print_panel(
-            "Provedor Git Ativo",
-            f"[bold]Provedor padrão:[/bold] [cyan]{default_provider}[/cyan]",
+            "Status de Git & Tasks",
+            f"[bold]Provedor de Git (git):[/bold] [cyan]{default_provider}[/cyan] ({git_state})\n"
+            f"[bold]Gerenciador de Tarefas (tasks):[/bold] [cyan]{tasks_service}[/cyan] ({tasks_state})",
         )
