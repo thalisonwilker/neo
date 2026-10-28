@@ -100,7 +100,7 @@ neo -v, --verbose       # Habilita mensagens de debug e traces
 
 ---
 
-### 1. ⚙️ Configuração & Credenciais (`neo config`)
+### 1. ⚙️ Configuração & Credenciais (`neo git config`, `neo tasks config`, `neo config`)
 
 O Neo utiliza o **Keyring nativo do sistema operacional** (macOS Keychain, Linux Secret Service / Keyring, Windows Credential Manager) para proteger tokens de API. Caso o Keyring esteja indisponível em ambientes headless/containers, há fallback automático para arquivo local protegido (`~/.config/neo/credentials.toml` com permissão restrita `0600`) ou variáveis de ambiente.
 
@@ -109,43 +109,46 @@ O Neo utiliza o **Keyring nativo do sistema operacional** (macOS Keychain, Linux
 | Comando | Descrição |
 |---|---|
 | `neo config show` | Exibe o status geral de autenticação de todos os serviços suportados (`bitbucket`, `github`, `shortcut`), o provedor Git padrão e os tokens mascarados. |
-| `neo config auth set <service> [--token <token>]` | Configura o token de API de um serviço (`bitbucket`, `github` ou `shortcut`). Oculta a digitação se `--token` for omitido. |
-| `neo config auth get <service>` | Consulta o status e exibe o token mascarado de um serviço específico. |
-| `neo config auth delete <service>` | Remove a credencial armazenada com segurança. |
-| `neo config set-provider <provider>` | Define o provedor Git padrão global (`github` ou `bitbucket`) persistido em `config.toml`. |
-| `neo config get-provider` | Exibe o provedor Git atualmente configurado como padrão. |
+| `neo git config auth set <service> [--token <token>]` | Configura o token de um serviço Git (`bitbucket` ou `github`). Oculta a digitação se `--token` for omitido. |
+| `neo git config auth get <service>` | Consulta o status e exibe o token mascarado de um serviço Git. |
+| `neo git config auth delete <service>` | Remove a credencial armazenada com segurança. |
+| `neo tasks config set [-s <service>] [--token <token>]` | Configura o token do serviço de tasks (`shortcut`, padrão). |
+| `neo tasks config get [-s <service>]` | Exibe o status e o token mascarado do serviço de tasks. |
+| `neo tasks config delete [-s <service>]` | Remove a credencial do serviço de tasks. |
+| `neo git config set-provider <provider>` | Define o provedor Git padrão global (`github` ou `bitbucket`) persistido em `config.toml`. |
+| `neo git config get-provider` | Exibe o provedor Git atualmente configurado como padrão. |
 
 #### Exemplos:
 
 ```bash
 # Configurar token do GitHub (Personal Access Token ou Classic Token com escopo repo)
-neo config auth set github --token "ghp_..."
+neo git config auth set github --token "ghp_..."
 
 # Configurar token do Shortcut de forma interativa (prompt seguro mascarado)
-neo config auth set shortcut
+neo tasks config set
 
 # Configurar token do Bitbucket diretamente via flag
-neo config auth set bitbucket --token "meu-app-password"
+neo git config auth set bitbucket --token "meu-app-password"
 
 # Definir GitHub como provedor Git padrão
-neo config set-provider github
+neo git config set-provider github
 
 # Consultar provedor Git padrão
-neo config get-provider
+neo git config get-provider
 
 # Verificar status de todas as integrações
 neo config show
 
 # Consultar credencial específica em formato JSON
-neo --json config auth get shortcut
+neo --json tasks config get
 
 # Remover credencial de um serviço
-neo config auth delete bitbucket
+neo git config auth delete bitbucket
 ```
 
 ---
 
-### 2. 🏢 Workspaces / Organizações Git (`neo workspace`)
+### 2. 🏢 Workspaces / Organizações Git (`neo git workspace`)
 
 Permite listar todos os workspaces/organizações acessíveis na conta (Bitbucket Cloud ou GitHub) e definir interativamente ou via flag qual deles é o workspace ativo/padrão, persistindo a escolha em `config.toml`.
 
@@ -153,82 +156,82 @@ Permite listar todos os workspaces/organizações acessíveis na conta (Bitbucke
 
 | Comando | Opções | Descrição |
 |---|---|---|
-| `neo workspace list` | `[-p, --provider <github\|bitbucket>]` | Lista todos os workspaces ou organizações aos quais a conta tem acesso, indicando com `[● Ativo]` o workspace padrão. |
-| `neo workspace current` | `[-p, --provider <github\|bitbucket>]` | Exibe o workspace/organização atualmente selecionado e sua origem (configuração local ou detecção automática via API). |
-| `neo workspace select` | `[-p, --provider <github\|bitbucket>]`, `[-s, --slug <slug>]` | Seleciona o workspace ativo. Sem flag, abre um menu interativo no terminal; com `--slug`, define diretamente. |
-| `neo workspace set <slug>` | `[-p, --provider <github\|bitbucket>]` | Atalho direto para definir o workspace padrão por slug. |
+| `neo git workspace list` | `[-p, --provider <github\|bitbucket>]` | Lista todos os workspaces ou organizações aos quais a conta tem acesso, indicando com `[● Ativo]` o workspace padrão. |
+| `neo git workspace current` | `[-p, --provider <github\|bitbucket>]` | Exibe o workspace/organização atualmente selecionado e sua origem (configuração local ou detecção automática via API). |
+| `neo git workspace select` | `[-p, --provider <github\|bitbucket>]`, `[-s, --slug <slug>]` | Seleciona o workspace ativo. Sem flag, abre um menu interativo no terminal; com `--slug`, define diretamente. |
+| `neo git workspace set <slug>` | `[-p, --provider <github\|bitbucket>]` | Atalho direto para definir o workspace padrão por slug. |
 
 #### Exemplos:
 
 ```bash
 # Listar workspaces do Bitbucket ou GitHub (auto-detecta pelo repositório ou provedor padrão)
-neo workspace list
+neo git workspace list
 
 # Listar organizações do GitHub explicitamente
-neo workspace list --provider github
+neo git workspace list --provider github
 
 # Selecionar workspace de forma interativa
-neo workspace select
+neo git workspace select
 
 # Definir workspace do Bitbucket
-neo workspace set acme_corp --provider bitbucket
+neo git workspace set acme_corp --provider bitbucket
 
 # Definir organização ativa no GitHub
-neo workspace set minha-organizacao --provider github
+neo git workspace set minha-organizacao --provider github
 
 # Verificar qual workspace está ativo
-neo workspace current
+neo git workspace current
 
 # Em formato JSON para scripts
-neo --json workspace list
+neo --json git workspace list
 ```
 
 ---
 
-### 3. 🗄️ Repositórios Git (`neo repo`)
+### 3. 🗄️ Repositórios Git (`neo git repo`)
 
 Gerencia e localiza repositórios no Bitbucket Cloud ou GitHub com arquitetura unificada de provedores.
 
 #### Resolução do Provedor Git:
 1. Flag explícita: `--provider github` ou `-p bitbucket`.
 2. Auto-detecção: se executado dentro de um repositório git local, inspeciona a URL do remote `origin`.
-3. Preferência persistida: consulta `default_provider` definido via `neo config set-provider`.
+3. Preferência persistida: consulta `default_provider` definido via `neo git config set-provider`.
 4. Fallback automático: seleciona o provedor que possui credenciais configuradas.
 
 #### Comandos Disponíveis:
 
 | Comando | Opções | Descrição |
 |---|---|---|
-| `neo repo list` | `[-p, --provider <prov>]`, `[-w, --workspace <ws>]` | Lista os repositórios disponíveis no workspace com visibilidade, branch padrão e data de atualização. |
-| `neo repo search <query>` | `[-p, --provider <prov>]`, `[-w, --workspace <ws>]` | Pesquisa repositórios por nome, slug ou texto da descrição. |
-| `neo repo clone <slug>` | `[-p, --provider <prov>]`, `[-w, --workspace <ws>]`, `[--ssh \| --https]` | Clona o repositório resolvendo a URL via API e disparando `git clone`. |
-| `neo repo create <name>` | `[-p, --provider <prov>]`, `[-w, --workspace <ws>]`, `[--private \| --public]`, `[-d, --description <desc>]`, `[-y, --yes]` | Cria um novo repositório com confirmação de segurança prévia. |
+| `neo git repo list` | `[-p, --provider <prov>]`, `[-w, --workspace <ws>]` | Lista os repositórios disponíveis no workspace com visibilidade, branch padrão e data de atualização. |
+| `neo git repo search <query>` | `[-p, --provider <prov>]`, `[-w, --workspace <ws>]` | Pesquisa repositórios por nome, slug ou texto da descrição. |
+| `neo git repo clone <slug>` | `[-p, --provider <prov>]`, `[-w, --workspace <ws>]`, `[--ssh \| --https]` | Clona o repositório resolvendo a URL via API e disparando `git clone`. |
+| `neo git repo create <name>` | `[-p, --provider <prov>]`, `[-w, --workspace <ws>]`, `[--private \| --public]`, `[-d, --description <desc>]`, `[-y, --yes]` | Cria um novo repositório com confirmação de segurança prévia. |
 
 #### Exemplos:
 
 ```bash
 # Listar repositórios do provedor padrão ou auto-detectado
-neo repo list
+neo git repo list
 
 # Listar repositórios do GitHub explicitamente
-neo repo list --provider github
+neo git repo list --provider github
 
 # Pesquisar repositórios contendo "api" no Bitbucket
-neo repo search api -p bitbucket
+neo git repo search api -p bitbucket
 
 # Clonar repositório forçando SSH
-neo repo clone backend-core --ssh
+neo git repo clone backend-core --ssh
 
 # Criar repositório privado no GitHub sem prompt interativo
-neo repo create novo-microservico --provider github --private -d "Microsserviço de pagamentos" -y
+neo git repo create novo-microservico --provider github --private -d "Microsserviço de pagamentos" -y
 
 # Exportar lista de repositórios em JSON para automações
-neo --json repo list > repos.json
+neo --json git repo list > repos.json
 ```
 
 ---
 
-### 4. 📜 Histórico & Commits (`neo commits`)
+### 4. 📜 Histórico & Commits (`neo git commits`)
 
 Consulta histórico de commits no Bitbucket ou GitHub com suporte a auto-detecção do repositório a partir do diretório Git local.
 
@@ -236,27 +239,27 @@ Consulta histórico de commits no Bitbucket ou GitHub com suporte a auto-detecç
 
 | Comando | Opções | Descrição |
 |---|---|---|
-| `neo commits search` | `[-p, --provider <prov>]`, `[-r, --repo <slug>]`, `[-w, --workspace <ws>]`, `[-a, --author <autor>]`, `[-q, --query <termo>]`, `[-l, --limit <n>]` | Pesquisa commits filtrando por autor, termo na mensagem ou limite. Caso `--repo` seja omitido, detecta o repositório via remote do git local. |
+| `neo git commits search` | `[-p, --provider <prov>]`, `[-r, --repo <slug>]`, `[-w, --workspace <ws>]`, `[-a, --author <autor>]`, `[-q, --query <termo>]`, `[-l, --limit <n>]` | Pesquisa commits filtrando por autor, termo na mensagem ou limite. Caso `--repo` seja omitido, detecta o repositório via remote do git local. |
 
 #### Exemplos:
 
 ```bash
 # Buscar commits no repositório do diretório atual (auto-detecta GitHub ou Bitbucket)
-neo commits search
+neo git commits search
 
 # Filtrar commits por autor em um repositório específico no GitHub
-neo commits search --provider github --repo neo --author "Thalyson"
+neo git commits search --provider github --repo neo --author "Thalyson"
 
 # Buscar alterações relacionadas a uma palavra-chave ou ID de ticket
-neo commits search --query "sc-2108" --limit 10
+neo git commits search --query "sc-2108" --limit 10
 
 # Obter histórico em JSON
-neo --json commits search --limit 5
+neo --json git commits search --limit 5
 ```
 
 ---
 
-### 5. 🎯 Demandas & Stories do Shortcut (`neo story`)
+### 5. 🎯 Tasks & Stories do Shortcut (`neo tasks`)
 
 Integração direta com a **REST API v3 do Shortcut** (`app.shortcut.com`) para acompanhamento de tarefas, chamados e análise contextual de tickets.
 
@@ -264,32 +267,32 @@ Integração direta com a **REST API v3 do Shortcut** (`app.shortcut.com`) para 
 
 | Comando | Opções | Descrição |
 |---|---|---|
-| `neo story whoami` | — | Valida o token e exibe dados do usuário logado (nome, username `@mention`, e-mail e ID). |
-| `neo story list` | `[-m, --mine]` | Lista stories ativas no workspace. A flag `--mine` filtra apenas as demandas atribuídas ao usuário logado. |
-| `neo story search <query>` | — | Pesquisa stories ativas por termo, palavra-chave ou título. |
-| `neo story show <id>` | — | Exibe detalhes completos de uma story (tipo, labels, link web direto e descrição formatada). |
-| `neo story analyze <id>` | — | Analisa o contexto da story, extraindo critérios de aceite, detectando alertas de impedimento/bloqueios, palavras-chave e sugerindo a branch git e o prefixo de commit ideal. |
+| `neo tasks whoami` | — | Valida o token e exibe dados do usuário logado (nome, username `@mention`, e-mail e ID). |
+| `neo tasks list` | `[-m, --mine]` | Lista stories ativas no workspace. A flag `--mine` filtra apenas as demandas atribuídas ao usuário logado. |
+| `neo tasks search <query>` | — | Pesquisa stories ativas por termo, palavra-chave ou título. |
+| `neo tasks show <id>` | — | Exibe detalhes completos de uma story (tipo, labels, link web direto e descrição formatada). |
+| `neo tasks analyze <id>` | — | Analisa o contexto da story, extraindo critérios de aceite, detectando alertas de impedimento/bloqueios, palavras-chave e sugerindo a branch git e o prefixo de commit ideal. |
 
 #### Exemplos:
 
 ```bash
 # Verificar credencial e usuário autenticado
-neo story whoami
+neo tasks whoami
 
 # Listar todas as minhas stories ativas
-neo story list --mine
+neo tasks list --mine
 
 # Pesquisar stories sobre login ou autenticação
-neo story search "autenticacao"
+neo tasks search "autenticacao"
 
 # Consultar detalhes da story #2108
-neo story show 2108
+neo tasks show 2108
 
 # Analisar contexto da story e obter sugestão de branch e commit
-neo story analyze 2108
+neo tasks analyze 2108
 ```
 
-Exemplo de saída de `neo story analyze`:
+Exemplo de saída de `neo tasks analyze`:
 ```text
 ╭────────────────────────────── Análise de Contexto: Story #2108 ──────────────────────────────╮
 │ Título: Ajustar timeout da conexão com gateway de pagamentos                                  │

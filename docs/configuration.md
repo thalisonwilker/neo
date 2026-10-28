@@ -39,34 +39,60 @@ graph TD
 
 ---
 
-## Comandos de Gerenciamento (`neo config`)
+## Comandos de Gerenciamento
 
-### Visualizar Status das Integrações
+Cada categoria de serviço configura as próprias credenciais: **`neo git config`** (Bitbucket/GitHub) e **`neo tasks config`** (Shortcut). O `neo config` serve apenas como visão geral.
+
+### Visualizar Status das Integrações (`neo config`)
 ```bash
 uv run neo config show
 ```
 
-### Definir e Consultar Tokens
+### Credenciais Git (`neo git config auth`)
 === "Interativo (Oculto)"
     ```bash
-    uv run neo config auth set shortcut
+    uv run neo git config auth set github
     # O terminal solicitará o token com digitação oculta
     ```
 
 === "Via Flag Direta"
     ```bash
-    uv run neo config auth set github --token "ghp_meu_token"
+    uv run neo git config auth set github --token "ghp_meu_token"
     ```
 
 === "Consultar Token Mascarado"
     ```bash
-    uv run neo config auth get github
+    uv run neo git config auth get github
     ```
 
 === "Remover Credencial"
     ```bash
-    uv run neo config auth delete bitbucket
+    uv run neo git config auth delete bitbucket
     ```
+
+### Credenciais de Tasks (`neo tasks config`)
+=== "Interativo (Oculto)"
+    ```bash
+    uv run neo tasks config set
+    ```
+
+=== "Via Flag Direta"
+    ```bash
+    uv run neo tasks config set --service shortcut --token "seu_token"
+    ```
+
+=== "Consultar Token Mascarado"
+    ```bash
+    uv run neo tasks config get
+    ```
+
+=== "Remover Credencial"
+    ```bash
+    uv run neo tasks config delete
+    ```
+
+!!! warning "Mudança de comandos"
+    Os comandos antigos (`neo config auth`, `neo repo`, `neo workspace`, `neo commits`, `neo story`) foram removidos. Use `neo git ...` e `neo tasks ...`.
 
 ---
 
@@ -76,13 +102,13 @@ Se você trabalha simultaneamente com repositórios no **GitHub** e no **Bitbuck
 
 ```bash
 # Definir GitHub como padrão
-uv run neo config set-provider github
+uv run neo git config set-provider github
 
 # Definir Bitbucket como padrão
-uv run neo config set-provider bitbucket
+uv run neo git config set-provider bitbucket
 
 # Consultar provedor padrão atual
-uv run neo config get-provider
+uv run neo git config get-provider
 ```
 
 Essa configuração é salva no arquivo `~/.config/neo/config.toml`.

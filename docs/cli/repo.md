@@ -1,10 +1,10 @@
 ---
 name: cli-repo
-description: Manual do comando neo repo para gerenciamento de repositórios Git.
+description: Manual do comando neo git repo para gerenciamento de repositórios Git.
 alwaysApply: false
 ---
 
-# `neo repo`
+# `neo git repo`
 
 O módulo `repo` permite listar, pesquisar, clonar e criar repositórios no **GitHub** e **Bitbucket Cloud**.
 
@@ -12,51 +12,51 @@ O módulo `repo` permite listar, pesquisar, clonar e criar repositórios no **Gi
 
 ## Comandos
 
-### `neo repo list`
+### `neo git repo list`
 Lista os repositórios disponíveis no workspace ativo.
 
 ```bash
-uv run neo repo list
+uv run neo git repo list
 # Forçando provedor ou workspace específico
-uv run neo repo list --provider github --workspace minha-org
+uv run neo git repo list --provider github --workspace minha-org
 ```
 
 ---
 
-### `neo repo search <termo>`
+### `neo git repo search <termo>`
 Pesquisa repositórios por nome, slug ou palavras-chave na descrição.
 
 ```bash
-uv run neo repo search auth
-uv run neo repo search api --provider bitbucket
+uv run neo git repo search auth
+uv run neo git repo search api --provider bitbucket
 ```
 
 ---
 
-### `neo repo clone <slug>`
+### `neo git repo clone <slug>`
 Clona um repositório resolvendo automaticamente a URL remota via API:
 
 === "SSH (Padrão)"
     ```bash
-    uv run neo repo clone core-backend --ssh
+    uv run neo git repo clone core-backend --ssh
     ```
 
 === "HTTPS"
     ```bash
-    uv run neo repo clone core-backend --https
+    uv run neo git repo clone core-backend --https
     ```
 
 ---
 
-### `neo repo create <nome>`
+### `neo git repo create <nome>`
 Cria um novo repositório com confirmação interativa de segurança.
 
 === "Com Confirmação Interativa"
     ```bash
-    uv run neo repo create servico-pagamento --private
+    uv run neo git repo create servico-pagamento --private
     ```
 
 === "Sem Prompt (CI / Scripts)"
     ```bash
-    uv run neo repo create servico-pagamento --private -d "API de pagamentos" -y
+    uv run neo git repo create servico-pagamento --private -d "API de pagamentos" -y
     ```

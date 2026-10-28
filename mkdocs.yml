@@ -14,16 +14,16 @@ theme:
     # Esquema Claro
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: teal
-      accent: teal
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-7
         name: Alternar para modo escuro
     # Esquema Escuro
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: teal
-      accent: green
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
         name: Alternar para modo claro
@@ -82,7 +82,7 @@ nav:
       - Workspaces: cli/workspace.md
       - Repositórios: cli/repo.md
       - Commits: cli/commits.md
-      - Stories & Demandas: cli/story.md
+      - Tasks & Demandas: cli/tasks.md
   - Engenharia & SDD:
       - Visão Geral: architecture.md
       - Glossário: glossary.md

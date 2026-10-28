@@ -4,12 +4,9 @@ description: Página inicial da documentação do Neo (Personal Command Assistan
 alwaysApply: false
 ---
 
-# Neo — Personal Command Assistant
-
-> **Compreenda seus sistemas. Seja dono das suas escolhas.**
-
+# <center>Neo — Personal Command Assistant</center>
 <div class="hero-container">
-  <img src="assets/neo-logo.jpg" alt="Neo CLI — Personal Command Assistant" class="hero-logo" />
+  <img style="width: 140px" src="assets/neo-logo.jpg" alt="Neo CLI — Personal Command Assistant" class="hero-logo" />
 </div>
 
 O **Neo** é um assistente pessoal de linha de comando de alta produtividade construído em **Python 3.13**, utilizando **Typer** e **Rich**. Ele centraliza e automatiza operações técnicas de trabalho — integrando-se nativamente com **GitHub**, **Bitbucket Cloud** e **Shortcut** — investigando informações com autonomia e fornecendo interfaces ricas no terminal.
@@ -28,7 +25,7 @@ O **Neo** é um assistente pessoal de linha de comando de alta produtividade con
     Interfaces visuais modernas estilizadas com **Rich** (tabelas, alertas, painéis) e suporte à flag global `--json` para integração transparente com `jq`, pipelines de CI e scripts de automação.
 
 === "Análise de Contexto"
-    Investigação contextual de tickets e chamados do Shortcut (`neo story analyze`), sugerindo branches, padrões de commit e critérios de aceite automaticamente.
+    Investigação contextual de tickets e chamados do Shortcut (`neo tasks analyze`), sugerindo branches, padrões de commit e critérios de aceite automaticamente.
 
 ---
 
@@ -49,25 +46,25 @@ uv run neo --help
 === "Consultar Stories"
     ```bash
     # Listar apenas as stories atribuídas a você
-    uv run neo story list --mine
+    uv run neo tasks list --mine
     ```
 
 === "Navegar em Repositórios"
     ```bash
     # Listar repositórios do provedor ativo (GitHub ou Bitbucket)
-    uv run neo repo list
+    uv run neo git repo list
     ```
 
 === "Pesquisar Commits"
     ```bash
     # Busca commits auto-detectando o repositório git atual
-    uv run neo commits search --query "fix" --limit 5
+    uv run neo git commits search --query "fix" --limit 5
     ```
 
 === "Alternar Workspace"
     ```bash
     # Selecionar workspace ativo interativamente
-    uv run neo workspace select
+    uv run neo git workspace select
     ```
 
 ---

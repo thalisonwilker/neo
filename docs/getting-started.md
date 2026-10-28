@@ -50,19 +50,19 @@ Antes de interagir com o GitHub, Bitbucket ou Shortcut, configure suas chaves de
 === "GitHub"
     Crie um **Personal Access Token** (Classic com escopo `repo` ou Fine-grained):
     ```bash
-    uv run neo config auth set github --token "ghp_seu_token_aqui"
+    uv run neo git config auth set github --token "ghp_seu_token_aqui"
     ```
 
 === "Bitbucket Cloud"
     Utilize um **API Token** ou App Password com permissões de repositórios:
     ```bash
-    uv run neo config auth set bitbucket --token "usuario:token"
+    uv run neo git config auth set bitbucket --token "usuario:token"
     ```
 
 === "Shortcut"
     Gere um token em *User Settings > API Tokens*:
     ```bash
-    uv run neo config auth set shortcut --token "seu_token_shortcut"
+    uv run neo tasks config set --token "seu_token_shortcut"
     ```
 
 Verifique o status das integrações:

@@ -1,10 +1,10 @@
 ---
 name: cli-commits
-description: Manual do comando neo commits para histórico e busca de commits.
+description: Manual do comando neo git commits para histórico e busca de commits.
 alwaysApply: false
 ---
 
-# `neo commits`
+# `neo git commits`
 
 O módulo `commits` investiga o histórico de versões nos repositórios remotos.
 
@@ -18,26 +18,26 @@ Quando executado dentro de uma pasta de projeto Git local, o Neo inspeciona auto
 
 ## Comandos
 
-### `neo commits search`
+### `neo git commits search`
 Pesquisa commits com filtros opcionais de autor, termo de mensagem e quantidade máxima:
 
 === "No Diretório Atual"
     ```bash
     # Detecta automaticamente o repositório atual
-    uv run neo commits search
+    uv run neo git commits search
     ```
 
 === "Filtrando por Autor"
     ```bash
-    uv run neo commits search --author "Thalyson"
+    uv run neo git commits search --author "Thalyson"
     ```
 
 === "Filtrando por Palavra-chave ou Ticket"
     ```bash
-    uv run neo commits search --query "sc-2108" --limit 10
+    uv run neo git commits search --query "sc-2108" --limit 10
     ```
 
 === "Em Repositório Específico"
     ```bash
-    uv run neo commits search --provider github --repo neo --limit 5
+    uv run neo git commits search --provider github --repo neo --limit 5
     ```

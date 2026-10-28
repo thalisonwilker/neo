@@ -1,10 +1,10 @@
 ---
 name: cli-workspace
-description: Manual do comando neo workspace para gerenciamento de contas e organizações.
+description: Manual do comando neo git workspace para gerenciamento de contas e organizações.
 alwaysApply: false
 ---
 
-# `neo workspace`
+# `neo git workspace`
 
 O comando `workspace` gerencia a conta ou organização ativa nos provedores Git suportados (**Bitbucket Cloud** e **GitHub**).
 
@@ -19,49 +19,49 @@ O comando `workspace` gerencia a conta ou organização ativa nos provedores Git
 
 ## Comandos
 
-### `neo workspace list`
+### `neo git workspace list`
 Lista todos os workspaces/organizações disponíveis, marcando com `[● Ativo]` o que estiver selecionado.
 
 === "Exemplo Padrão"
     ```bash
-    uv run neo workspace list
+    uv run neo git workspace list
     ```
 
 === "Especificando Provedor"
     ```bash
-    uv run neo workspace list --provider github
-    uv run neo workspace list -p bitbucket
+    uv run neo git workspace list --provider github
+    uv run neo git workspace list -p bitbucket
     ```
 
 ---
 
-### `neo workspace current`
+### `neo git workspace current`
 Exibe o workspace atualmente selecionado e sua origem (configuração local persistida ou detecção remota).
 
 ```bash
-uv run neo workspace current
+uv run neo git workspace current
 ```
 
 ---
 
-### `neo workspace select`
+### `neo git workspace select`
 Abre um menu interativo com navegação por teclado no terminal para seleção visual, ou define diretamente via flag `--slug`:
 
 === "Interativo"
     ```bash
-    uv run neo workspace select
+    uv run neo git workspace select
     ```
 
 === "Por Slug Direto"
     ```bash
-    uv run neo workspace select --slug acme_corp
+    uv run neo git workspace select --slug acme_corp
     ```
 
 ---
 
-### `neo workspace set <slug>`
+### `neo git workspace set <slug>`
 Atalho conveniente para definir o workspace ativo:
 
 ```bash
-uv run neo workspace set meu-time --provider github
+uv run neo git workspace set meu-time --provider github
 ```
