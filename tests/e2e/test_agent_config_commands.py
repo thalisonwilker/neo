@@ -99,4 +99,3 @@ def test_AC_4_AC_13_AC_14_agent_config_model_sdd_list_unset_and_show(tmp_path: P
         assert res_unset.exit_code == 0
         res_get_mod = runner.invoke(app, ["config", "agent", "get", "model", "--json"])
         assert json.loads(res_get_mod.output)["value"] is None
-

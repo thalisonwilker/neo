@@ -120,4 +120,3 @@ class AntigravityAdapter:
         if interrupted_sig is not None and return_code == 0:
             return 130
         return return_code
-

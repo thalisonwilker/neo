@@ -83,4 +83,3 @@ def test_AC_9_and_not_found_and_json_rejection_in_agent_run(tmp_path: Path):
     ):
         res_missing = runner.invoke(app, ["agent", "run", "--dir", str(tmp_path)])
         assert res_missing.exit_code == int(ExitCode.NOT_FOUND)
-
