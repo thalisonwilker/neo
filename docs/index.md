@@ -6,7 +6,7 @@ alwaysApply: false
 
 # <center>Neo — Personal Command Assistant</center>
 <div class="hero-container">
-  <img style="width: 140px" src="assets/neo-logo.jpg" alt="Neo CLI — Personal Command Assistant" class="hero-logo" />
+  <img style="width: 240px" src="assets/neo-logo.jpg" alt="Neo CLI — Personal Command Assistant" class="hero-logo" />
 </div>
 
 <p align="center" class="hero-subtitle">

@@ -12,6 +12,7 @@ alwaysApply: false
 |---|---|---|---|
 | **Analysis / Análise** | Processo de correlacionar dados de uma demanda ou bug com o histórico de commits e código | Telemetria ou profiling de performance | `Analysis & Correlation` |
 | **App Password** | Credencial de aplicação gerada no Bitbucket com escopos restritos para a CLI | Senha pessoal da conta Atlassian | `Bitbucket Integration` |
+| **Branch** | Linha independente de desenvolvimento em um repositório Git (`main`, `feature/*`, `bugfix/*`), identificada pelo nome e hash do último commit | Tag estática ou fork de repositório | `Git Integration` |
 | **Bug Investigation** | Fluxo automático que busca um card no Shortcut e varre o Bitbucket por commits e PRs relacionados | Debugging interativo de código em IDE | `Analysis & Correlation` |
 | **Commit** | Registro imutável de alteração no histórico de um repositório Git no Bitbucket | Task ou subtask de desenvolvimento | `Bitbucket Integration` |
 | **Keyring** | Chaveiro seguro nativo do sistema operacional (Keychain no macOS, SecretService no Linux) | Arquivo de texto `.env` | `Configuration & Secrets` |
