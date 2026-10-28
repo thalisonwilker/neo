@@ -1,97 +1,92 @@
 ---
 name: cli-index
-description: Visão geral da interface de linha de comando e opções globais do Neo.
+description: Visão geral da gramática neo git, verbos padronizados, opções comuns e códigos de saída.
 alwaysApply: false
 ---
 
 # Visão Geral da CLI
 
-Os comandos do Neo seguem o padrão `neo <domínio> <recurso> <ação>`. Você recebe tabelas formatadas com **Rich** para leitura rápida no terminal ou JSON puro com `--json` para alimentar scripts, `jq` e pipelines de CI/CD.
+O módulo Git do Neo segue uma gramática estrita, previsível e sem abreviações ambíguas:
+
+```text
+neo git <recurso> <ação> [argumentos] [--opções]
+```
+
+- **Somente opções em forma longa:** o módulo `neo git` não utiliza atalhos de uma letra (`--provider`, `--workspace`, `--repo`, `--query`, `--limit`, `--yes`, `--json`).
+- **Comandos em inglês, mensagens em português:** nomes de comandos, chaves e flags são em inglês; tabelas, painéis e mensagens de erro são em português do Brasil.
+- **Saída dupla:** formato visual **Rich** por padrão para leitura humana e JSON puro no `stdout` quando `--json` é informado.
 
 ---
 
-## Flags Globais
+## Verbos Padronizados
 
-Passe as flags globais logo após `neo`, antes do subcomando:
+| Verbo | Uso | Recursos |
+|---|---|---|
+| `list` | Lista registros de um recurso | `config`, `workspace`, `repo`, `commits` *(e planejado: `branch`, `pr`, `tag`, `release`)* |
+| `show` | Exibe todos os detalhes de um item específico | `workspace`, `repo`, `commits` *(e planejado: `branch`, `pr`, `tag`, `release`)* |
+| `search` | Filtra registros por palavra-chave via `--query` | `repo`, `commits` *(e planejado: `pr`)* |
+| `select` | Escolhe o item ativo de forma interativa ou via flag | `workspace` |
+| `set` / `get` / `unset` | Define, consulta ou remove uma chave de configuração | `config` |
+| `login` / `status` / `logout` | Autentica, verifica ou remove credenciais de um provedor | `auth` |
+| `create` / `remove` / `open` / `clone` / `diff` | Ações de criação, remoção, abertura e comparação | *(Planejado no backlog)* |
 
-| Flag | O que faz |
-|---|---|
-| `--help` | Exibe a ajuda rápida do comando ou subcomando atual. |
-| `--version`, `-V` | Imprime a versão instalada do Neo e encerra. |
-| `--json` | Emite JSON puro no `stdout` e desativa cores/tabelas visuais. |
-| `-v`, `--verbose` | Exibe detalhes de chamadas HTTP e diagnóstico em caso de falha. |
+---
 
-### Compondo Comandos no Terminal (`--json` + `jq`)
+## Opções Comuns
+
+| Opção | Argumento | Descrição |
+|---|---|---|
+| `--provider` | `github` \| `bitbucket` | Sobrescreve o provedor Git apenas para a execução atual. |
+| `--workspace` | `<slug>` | Sobrescreve o workspace (Bitbucket) ou organização/usuário (GitHub). |
+| `--repo` | `<slug>` | Informa o repositório alvo (dispensável quando executado dentro de um repositório Git local). |
+| `--query` | `<termo>` | Termo de busca nos comandos `search`. |
+| `--limit` | `<inteiro>` | Limita a quantidade máxima de itens retornados. |
+| `--json` | *(flag booleana)* | Emite JSON puro no `stdout`, sem cores nem bordas decorativas. |
+| `--yes` | *(flag booleana)* | Pula a confirmação interativa em ações destrutivas (como `auth logout`). |
+| `--help` | *(flag booleana)* | Exibe a ajuda contextual do comando ou subgrupo. |
+
+---
+
+## Tabela de Códigos de Saída
+
+Todo comando do Neo retorna um código de saída semântico para facilitar o uso em scripts shell e pipelines de CI/CD:
+
+| Código | Significado | Quando ocorre |
+|---|---|---|
+| `0` | **Sucesso** | Comando executado até o fim sem erros. |
+| `1` | **Erro genérico** | Erro inesperado de rede, erro `5xx` ou `429` da API, ou operação cancelada na confirmação interativa. |
+| `2` | **Uso incorreto** | Opção desconhecida, argumento obrigatório ausente (`--query` faltando em `search`), chave proibida (`config set token`) ou comando antigo removido. |
+| `3` | **Erro de autenticação** | Credencial não configurada, token inválido/expirado (`401`) ou permissão negada (`403`). |
+| `4` | **Não encontrado** | Repositório, workspace ou commit inexistente (`404`), ou repositório não detectado fora de uma pasta Git. |
+| `5` | **Não suportado** | Comando ou operação não suportada pelo provedor ativo (a mensagem inclui sugestão de alternativa). |
+
+---
+
+## Compondo Comandos com `--json` e `jq`
 
 ```bash
-# Extrair apenas os slugs dos seus repositórios no provedor ativo
-neo --json git repo list | jq -r '.[].slug'
+# Listar apenas os nomes e slugs dos repositórios do provedor ativo
+neo git repo list --json | jq '.[] | {name, slug}'
 
-# Contar quantas tasks estão na coluna "Fazendo" na sprint atual
-neo --json tasks resume | jq '.doing | length'
+# Filtrar commits de correção e extrair hash curto e autor
+neo git commits search --query "fix" --limit 5 --json | jq '.[] | {hash: .hash[0:7], author: .author.display_name}'
 
-# Clonar todos os repositórios que contêm "service" no nome
-neo --json git repo search service | jq -r '.[].slug' | xargs -I {} neo git repo clone {}
+# Verificar em um script se o provedor atual está autenticado
+neo git status --json | jq -e '.authenticated'
 ```
 
 ---
 
-## Mapa de Comandos Hoje
+## Mapa de Páginas da CLI
 
-### 1. `neo git` (GitHub & Bitbucket Cloud)
-
-Gerencia credenciais, organizações/workspaces, repositórios e busca de commits nos dois provedores com a mesma sintaxe:
-
-```mermaid
-flowchart LR
-    Git["neo git"] --> GConfig["config"]
-    Git --> Workspace["workspace"]
-    Git --> Repo["repo"]
-    Git --> Commits["commits"]
-
-    GConfig --> GAuth["auth (set | get | delete)"]
-    GConfig --> GProv["set-provider | get-provider"]
-
-    Workspace --> WCmds["list | current | select | set"]
-    Repo --> RCmds["list | search | clone | create"]
-    Commits --> CCmds["search"]
-```
-
-- [Configuração Git](../configuration.md) (`neo git config`): salve tokens no Keyring e escolha seu provedor padrão (`github` ou `bitbucket`).
-- [Workspaces](workspace.md) (`neo git workspace`): alterne entre organizações ou contas sem precisar passar flags em todo comando.
-- [Repositórios](repo.md) (`neo git repo`): liste, filtre, crie e clone repositórios via SSH ou HTTPS.
-- [Commits](commits.md) (`neo git commits`): pesquise commits por autor ou mensagem com detecção automática do repositório local.
-
----
-
-### 2. `neo tasks` (Shortcut)
-
-Conecta seu terminal ao **Shortcut** para visualizar quadros Kanban, filtrar sprints e preparar o contexto antes de abrir uma branch:
-
-```mermaid
-flowchart LR
-    Tasks["neo tasks"] --> TConfig["config"]
-    Tasks --> Iterations["iterations"]
-    Tasks --> Resume["resume (-i | --all | --configure)"]
-    Tasks --> Whoami["whoami"]
-    Tasks --> List["list (--mine | -i)"]
-    Tasks --> Search["search (query)"]
-    Tasks --> Show["show (id)"]
-    Tasks --> Analyze["analyze (id)"]
-
-    TConfig --> TAuth["set | get | delete | columns"]
-```
-
-- [Configuração de Tasks](../configuration.md) (`neo tasks config`): configure o token do Shortcut e mapeie as colunas do seu workflow.
-- [Tasks & Demandas](tasks.md) (`neo tasks`): veja o quadro Kanban (`resume`), liste sprints (`iterations`), filtre stories (`list`, `search`, `show`) e gere sugestões de branch e commit (`analyze`).
-
----
-
-### 3. `neo config` (Diagnóstico Geral)
-
-```mermaid
-flowchart LR
-    Neo["neo config"] --> Show["show (Status geral: Git + Tasks)"]
-```
-
-- [Diagnóstico de Configuração](../configuration.md) (`neo config show`): confira em uma tabela quais tokens estão ativos, de onde vêm (Keyring, variável de ambiente ou arquivo) e qual provedor Git é o padrão.
+- **Módulo Git (`neo git`):**
+  - [Configuração Git (`neo git config`)](config.md): `set`, `get`, `list`, `unset`.
+  - [Autenticação Git (`neo git auth`)](auth.md): `login`, `status`, `logout`.
+  - [Workspaces (`neo git workspace`)](workspace.md): `list`, `select`, `show`.
+  - [Repositórios (`neo git repo`)](repo.md): `list`, `search`, `show` *(e itens planejados)*.
+  - [Commits (`neo git commits`)](commits.md): `list`, `search`, `show` *(e itens planejados)*.
+  - [Status Git (`neo git status`)](status.md): diagnóstico de contexto e recursos planejados (`branch`, `pr`, `tag`, `release`).
+- **Módulo de Demandas (`neo tasks`):**
+  - [Tasks & Demandas (`neo tasks`)](tasks.md): integração com o Shortcut (`resume`, `list`, `search`, `show`, `analyze`, `iterations`, `whoami`).
+- **Migração:**
+  - [Guia de Migração](../migration.md): equivalência entre comandos antigos e novos.

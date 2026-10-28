@@ -11,7 +11,7 @@ from neo.commands.config import config_app
 from neo.commands.git import git_app
 from neo.commands.tasks import tasks_app
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 
 @dataclass

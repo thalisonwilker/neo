@@ -6,17 +6,17 @@ alwaysApply: false
 
 # Primeiros Passos
 
-Instale o Neo, conecte suas contas do GitHub, Bitbucket ou Shortcut e execute sua primeira consulta no terminal em menos de dois minutos.
+Instale o Neo em ambiente isolado, autentique sua conta no GitHub ou Bitbucket Cloud e configure seu provedor e workspace padrão.
 
 ---
 
 ## Pré-requisitos
 
 - **Python >= 3.13**
-- **Git** instalado e configurado no `PATH`
-- Recomendado: gerenciador [`uv`](https://docs.astral.sh/uv/) para instalar ferramentas CLI em ambientes isolados:
+- **Git** instalado e acessível no `PATH`
+- Gerenciador de ferramentas CLI [`uv`](https://docs.astral.sh/uv/) ou [`pipx`](https://pipx.pypa.io/):
   ```bash
-  # macOS / Linux
+  # Instalar uv no macOS / Linux
   curl -LsSf https://astral.sh/uv/install.sh | sh
   ```
 
@@ -24,95 +24,100 @@ Instale o Neo, conecte suas contas do GitHub, Bitbucket ou Shortcut e execute su
 
 ## 1. Instale o Neo
 
-=== "Via PyPI (`uv` ou `pip`)"
-    Instale o pacote **`neo-cmd`** para liberar o binário `neo` globalmente:
-    ```bash
-    # Recomendado: ambiente isolado gerenciado pelo uv
-    uv tool install neo-cmd
+```bash
+# Opção 1: com uv (recomendado)
+uv tool install neo-cmd
 
-    # Alternativa com pip
-    pip install neo-cmd
-    ```
+# Opção 2: com pipx
+pipx install neo-cmd
+```
 
-=== "A partir do Código-Fonte"
-    Clone o repositório e sincronize as dependências locais:
-    ```bash
-    git clone https://github.com/thalisonwilker/neo.git
-    cd neo
-    uv sync
-    ```
+!!! warning "Erro `externally-managed-environment` (PEP 668)"
+    Distribuições Linux recentes e o Python instalado via Homebrew no macOS bloqueiam `pip install` direto no Python do sistema (erro `error: externally-managed-environment`). Use sempre **`uv tool install neo-cmd`** ou **`pipx install neo-cmd`**: ambos criam um ambiente virtual isolado automaticamente e expõem o binário `neo` no seu `PATH`.
 
-Confirme que o binário está acessível:
+Se estiver contribuindo com o código-fonte do projeto:
+
+```bash
+git clone https://github.com/thalisonwilker/neo.git
+cd neo
+uv sync
+uv run neo --version
+```
+
+Confirme a instalação:
 
 ```bash
 neo --version
-# Neo v0.1.1
+# Neo v0.2.0
 ```
 
 ---
 
-## 2. Conecte seus Tokens
+## 2. Autentique seu Provedor Git
 
-Seus tokens são salvos no **Keyring nativo do sistema operacional** (ou em `~/.config/neo/credentials.toml` com permissão `0600` quando o Keyring não estiver disponível).
-
- Dica: omita a flag `--token` se preferir digitar o segredo de forma oculta no terminal, sem deixar rastro no histórico do shell (`~/.zsh_history` ou `~/.bash_history`).
+O comando `neo git auth login` solicita o segredo com entrada oculta no terminal e o armazena no **Keyring do sistema operacional** (ou em `~/.config/neo/credentials.toml` com permissão `0600`). O Neo nunca aceita tokens como argumento de linha de comando.
 
 === "GitHub"
-    Gere um **Personal Access Token** (Classic com escopo `repo` ou Fine-grained):
+    Gere um **Personal Access Token** (Classic com escopo `repo` ou Fine-grained) e execute:
     ```bash
-    # Prompt oculto (recomendado)
-    neo git config auth set github
-
-    # Ou via flag direta
-    neo git config auth set github --token "ghp_seu_token_aqui"
+    neo git auth login --provider github
     ```
 
 === "Bitbucket Cloud"
-    Use um **API Token** ou **App Password** no formato `usuario:token` (ou apenas o token Workspace):
+    Gere um **API Token** na sua conta Atlassian e execute:
     ```bash
-    # Prompt oculto (recomendado)
-    neo git config auth set bitbucket
-
-    # Ou via flag direta
-    neo git config auth set bitbucket --token "usuario:token"
+    neo git auth login --provider bitbucket
     ```
+    O terminal solicitará o e-mail da sua conta Atlassian e, em seguida, o API Token com digitação oculta.
 
-=== "Shortcut"
-    Gere um token em *Settings > API Tokens* no Shortcut:
+    !!! warning "App Passwords descontinuadas no Bitbucket Cloud"
+        O Bitbucket Cloud descontinuou as antigas *App Passwords*. Crie e utilize um **API Token** vinculado ao e-mail da sua conta Atlassian.
+
+=== "Shortcut (Módulo Tasks)"
+    Para usar o módulo `neo tasks`, salve o token gerado em *Settings > API Tokens*:
     ```bash
-    # Prompt oculto (recomendado)
     neo tasks config set
-
-    # Ou via flag direta
-    neo tasks config set --token "seu_token_shortcut"
     ```
 
 ---
 
-## 3. Execute seu Primeiro Comando
+## 3. Defina o Provedor e o Workspace Padrão
 
-Verifique o status geral das integrações e faça sua primeira consulta:
+Configure qual provedor e qual workspace (organização/conta no GitHub ou Workspace no Bitbucket) o Neo deve usar quando você não estiver dentro de um repositório Git local:
 
 ```bash
-# Painel consolidado de credenciais e provedor Git ativo
-neo config show
+# Definir o provedor Git padrão (github ou bitbucket)
+neo git config set provider github
 
-# Quadro Kanban da sua sprint atual no Shortcut
-neo tasks resume
+# Definir o workspace padrão
+neo git config set workspace minha-organizacao
 
-# Repositórios do seu workspace ativo no GitHub ou Bitbucket
-neo git repo list
+# Conferir as configurações ativas
+neo git config list
 ```
 
-Precisa processar a saída em um script? Adicione `--json` antes do subcomando:
+---
+
+## 4. Verifique o Contexto e Faça sua Primeira Consulta
 
 ```bash
-neo --json config show | jq .
+# Verificar autenticação nos provedores Git
+neo git auth status
+
+# Inspecionar o contexto Git completo (repositório local, provedor e workspace)
+neo git status
+
+# Listar os repositórios do workspace configurado
+neo git repo list --limit 10
+
+# Exportar em JSON para usar com jq
+neo git repo list --limit 5 --json | jq '.[] | {name, slug, main_branch}'
 ```
 
 ---
 
 ## Próximos Passos
 
-- [Configuração & Credenciais](configuration.md): entenda a precedência de tokens, variáveis de ambiente para CI e mapeamento de colunas do Kanban.
-- [Guia de Comandos da CLI](cli/index.md): veja todos os subcomandos e filtros de `neo git` e `neo tasks`.
+- [Configuração & Credenciais](configuration.md): veja todas as chaves da seção `[git]`, a ordem de precedência e as variáveis de ambiente para CI/CD.
+- [Visão Geral da CLI](cli/index.md): consulte a gramática, os verbos padronizados e a tabela de códigos de saída.
+- [Guia de Migração](migration.md): tabela de equivalência se você utilizava a versão `v0.1.0`/`v0.1.1`.

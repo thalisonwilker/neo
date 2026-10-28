@@ -1,6 +1,6 @@
 [project]
 name = "neo-cmd"
-version = "0.1.1"
+version = "0.2.0"
 description = "Um assistente pessoal via linha de comando para organizar a vida de um dev — Compreenda seus sistemas. Seja dono das suas escolhas."
 readme = "README.md"
 license = "MIT"

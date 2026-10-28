@@ -1,35 +1,77 @@
 ---
 name: architecture
-description: Visão geral da arquitetura, convenções DDD e esteira Spec-Driven Development.
+description: Visão geral da arquitetura, protocolo GitProviderProtocol, ADRs e esteira Spec-Driven Development.
 alwaysApply: false
 ---
 
 # Arquitetura & Spec-Driven Development
 
-O Neo combina **Domain-Driven Design (DDD)** tático com **Spec-Driven Development (SDD)**. O objetivo é simples: manter o núcleo fácil de testar e garantir que cada comando novo nasça de um contrato claro antes de virar código.
+O Neo combina **Domain-Driven Design (DDD)** tático com **Spec-Driven Development (SDD)**. As regras de negócio ficam isoladas de detalhes de rede e terminal, e toda mudança nasce de uma especificação testável.
 
 ---
 
-## Arquitetura em Camadas
+## Camadas da Aplicação
 
-As dependências apontam sempre para dentro, isolando regras de negócio de detalhes de HTTP, terminal ou sistema operacional:
+As dependências apontam sempre para dentro:
 
 ```text
-interfaces (CLI) → application → domain ← infrastructure (integrations)
+interfaces (CLI) → application (resolver/services) → domain (models/protocols) ← infrastructure (integrations/config)
 ```
 
-1. **`interfaces/` (`src/neo/cli.py` e `src/neo/commands/`):** Borda de entrada na linha de comando. Traduz argumentos do **Typer**, formata painéis e tabelas com **Rich** e serializa a saída quando `--json` está ativo.
-2. **`application/` & `services/`:** Casos de uso da aplicação, como detecção automática de repositório Git via `remote`, resolução de provedor e análise contextual de stories.
-3. **`domain/`:** Entidades, objetos de valor e protocolos (`GitProviderProtocol`, modelos de repositório, commit, workspace e story). Não importa bibliotecas de rede ou de interface.
-4. **`infrastructure/` (`src/neo/integrations/` e `config.py`):** Adaptadores concretos para **GitHub**, **Bitbucket Cloud** e **Shortcut** usando `httpx`, além da persistência em `keyring` e arquivos TOML.
-
-Essa separação é o que prepara o Neo para os próximos passos do roadmap — novos módulos de vida pessoal (estudos, lazer e finanças) e uma futura API pública entram como novos adaptadores e domínios sem reescrever a base.
+1. **`interfaces/` (`src/neo/cli.py` e `src/neo/commands/`):** Borda de entrada da CLI construída com **Typer** e **Rich**. Implementa a gramática `neo git <recurso> <ação> [--opções]`, valida parâmetros de uso (código `2`) e formata a saída em tabelas/painéis humanos ou JSON puro (`--json`).
+2. **`application/` (`src/neo/integrations/resolver.py` e `src/neo/services/`):** Orquestra a resolução de provedor e workspace seguindo a cadeia de precedência (`CLI > ENV > config.toml > remote > default`), detecta metadados do repositório Git local e traduz exceções de domínio em códigos de saída padronizados (`0` a `5`).
+3. **`domain/` (`src/neo/integrations/*_models.py` e protocolos):** Define os modelos de dados (`BitbucketRepo`, `BitbucketCommit`, `BitbucketWorkspace`) e o contrato comum de provedores Git.
+4. **`infrastructure/` (`src/neo/integrations/github.py`, `bitbucket.py`, `shortcut.py` e `src/neo/config.py`):** Clientes HTTP (`httpx`), integração com o **Keyring** do sistema operacional e persistência em arquivos TOML (`0600`).
 
 ---
 
-## Como Funciona o Spec-Driven Development (SDD)
+## Interface Comum de Provedores (`GitProviderProtocol`)
 
-Nenhuma feature é implementada no improviso. Todo comando segue quatro etapas verificáveis em CI:
+Para que `neo git workspace`, `neo git repo` e `neo git commits` funcionem de forma idêntica no **GitHub** e no **Bitbucket Cloud**, ambos os clientes implementam o contrato `GitProviderProtocol`:
+
+```python
+class GitProviderProtocol(Protocol):
+    def list_workspaces(self) -> list[BitbucketWorkspace]: ...
+    def get_default_workspace(self, ignore_config: bool = False) -> str: ...
+    def list_repositories(
+        self, workspace: str | None = None, limit: int | None = None
+    ) -> list[BitbucketRepo]: ...
+    def search_repositories(
+        self, query: str, workspace: str | None = None, limit: int | None = None
+    ) -> list[BitbucketRepo]: ...
+    def get_repository(self, repo_slug: str, workspace: str | None = None) -> BitbucketRepo: ...
+    def list_commits(
+        self,
+        repo_slug: str,
+        workspace: str | None = None,
+        author: str | None = None,
+        query: str | None = None,
+        limit: int = 20,
+    ) -> list[BitbucketCommit]: ...
+    def get_commit(
+        self, repo_slug: str, sha: str, workspace: str | None = None
+    ) -> BitbucketCommit: ...
+```
+
+Quando uma operação futura não for suportada por um dos provedores, o adaptador lança `UnsupportedProviderOperationError`, que a CLI converte automaticamente no código de saída `5` acompanhado de uma sugestão de alternativa.
+
+---
+
+## Decisões Arquiteturais (ADRs)
+
+As decisões estruturais do projeto são imutáveis e ficam registradas em `docs/architecture/adr/`:
+
+- **ADR-0002 (Tech Stack Core):** Python >= 3.13, `uv`, Typer, Rich, `httpx`, Pydantic e `keyring`.
+- **ADR-0003 (Arquitetura Modular e Integrações):** Isolamento de clientes HTTP como *Anti-Corruption Layer (ACL)*.
+- **ADR-0004 (Gestão de Credenciais e Segurança):** Keyring do SO como armazenamento primário, fallback `0600` (`credentials.toml`) e variáveis de ambiente para CI/CD.
+- **ADR-0005 (Padrões de Qualidade e Testes):** Ruff, Mypy em modo `strict`, Pytest com `respx` (sem chamadas de rede real) e cobertura `>= 80%`.
+- **ADR-0006 (Observabilidade e UX na CLI):** Dupla saída (Rich para humanos, `--json` estrito no `stdout` para automação) e códigos de saída semânticos.
+
+---
+
+## Esteira Spec-Driven Development (SDD)
+
+Nenhum comando é codificado antes da especificação:
 
 ```mermaid
 graph LR
@@ -38,7 +80,5 @@ graph LR
     Codigo --> Gates["4. Gates de Qualidade & DoD"]
 ```
 
-- **A spec é o contrato:** Cada funcionalidade começa em `specs/NNNN-*/spec.md` com critérios de aceite em formato *Given/When/Then* (`AC-1`, `AC-2`...).
-- **Rastreabilidade ponta a ponta:** O script de auditoria valida se todo `AC-N` da especificação possui tarefa correspondente em `tasks.md` e teste automatizado cobrindo o cenário.
-- **Gates automatizados no CI:** Todo push e Pull Request passa por linter (`ruff`), checagem estática de tipos em modo estrito (`mypy src`), compilação da documentação (`mkdocs build --strict`) e suíte `pytest` com cobertura mínima de `80%`.
-- **Memória e decisões documentadas:** O estado atual do desenvolvimento fica em `docs/STATE.md`, e decisões arquiteturais difíceis de reverter são registradas como ADRs imutáveis em `docs/architecture/adr/`.
+- **Contrato executável:** Cada requisito em `specs/NNNN-*/spec.md` possui um identificador `AC-N` em formato *Given/When/Then*.
+- **Rastreabilidade verificada em CI:** Os scripts `scripts/audit-esteira.mjs` e `scripts/eval-spec-fidelity.mjs` garantem que todo `AC-N` esteja mapeado em `tasks.md` e referenciado na suíte de testes automatizados.

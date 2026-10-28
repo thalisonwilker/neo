@@ -21,7 +21,7 @@ alwaysApply: false
     <img src="https://img.shields.io/endpoint?url=https://thalisonwilker.github.io/neo/coverage-badge.json" alt="Coverage">
   </a>
   <a href="https://pypi.org/project/neo-cmd/" target="_blank">
-    <img src="https://img.shields.io/badge/version-v0.1.1-34D058" alt="Version">
+    <img src="https://img.shields.io/badge/version-v0.2.0-34D058" alt="Version">
   </a>
   <a href="https://www.python.org/" target="_blank">
     <img src="https://img.shields.io/badge/python-3.13+-34D058" alt="Python 3.13+">
@@ -41,26 +41,26 @@ O **Neo** é um assistente pessoal de linha de comando feito por dev, para devs 
 ## Por que usar o Neo
 
 === "Linha de Comando por Escolha"
-    Troque cliques e trocas de aba por comandos curtos e previsíveis. O Neo detecta o repositório Git atual automaticamente e responde no terminal em segundos, com tabelas formatadas via **Rich**.
+    Troque cliques e trocas de aba por comandos previsíveis no padrão `neo git <recurso> <ação>`. O Neo detecta o repositório Git atual automaticamente e responde no terminal com tabelas formatadas via **Rich**.
 
 === "GitHub, Bitbucket e Shortcut em um Lugar"
-    Use a mesma sintaxe para listar, buscar e clonar repositórios no **GitHub** ou no **Bitbucket Cloud** (`--provider / -p` ou detecção automática pelo `remote`) e acompanhe suas demandas do **Shortcut** sem sair do código.
+    Use a mesma gramática para listar, buscar e inspecionar repositórios e commits no **GitHub** ou no **Bitbucket Cloud** (`--provider` ou detecção automática pelo `remote`) e acompanhe suas demandas do **Shortcut** sem sair do código.
 
 === "Pronto para Scripts e CI (`--json`)"
-    Todo comando aceita a flag global `--json`. Combine o Neo com `jq`, scripts shell e pipelines de CI/CD para transformar consultas manuais em automações reprodutíveis.
+    Todo comando de leitura aceita `--json`. Combine o Neo com `jq`, scripts shell e pipelines de CI/CD usando códigos de saída semânticos (`0` a `5`).
 
 === "Credenciais Fora de Texto Puro"
-    Seus tokens ficam no **Keyring nativo do SO** (macOS Keychain, Linux Secret Service, Windows Credential Manager), com fallback para arquivo local restrito (`0600`) ou variáveis de ambiente em servidores de CI.
+    `neo git auth login` solicita o token com entrada oculta e salva no **Keyring nativo do SO** (macOS Keychain, Linux Secret Service, Windows Credential Manager), com fallback para `~/.config/neo/credentials.toml` (`0600`) ou variáveis de ambiente em CI.
 
 ---
 
 ## Instalação Rápida
 
-=== "Via PyPI (Recomendado)"
+=== "Via uv ou pipx (Recomendado)"
     ```bash
-    # Instale globalmente com uv ou pip
+    # Instale globalmente em ambiente isolado
     uv tool install neo-cmd
-    # ou: pip install neo-cmd
+    # ou: pipx install neo-cmd
 
     # Confirme a instalação
     neo --help
@@ -76,9 +76,24 @@ O **Neo** é um assistente pessoal de linha de comando feito por dev, para devs 
 
 ## Veja na Prática
 
+=== "Diagnóstico do Contexto Git"
+    ```bash
+    # Veja branch atual, provedor ativo, workspace resolvido e status de autenticação
+    neo git status
+    ```
+
+=== "Busca de Commits e Repositórios"
+    ```bash
+    # Liste repositórios do workspace ativo (GitHub ou Bitbucket Cloud)
+    neo git repo list
+
+    # Busque os últimos 5 commits com "fix" na mensagem no repositório atual
+    neo git commits search --query "fix" --limit 5
+    ```
+
 === "Quadro Kanban no Terminal"
     ```bash
-    # Veja suas tarefas em A fazer | Fazendo | Feito sem abrir o navegador
+    # Veja suas tarefas em A fazer | Fazendo | Feito na sprint atual
     neo tasks resume
     ```
 
@@ -88,25 +103,10 @@ O **Neo** é um assistente pessoal de linha de comando feito por dev, para devs 
     neo tasks analyze 12345
     ```
 
-=== "Suas Demandas da Iteração"
-    ```bash
-    # Liste apenas as stories atribuídas a você na iteração atual
-    neo tasks list --mine --iteration current
-    ```
-
-=== "Busca de Commits e Repositórios"
-    ```bash
-    # Liste repositórios do provedor ativo (GitHub ou Bitbucket)
-    neo git repo list
-
-    # Busque os últimos 5 commits com "fix" no repositório atual
-    neo git commits search --query "fix" --limit 5
-    ```
-
 === "Automação com `--json` e `jq`"
     ```bash
-    # Extraia os IDs e nomes das suas stories em andamento direto para um script
-    neo --json tasks list --mine | jq '.[] | {id, name, state}'
+    # Extraia os slugs e URLs SSH dos seus repositórios direto para um script
+    neo git repo list --json | jq '.[] | {slug, ssh: .clone_links[0].href}'
     ```
 
 === "Alternar Workspace"

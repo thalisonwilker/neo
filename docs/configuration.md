@@ -1,143 +1,130 @@
 ---
 name: configuration
-description: Guia detalhado de configuração de credenciais, provedores Git e segurança no Neo.
+description: Guia de configuração da seção [git] do config.toml, precedência e variáveis de ambiente de autenticação.
 alwaysApply: false
 ---
 
 # Configuração & Credenciais
 
-O Neo nunca salva tokens em texto aberto sem proteção. Você pode usar o **Keyring do sistema operacional** no seu computador pessoal e **variáveis de ambiente** em pipelines de CI/CD sem mudar uma linha nos seus scripts.
+O Neo separa **configuração de preferências** (`~/.config/neo/config.toml`) de **credenciais de autenticação** (Keyring do sistema operacional ou `~/.config/neo/credentials.toml`). A chave `token` não existe em `neo git config`.
 
 ---
 
-## Ordem de Precedência de Credenciais
+## Seção `[git]` do `config.toml`
 
-Sempre que um comando chama a API do **GitHub**, **Bitbucket Cloud** ou **Shortcut**, o Neo resolve o token nesta ordem:
-
-```mermaid
-graph TD
-    A["Chamada de API"] --> B{"1. Variável de Ambiente?"}
-    B -- "Sim" --> C["Usa token da variável de ambiente"]
-    B -- "Não" --> D{"2. Keyring do SO?"}
-    D -- "Sim" --> E["Recupera segredo do Keyring"]
-    D -- "Não" --> F{"3. Arquivo ~/.config/neo/credentials.toml?"}
-    F -- "Sim" --> G["Recupera segredo do arquivo 0600"]
-    F -- "Não" --> H["Erro: credencial não configurada"]
-```
-
-1. **Variáveis de Ambiente (ideal para CI/CD e containers):**
-   - `GITHUB_TOKEN`
-   - `BITBUCKET_TOKEN`
-   - `SHORTCUT_TOKEN`
-2. **Keyring Nativo do Sistema Operacional (padrão no desktop):**
-   - macOS: *Keychain Access*
-   - Linux: *Secret Service API / Freedesktop*
-   - Windows: *Windows Credential Manager*
-3. **Fallback Local Restrito:**
-   - Caminho: `~/.config/neo/credentials.toml`
-   - Permissão forçada: `0600` (leitura e escrita restritas ao seu usuário).
-
----
-
-## Comandos de Configuração
-
-Cada domínio gerencia suas credenciais: **`neo git config`** para provedores Git e **`neo tasks config`** para gestão de tarefas. O comando raiz **`neo config show`** exibe o diagnóstico consolidado.
-
-### Ver Diagnóstico Geral (`neo config show`)
-
-```bash
-# Exibe provedor padrão, workspaces ativos e status de cada token
-neo config show
-
-# Versão em JSON para healthcheck em scripts
-neo --json config show
-```
-
-### Credenciais Git (`neo git config auth`)
-
-=== "Prompt Oculto (Recomendado)"
-    ```bash
-    # Solicita o token sem exibi-lo na tela nem gravar no history do shell
-    neo git config auth set github
-    neo git config auth set bitbucket
-    ```
-
-=== "Via Flag (`--token`)"
-    ```bash
-    neo git config auth set github --token "ghp_meu_token"
-    ```
-
-=== "Consultar Token Mascarado"
-    ```bash
-    neo git config auth get github
-    ```
-
-=== "Remover Token"
-    ```bash
-    neo git config auth delete bitbucket
-    ```
-
-### Provedor Git Padrão (`neo git config`)
-
-Quando você executa `neo git repo list` fora de um repositório Git e sem passar `--provider / -p`, o Neo usa o provedor padrão salvo em `~/.config/neo/config.toml`:
-
-```bash
-# Definir GitHub como padrão global
-neo git config set-provider github
-
-# Definir Bitbucket como padrão global
-neo git config set-provider bitbucket
-
-# Consultar qual provedor está ativo como padrão
-neo git config get-provider
-```
-
----
-
-### Credenciais e Colunas de Tasks (`neo tasks config`)
-
-=== "Prompt Oculto (Recomendado)"
-    ```bash
-    neo tasks config set
-    ```
-
-=== "Via Flag (`--token`)"
-    ```bash
-    neo tasks config set --service shortcut --token "seu_token"
-    ```
-
-=== "Consultar ou Remover Token"
-    ```bash
-    neo tasks config get
-    neo tasks config delete
-    ```
-
-=== "Mapear Colunas do Quadro Kanban"
-    ```bash
-    # Assistente interativo: busca os estados reais do seu workflow na API
-    neo tasks config columns
-
-    # Ou defina diretamente por flag (aceita múltiplas colunas separadas por vírgula)
-    neo tasks config columns \
-      --todo "📝 - Backlog de Sprint, 🚨 - Bug" \
-      --doing "🚧 - Em Progresso" \
-      --done "✅ - Finalizado"
-    ```
-
----
-
-## Como Funciona o Mapeamento do Quadro (`neo tasks resume`)
-
-O comando `neo tasks resume` agrupa suas tarefas em três colunas no terminal: **A fazer**, **Fazendo** e **Feito**. Como cada time usa nomes diferentes de etapa no Shortcut, o Neo salva a correspondência em `~/.config/neo/config.toml`:
+O arquivo `~/.config/neo/config.toml` armazena suas preferências de trabalho na seção `[git]` com permissão `0600`:
 
 ```toml
-[shortcut]
-todo_columns = ["📝 - Backlog de Sprint", "🚨 - Bug"]
-doing_columns = ["🚧 - Em Progresso"]
-done_columns = ["✅ - Finalizado"]
+[git]
+provider = "github"
+workspace = "minha-organizacao"
+default-branch = "main"
+branch-pattern = "{type}/{id}-{slug}"
+commit-format = "{type}: {message}"
 ```
 
-Se você rodar `neo tasks resume` pela primeira vez sem ter configurado as colunas, o próprio comando consulta os estados do seu workflow na API e abre o seletor interativo antes de desenhar o quadro.
+### Tabela de Chaves Suportadas (`neo git config`)
 
-!!! warning "Comandos legados removidos"
-    Os caminhos antigos da versão inicial (`neo config auth`, `neo repo`, `neo workspace`, `neo commits` e `neo story`) foram substituídos por `neo git ...` e `neo tasks ...`.
+| Chave | Valores aceitos | Valor padrão | Descrição |
+|---|---|---|---|
+| `provider` | `github` \| `bitbucket` | *(auto/fallback)* | Provedor Git padrão quando fora de um repositório Git local. |
+| `workspace` | `<slug>` (texto não-vazio) | *(auto via API)* | Workspace (Bitbucket) ou organização/usuário (GitHub) padrão. |
+| `default-branch` | Ex.: `main`, `master`, `develop` | `main` | Nome da branch principal padrão para operações Git. |
+| `branch-pattern` | Ex.: `{type}/{id}-{slug}` | `{type}/{id}-{slug}` | Padrão de nomenclatura sugerido para branches. |
+| `commit-format` | Ex.: `{type}: {message}` | `{type}: {message}` | Formato padrão sugerido para mensagens de commit. |
+
+```bash
+# Definir e consultar valores
+neo git config set provider github
+neo git config set workspace minha-organizacao
+neo git config get provider
+neo git config list
+
+# Restaurar uma chave para o valor padrão
+neo git config unset default-branch
+```
+
+!!! info "Segurança: `token` não é uma chave de configuração"
+    A chave `token` é rejeitada por `neo git config` com erro de uso incorreto (código `2`). Use sempre [`neo git auth login`](cli/auth.md) ou variáveis de ambiente.
+
+---
+
+## Ordem de Precedência de Configuração (`provider` e `workspace`)
+
+Quando você executa qualquer comando `neo git`, o provedor e o workspace são resolvidos exatamente nesta ordem:
+
+```mermaid
+flowchart TD
+    A["Execução de comando neo git"] --> B{"1. Opção na CLI? (--provider / --workspace)"}
+    B -- "Sim" --> C["Usa valor da linha de comando (cli)"]
+    B -- "Não" --> D{"2. Variável de ambiente? (NEO_GIT_PROVIDER / NEO_GIT_WORKSPACE)"}
+    D -- "Sim" --> E["Usa valor do ambiente (env)"]
+    D -- "Não" --> F{"3. Seção [git] do config.toml?"}
+    F -- "Sim" --> G["Usa valor persistido (config)"]
+    F -- "Não" --> H{"4. Repositório Git local com remote origin?"}
+    H -- "Sim" --> I["Auto-detecta provedor, workspace e repo pelo remote (remote)"]
+    H -- "Não" --> J["5. Padrão (default)"]
+```
+
+1. **Opção de linha de comando:** `--provider <github|bitbucket>` e `--workspace <slug>`.
+2. **Variáveis de ambiente de contexto:** `NEO_GIT_PROVIDER` e `NEO_GIT_WORKSPACE`.
+3. **Seção `[git]` do `~/.config/neo/config.toml`:** chaves `provider` e `workspace`.
+4. **Auto-detecção pelo `remote origin`:** analisa a URL do repositório Git atual (`github.com` ou `bitbucket.org`).
+5. **Padrão:** `github` se apenas o GitHub estiver autenticado; caso contrário, `bitbucket` (e o primeiro workspace retornado pela API).
+
+Use `neo git status` para ver de qual camada cada valor foi resolvido no diretório atual.
+
+---
+
+## Autenticação e Variáveis de Ambiente
+
+### Armazenamento Local (`neo git auth login`)
+
+1. **Keyring do Sistema Operacional (prioritário):**
+   - macOS: *Keychain Access*
+   - Linux: *Secret Service / Freedesktop*
+   - Windows: *Windows Credential Manager*
+2. **Arquivo de Credenciais Restrito (fallback):**
+   - Caminho: `~/.config/neo/credentials.toml`
+   - Permissão obrigatória: `0600` (leitura e escrita apenas pelo seu usuário).
+
+!!! warning "Bitbucket Cloud: use API Token + E-mail"
+    As antigas *App Passwords* do Bitbucket Cloud foram descontinuadas pela Atlassian. O Bitbucket Cloud exige o **e-mail da conta** e um **API Token**. O comando `neo git auth login --provider bitbucket` solicita ambos de forma segura.
+
+### Variáveis de Ambiente para Automação e CI/CD
+
+Em pipelines de CI/CD ou scripts automatizados, defina as variáveis de ambiente abaixo (elas têm prioridade sobre o Keyring e sobre `credentials.toml`):
+
+| Provedor / Contexto | Variável Principal | Alternativas Aceitas | Descrição |
+|---|---|---|---|
+| **GitHub** | `NEO_GITHUB_TOKEN` | `GITHUB_TOKEN`, `GH_TOKEN` | Personal Access Token do GitHub (Classic ou Fine-grained). |
+| **Bitbucket Cloud** | `NEO_BITBUCKET_EMAIL` | — | E-mail da conta Atlassian usada na autenticação Basic da API. |
+| **Bitbucket Cloud** | `NEO_BITBUCKET_TOKEN` | `BITBUCKET_TOKEN` | API Token do Bitbucket Cloud. |
+| **Contexto Git** | `NEO_GIT_PROVIDER` | — | Força o provedor padrão (`github` ou `bitbucket`). |
+| **Contexto Git** | `NEO_GIT_WORKSPACE` | — | Força o workspace ou organização padrão. |
+| **Shortcut (Tasks)** | `SHORTCUT_API_TOKEN` | `SHORTCUT_TOKEN` | Token da API v3 do Shortcut para `neo tasks`. |
+
+```bash
+# Exemplo em pipeline de CI/CD (GitHub)
+export NEO_GIT_PROVIDER="github"
+export NEO_GIT_WORKSPACE="minha-org"
+export NEO_GITHUB_TOKEN="ghp_exemplo_ci"
+
+neo git repo list --json | jq '.[].slug'
+```
+
+Nenhum comando do Neo imprime o token em logs, mensagens de erro, `--verbose` ou `--json`.
+
+---
+
+## Configuração do Módulo `neo tasks` (Shortcut)
+
+O módulo `neo tasks` mantém suas próprias configurações de credenciais e mapeamento de colunas do quadro Kanban:
+
+```bash
+# Salvar token do Shortcut (prompt oculto)
+neo tasks config set
+
+# Mapear colunas A fazer | Fazendo | Feito do comando neo tasks resume
+neo tasks config columns
+```

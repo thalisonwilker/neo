@@ -74,13 +74,53 @@ def test_AC_2_docs_structure_and_pages():
     assert (docs_dir / "getting-started.md").exists()
     assert (docs_dir / "configuration.md").exists()
     assert (docs_dir / "cli" / "index.md").exists()
+    assert (docs_dir / "cli" / "config.md").exists()
+    assert (docs_dir / "cli" / "auth.md").exists()
     assert (docs_dir / "cli" / "workspace.md").exists()
     assert (docs_dir / "cli" / "repo.md").exists()
     assert (docs_dir / "cli" / "commits.md").exists()
+    assert (docs_dir / "cli" / "status.md").exists()
     assert (docs_dir / "cli" / "tasks.md").exists()
+    assert (docs_dir / "migration.md").exists()
     assert (docs_dir / "architecture.md").exists()
     assert (docs_dir / "assets" / "neo-logo.jpg").exists()
     assert (docs_dir / "stylesheets" / "extra.css").exists()
+    assert (PROJECT_ROOT / "CHANGELOG.md").exists()
+
+
+def test_AC_9_docs_no_legacy_git_commands():
+    """Valida AC-9: Nenhum comando antigo do neo git aparece fora de migration.md."""
+    docs_dir = PROJECT_ROOT / "docs"
+    forbidden_patterns = [
+        "neo git config auth",
+        "neo git config set-provider",
+        "neo git config get-provider",
+        "neo git workspace current",
+        "neo git workspace set",
+        "neo git config set token",
+    ]
+    portal_pages = [
+        docs_dir / "index.md",
+        docs_dir / "getting-started.md",
+        docs_dir / "configuration.md",
+        docs_dir / "glossary.md",
+        docs_dir / "architecture.md",
+        docs_dir / "cli" / "index.md",
+        docs_dir / "cli" / "config.md",
+        docs_dir / "cli" / "auth.md",
+        docs_dir / "cli" / "workspace.md",
+        docs_dir / "cli" / "repo.md",
+        docs_dir / "cli" / "commits.md",
+        docs_dir / "cli" / "status.md",
+    ]
+    for page in portal_pages:
+        content = page.read_text(encoding="utf-8")
+        for pattern in forbidden_patterns:
+            assert pattern not in content, f"Padrão legado '{pattern}' encontrado em {page}"
+
+    migration_content = (docs_dir / "migration.md").read_text(encoding="utf-8")
+    assert "neo git auth login" in migration_content
+    assert "neo git workspace select" in migration_content
 
 
 def test_AC_3_dockerfile_docs():

@@ -29,14 +29,10 @@ O **Neo** (`neo-cmd`) é um assistente pessoal de linha de comando feito por dev
 
 ## Instalação
 
-### Via PyPI (`uv` ou `pip`)
-
 ```bash
-# Recomendado: instalar globalmente em ambiente isolado com uv
+# Recomendado: instalar globalmente em ambiente isolado com uv ou pipx
 uv tool install neo-cmd
-
-# Ou via pip
-pip install neo-cmd
+# ou: pipx install neo-cmd
 ```
 
 ### Desenvolvimento Local
@@ -53,24 +49,26 @@ uv run neo --help
 ## Veja na Prática
 
 ```bash
-# 1. Salve seus tokens no Keyring do sistema operacional (prompt oculto)
-neo git config auth set github
-neo tasks config set
+# 1. Autentique seus provedores no Keyring do sistema operacional (entrada oculta)
+neo git auth login --provider github
+neo git config set provider github
+neo git config set workspace minha-organizacao
 
-# 2. Veja o quadro Kanban (A fazer | Fazendo | Feito) da sua sprint atual
-neo tasks resume
+# 2. Confira o diagnóstico do repositório local e das integrações
+neo git status
+neo git auth status
 
-# 3. Filtre suas stories e gere sugestões de branch e commit antes de codar
-neo tasks list --mine
-neo tasks analyze 2108
-
-# 4. Navegue por workspaces, repositórios e commits (GitHub ou Bitbucket)
-neo git workspace select
-neo git repo list
+# 3. Navegue por workspaces, repositórios e commits (GitHub ou Bitbucket Cloud)
+neo git workspace list
+neo git repo list --limit 10
 neo git commits search --query "fix" --limit 5
 
+# 4. Veja o quadro Kanban (A fazer | Fazendo | Feito) e analise tasks no Shortcut
+neo tasks resume
+neo tasks analyze 2108
+
 # 5. Combine com --json e jq para criar scripts e automações
-neo --json tasks list --mine | jq '.[] | {id, name, state}'
+neo git repo list --json | jq '.[] | {slug, main_branch}'
 ```
 
 ---
