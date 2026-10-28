@@ -36,7 +36,7 @@ Configura a esteira automatizada de CI/CD via **GitHub Actions** para o Neo, gar
 ### AC-3: Configuração do `site_url` no `mkdocs.yml`
 - **Dado** o arquivo `mkdocs.yml`,
 - **Quando** inspecionado o campo `site_url`,
-- **Então** deve estar apontando para a URL canônica do GitHub Pages do projeto (`https://thalysonwilker.github.io/neo/`).
+- **Então** deve estar apontando para a URL canônica do GitHub Pages do projeto (`https://thalisonwilker.github.io/neo/`).
 
 ### AC-4: Validação Sintática e de Integridade dos Workflows
 - **Dado** os arquivos YAML em `.github/workflows/`,

@@ -79,4 +79,4 @@ def test_AC_3_mkdocs_site_url():
         config = yaml.unsafe_load(f)
 
     site_url = config.get("site_url", "")
-    assert site_url == "https://thalysonwilker.github.io/neo/"
+    assert site_url == "https://thalisonwilker.github.io/neo/"

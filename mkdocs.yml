@@ -1,8 +1,8 @@
 site_name: Neo
 site_description: Personal Command Assistant — Compreenda seus sistemas. Seja dono das suas escolhas.
 site_author: Thalyson
-site_url: https://thalysonwilker.github.io/neo/
-repo_url: https://github.com/thalysonwilker/neo
+site_url: https://thalisonwilker.github.io/neo/
+repo_url: https://github.com/thalisonwilker/neo
 repo_name: neo
 
 theme:

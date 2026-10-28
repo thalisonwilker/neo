@@ -28,7 +28,7 @@ Este guia orienta a instalação do Neo, configuração das ferramentas de desen
 Clone o repositório e sincronize o ambiente virtual:
 
 ```bash
-git clone https://github.com/thalysonwilker/neo.git
+git clone https://github.com/thalisonwilker/neo.git
 cd neo
 uv sync
 ```

@@ -13,8 +13,8 @@ alwaysApply: false
 </p>
 
 <p align="center">
-  <a href="https://github.com/thalysonwilker/neo/actions/workflows/ci.yml"><img src="https://github.com/thalysonwilker/neo/actions/workflows/ci.yml/badge.svg" alt="CI & Deploy" /></a>
-  <a href="https://thalysonwilker.github.io/neo/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-00e5a3?style=flat&logo=materialformkdocs&logoColor=white" alt="Docs" /></a>
+  <a href="https://github.com/thalisonwilker/neo/actions/workflows/ci.yml"><img src="https://github.com/thalisonwilker/neo/actions/workflows/ci.yml/badge.svg" alt="CI & Deploy" /></a>
+  <a href="https://thalisonwilker.github.io/neo/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-00e5a3?style=flat&logo=materialformkdocs&logoColor=white" alt="Docs" /></a>
   <img src="https://img.shields.io/badge/coverage-%E2%89%A580%25-brightgreen" alt="Coverage" />
   <img src="https://img.shields.io/badge/python-3.13+-blue" alt="Python 3.13+" />
 </p>
@@ -80,7 +80,7 @@ uv run --group docs mkdocs build --strict
 O deploy do portal de documentação é **100% automatizado** via GitHub Actions (`.github/workflows/ci.yml`). A cada push aprovado na branch `main`:
 1. Os **Quality Gates** são validados (Lint, Mypy, Testes e Cobertura $\ge 80\%$).
 2. A documentação é compilada em modo estrito.
-3. O deploy é publicado em: **[thalysonwilker.github.io/neo](https://thalysonwilker.github.io/neo/)**.
+3. O deploy é publicado em: **[thalisonwilker.github.io/neo](https://thalisonwilker.github.io/neo/)**.
 
 > 💡 **Ativação Inicial no GitHub:** No repositório, acesse *Settings > Pages* e certifique-se de que a opção **Build and deployment > Source** esteja configurada como **GitHub Actions**.
 
