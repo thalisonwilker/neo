@@ -30,6 +30,10 @@ SUPPORTED_SERVICES: tuple[ServiceType, ...] = ("bitbucket", "shortcut", "github"
 GitProviderType = Literal["bitbucket", "github"]
 SUPPORTED_GIT_PROVIDERS: tuple[GitProviderType, ...] = ("bitbucket", "github")
 
+TaskServiceType = Literal["shortcut"]
+SUPPORTED_TASK_SERVICES: tuple[TaskServiceType, ...] = ("shortcut",)
+DEFAULT_TASK_SERVICE: TaskServiceType = "shortcut"
+
 ENV_VAR_MAPPING: dict[ServiceType, tuple[str, ...]] = {
     "bitbucket": ("BITBUCKET_TOKEN", "BITBUCKET_APP_PASSWORD"),
     "shortcut": ("SHORTCUT_API_TOKEN", "SHORTCUT_TOKEN"),
@@ -55,6 +59,17 @@ def validate_git_provider(provider: str) -> GitProviderType:
         valid_providers = ", ".join(SUPPORTED_GIT_PROVIDERS)
         raise ValueError(
             f"Provedor Git não suportado: '{provider}'. Provedores suportados: {valid_providers}"
+        )
+    return normalized
+
+
+def validate_task_service(service: str) -> TaskServiceType:
+    """Valida se o serviço de tasks informado é suportado."""
+    normalized = service.strip().lower()
+    if normalized not in SUPPORTED_TASK_SERVICES:
+        valid_services = ", ".join(SUPPORTED_TASK_SERVICES)
+        raise ValueError(
+            f"Serviço de tasks não suportado: '{service}'. Serviços suportados: {valid_services}"
         )
     return normalized
 

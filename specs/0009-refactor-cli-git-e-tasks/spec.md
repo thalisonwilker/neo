@@ -6,7 +6,7 @@ alwaysApply: true
 
 # Spec — Refactor CLI: `neo git` e `neo tasks`
 
-> **Fonte da verdade.** Status: em review
+> **Fonte da verdade.** Status: implementada
 > Tier: **Pequeno** (reorganização da borda `interfaces/`; sem mudança de domínio, integrações ou ADR).
 
 ## Resumo

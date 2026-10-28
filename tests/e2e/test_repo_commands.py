@@ -24,7 +24,7 @@ def test_AC_6_repo_without_credentials():
         patch.dict(os.environ, {}, clear=True),
         patch("keyring.get_password", return_value=None),
     ):
-        res = runner.invoke(app, ["repo", "list"])
+        res = runner.invoke(app, ["git", "repo", "list"])
         assert res.exit_code == 1
         assert "Credenciais do Bitbucket não configuradas" in res.output
 
@@ -51,13 +51,15 @@ def test_AC_1_repo_list_human_and_json():
 
     with patch.dict(os.environ, {"BITBUCKET_TOKEN": "mock-token"}):
         # Modo Humano
-        res_human = runner.invoke(app, ["repo", "list", "--workspace", "my-workspace"])
+        res_human = runner.invoke(app, ["git", "repo", "list", "--workspace", "my-workspace"])
         assert res_human.exit_code == 0
         assert "Serviço Auth" in res_human.output
         assert "servico-auth" in res_human.output
 
         # Modo JSON
-        res_json = runner.invoke(app, ["--json", "repo", "list", "--workspace", "my-workspace"])
+        res_json = runner.invoke(
+            app, ["--json", "git", "repo", "list", "--workspace", "my-workspace"]
+        )
         assert res_json.exit_code == 0
         data = json.loads(res_json.output)
         assert len(data) == 1
@@ -85,7 +87,9 @@ def test_AC_2_repo_search():
     )
 
     with patch.dict(os.environ, {"BITBUCKET_TOKEN": "mock-token"}):
-        res = runner.invoke(app, ["repo", "search", "pagamentos", "--workspace", "my-workspace"])
+        res = runner.invoke(
+            app, ["git", "repo", "search", "pagamentos", "--workspace", "my-workspace"]
+        )
         assert res.exit_code == 0
         assert "Backend Pagamentos" in res.output
         assert "Frontend" not in res.output
@@ -119,7 +123,9 @@ def test_AC_3_repo_clone():
         patch("subprocess.run") as mock_run,
     ):
         mock_run.return_value.returncode = 0
-        res = runner.invoke(app, ["repo", "clone", "meu-projeto", "--workspace", "my-workspace"])
+        res = runner.invoke(
+            app, ["git", "repo", "clone", "meu-projeto", "--workspace", "my-workspace"]
+        )
         assert res.exit_code == 0
         assert "clonado com sucesso" in res.output
         mock_run.assert_called_with(
@@ -145,7 +151,7 @@ def test_AC_4_repo_create():
     with patch.dict(os.environ, {"BITBUCKET_TOKEN": "mock-token"}):
         res = runner.invoke(
             app,
-            ["repo", "create", "meu-novo-repo", "--workspace", "my-workspace", "--yes"],
+            ["git", "repo", "create", "meu-novo-repo", "--workspace", "my-workspace", "--yes"],
         )
         assert res.exit_code == 0
         assert "criado com sucesso" in res.output

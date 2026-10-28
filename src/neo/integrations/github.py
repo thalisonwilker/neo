@@ -59,7 +59,7 @@ class GitHubClient:
         if response.status_code == 401:
             raise GitHubAuthError(
                 "Falha de autenticação no GitHub (401). "
-                "Verifique seu token executando `neo config auth set github`."
+                "Verifique seu token executando `neo git config auth set github`."
             )
         if response.status_code == 403:
             raise GitHubRateLimitError(

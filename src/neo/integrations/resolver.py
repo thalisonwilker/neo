@@ -136,7 +136,7 @@ def resolve_git_provider(
         service_label = "GitHub" if provider_name == "github" else "Bitbucket"
         msg = (
             f"Credenciais do {service_label} não configuradas. "
-            f"Execute `neo config auth set {provider_name}`."
+            f"Execute `neo git config auth set {provider_name}`."
         )
         print_error(msg, as_json=as_json, code=1)
         raise typer.Exit(code=1)

@@ -37,26 +37,24 @@ def test_AC_2_and_AC_3_auth_set_and_get(tmp_path: Path):
         patch.dict(os.environ, {}, clear=True),
     ):
         # 1. Get em serviço não configurado deve falhar (código 1)
-        res_not_found = runner.invoke(app, ["config", "auth", "get", "bitbucket"])
+        res_not_found = runner.invoke(app, ["git", "config", "auth", "get", "bitbucket"])
         assert res_not_found.exit_code == 1
 
         # 2. Set token com flag
         res_set = runner.invoke(
-            app, ["config", "auth", "set", "bitbucket", "--token", "secret-bitbucket-token"]
+            app, ["git", "config", "auth", "set", "bitbucket", "--token", "secret-bitbucket-token"]
         )
         assert res_set.exit_code == 0
         assert "configurado com sucesso" in res_set.output
 
         # 3. Get token (deve estar mascarado, nunca o texto puro)
-        res_get = runner.invoke(app, ["config", "auth", "get", "bitbucket"])
+        res_get = runner.invoke(app, ["git", "config", "auth", "get", "bitbucket"])
         assert res_get.exit_code == 0
         assert "secret-bitbucket-token" not in res_get.output
         assert "oken" in res_get.output
 
         # 4. Set token com prompt interativo
-        res_set_prompt = runner.invoke(
-            app, ["config", "auth", "set", "shortcut"], input="interactive-token\n"
-        )
+        res_set_prompt = runner.invoke(app, ["tasks", "config", "set"], input="interactive-token\n")
         assert res_set_prompt.exit_code == 0
         assert "configurado com sucesso" in res_set_prompt.output
 
@@ -64,12 +62,12 @@ def test_AC_2_and_AC_3_auth_set_and_get(tmp_path: Path):
 def test_AC_2_auth_set_invalid_service_and_json_error():
     """AC-2: Tratamento de erros no auth set."""
     # Serviço inválido
-    res = runner.invoke(app, ["config", "auth", "set", "invalido", "--token", "abc"])
+    res = runner.invoke(app, ["git", "config", "auth", "set", "invalido", "--token", "abc"])
     assert res.exit_code == 1
-    assert "Serviço não suportado" in res.output
+    assert "não suportado" in res.output
 
     # Sem token em modo --json
-    res_json_missing = runner.invoke(app, ["--json", "config", "auth", "set", "bitbucket"])
+    res_json_missing = runner.invoke(app, ["--json", "git", "config", "auth", "set", "bitbucket"])
     assert res_json_missing.exit_code == 1
     data = json.loads(res_json_missing.output)
     assert data["status"] == "error"
@@ -77,9 +75,9 @@ def test_AC_2_auth_set_invalid_service_and_json_error():
 
 def test_AC_3_auth_get_invalid_service():
     """AC-3: Erro ao consultar serviço inválido."""
-    res = runner.invoke(app, ["config", "auth", "get", "invalido"])
+    res = runner.invoke(app, ["git", "config", "auth", "get", "invalido"])
     assert res.exit_code == 1
-    assert "Serviço não suportado" in res.output
+    assert "não suportado" in res.output
 
 
 def test_AC_4_precedence_env_var():
@@ -88,7 +86,7 @@ def test_AC_4_precedence_env_var():
         patch.dict(os.environ, {"BITBUCKET_TOKEN": "token-from-env-var"}),
         patch("keyring.get_password", return_value="token-from-keyring"),
     ):
-        res = runner.invoke(app, ["--json", "config", "auth", "get", "bitbucket"])
+        res = runner.invoke(app, ["--json", "git", "config", "auth", "get", "bitbucket"])
         assert res.exit_code == 0
         data = json.loads(res.output)
         assert data["configured"] is True
@@ -98,7 +96,7 @@ def test_AC_4_precedence_env_var():
 def test_AC_5_json_flag_output():
     """AC-5: A flag global --json gera saída em JSON estruturado estrito."""
     with patch.dict(os.environ, {"SHORTCUT_API_TOKEN": "token-sh-123456"}):
-        res = runner.invoke(app, ["--json", "config", "auth", "get", "shortcut"])
+        res = runner.invoke(app, ["--json", "tasks", "config", "get"])
         assert res.exit_code == 0
         data = json.loads(res.output)
         assert data["service"] == "shortcut"
@@ -137,16 +135,16 @@ def test_AC_6_auth_delete():
         patch("keyring.get_password", side_effect=lambda s, u: stored.get(u)),
     ):
         # Remoção com sucesso
-        res_del = runner.invoke(app, ["config", "auth", "delete", "bitbucket"])
+        res_del = runner.invoke(app, ["git", "config", "auth", "delete", "bitbucket"])
         assert res_del.exit_code == 0
         assert "removida com sucesso" in res_del.output
         assert "bitbucket" not in stored
 
         # Remoção de serviço já inexistente
-        res_del_not_found = runner.invoke(app, ["config", "auth", "delete", "bitbucket"])
+        res_del_not_found = runner.invoke(app, ["git", "config", "auth", "delete", "bitbucket"])
         assert res_del_not_found.exit_code == 1
         assert "Nenhuma credencial encontrada" in res_del_not_found.output
 
         # Remoção de serviço inválido
-        res_del_invalid = runner.invoke(app, ["config", "auth", "delete", "invalido"])
+        res_del_invalid = runner.invoke(app, ["git", "config", "auth", "delete", "invalido"])
         assert res_del_invalid.exit_code == 1

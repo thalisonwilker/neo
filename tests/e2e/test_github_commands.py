@@ -1,4 +1,4 @@
-"""Testes E2E para comandos com provedor GitHub (`neo repo`, `neo commits`, `neo workspace`)."""
+"""Testes E2E para comandos com provedor GitHub (`neo git repo`, `neo git commits`, `neo git workspace`)."""
 
 import json
 from pathlib import Path
@@ -27,7 +27,7 @@ def mock_github_env(tmp_path: Path):
 def test_AC_7_github_without_credentials():
     """Valida AC-7: Tratamento de erros e ausência de credenciais do GitHub."""
     with patch("neo.integrations.resolver.get_credential", return_value=None):
-        res = runner.invoke(app, ["repo", "list", "--provider", "github"])
+        res = runner.invoke(app, ["git", "repo", "list", "--provider", "github"])
         assert res.exit_code == 1
         assert "Credenciais do GitHub não configuradas" in res.output
 
@@ -37,15 +37,15 @@ def test_AC_2_config_set_and_get_provider(tmp_path: Path):
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
     ):
-        res_set = runner.invoke(app, ["config", "set-provider", "github"])
+        res_set = runner.invoke(app, ["git", "config", "set-provider", "github"])
         assert res_set.exit_code == 0
         assert "Provedor Git padrão definido com sucesso: github" in res_set.output
 
-        res_get = runner.invoke(app, ["config", "get-provider"])
+        res_get = runner.invoke(app, ["git", "config", "get-provider"])
         assert res_get.exit_code == 0
         assert "github" in res_get.output
 
-        res_invalid = runner.invoke(app, ["config", "set-provider", "gitlab"])
+        res_invalid = runner.invoke(app, ["git", "config", "set-provider", "gitlab"])
         assert res_invalid.exit_code == 1
         assert "Provedor Git não suportado" in res_invalid.output
 
@@ -89,7 +89,7 @@ def test_AC_5_repo_list_and_create_github(mock_github_env: Path):
     )
 
     # 1. Listar repositórios no GitHub
-    res_list = runner.invoke(app, ["repo", "list", "--provider", "github"])
+    res_list = runner.invoke(app, ["git", "repo", "list", "--provider", "github"])
     assert res_list.exit_code == 0
     assert "octo-repo" in res_list.output
     assert "GitHub" in res_list.output
@@ -97,7 +97,7 @@ def test_AC_5_repo_list_and_create_github(mock_github_env: Path):
     # 2. Criar repositório no GitHub com flag --yes
     res_create = runner.invoke(
         app,
-        ["repo", "create", "novo-projeto", "--provider", "github", "--public", "--yes"],
+        ["git", "repo", "create", "novo-projeto", "--provider", "github", "--public", "--yes"],
     )
     assert res_create.exit_code == 0
     assert "novo-projeto" in res_create.output
@@ -124,6 +124,7 @@ def test_AC_5_commits_search_github(mock_github_env: Path):
     res = runner.invoke(
         app,
         [
+            "git",
             "commits",
             "search",
             "--repo",
@@ -149,13 +150,13 @@ def test_AC_6_workspace_list_github(mock_github_env: Path):
         return_value=httpx.Response(200, json=[{"id": 2, "login": "acme-corp"}])
     )
 
-    res = runner.invoke(app, ["workspace", "list", "--provider", "github"])
+    res = runner.invoke(app, ["git", "workspace", "list", "--provider", "github"])
     assert res.exit_code == 0
     assert "octocat" in res.output
     assert "acme-corp" in res.output
     assert "GitHub" in res.output
 
-    res_json = runner.invoke(app, ["--json", "workspace", "list", "--provider", "github"])
+    res_json = runner.invoke(app, ["--json", "git", "workspace", "list", "--provider", "github"])
     assert res_json.exit_code == 0
     data = json.loads(res_json.output)
     assert len(data) == 2

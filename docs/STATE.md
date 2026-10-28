@@ -11,7 +11,7 @@ alwaysApply: true
 **Última atualização:** 2026-10-27 por Antigravity
 
 ## Em andamento / próximo passo
-- **Fase atual:** Onda 1 (MVP). Features concluídas: `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket`, `0004-modulo-shortcut`, `0005-selecao-de-workspace-bitbucket`, `0006-modulo-github-e-multi-provedor-git`, `0007-documentacao-mkdocs-conteinerizada` e `0008-ci-cd-e-deploy-github-actions` (workflow unificado de CI com auditoria SDD, lint com Ruff, tipagem com Mypy, testes com cobertura mínima de 80%, e job de deploy automático no GitHub Pages v4 para pushes na `main`). 85 testes automatizados passando, 87% de cobertura, gates estáticos e de esteira 100% verdes.
+- **Fase atual:** Onda 1 (MVP). Features concluídas: `0009-refactor-cli-git-e-tasks` (CLI unificada em `neo git` e `neo tasks --service`, `neo config` só com `show`, comandos antigos removidos), `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket`, `0004-modulo-shortcut`, `0005-selecao-de-workspace-bitbucket`, `0006-modulo-github-e-multi-provedor-git`, `0007-documentacao-mkdocs-conteinerizada` e `0008-ci-cd-e-deploy-github-actions` (workflow unificado de CI com auditoria SDD, lint com Ruff, tipagem com Mypy, testes com cobertura mínima de 80%, e job de deploy automático no GitHub Pages v4 para pushes na `main`). 98 testes automatizados passando, 87% de cobertura, gates estáticos e de esteira 100% verdes.
 - **Próximo passo concreto:** Implementar a feature de análise cruzada e correlação de investigações (`neo bug investigate <id>`) correlacionando dados do Shortcut com commits e repositórios do Bitbucket ou GitHub.
 
 ## Decisões recentes

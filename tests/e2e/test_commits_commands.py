@@ -27,7 +27,7 @@ def test_AC_6_commits_without_credentials():
         patch.dict(os.environ, {}, clear=True),
         patch("keyring.get_password", return_value=None),
     ):
-        res = runner.invoke(app, ["commits", "search", "--repo", "meu-repo"])
+        res = runner.invoke(app, ["git", "commits", "search", "--repo", "meu-repo"])
         assert res.exit_code == 1
         assert "Credenciais do Bitbucket não configuradas" in res.output
 
@@ -38,7 +38,7 @@ def test_commits_without_repo_and_no_git():
         patch.dict(os.environ, {"BITBUCKET_TOKEN": "mock-token"}),
         patch("neo.commands.commits._infer_repo_slug_from_git", return_value=None),
     ):
-        res = runner.invoke(app, ["commits", "search"])
+        res = runner.invoke(app, ["git", "commits", "search"])
         assert res.exit_code == 1
         assert "Repositório não informado" in res.output
 
@@ -66,7 +66,7 @@ def test_AC_5_commits_search_human_and_json():
         # Modo Humano
         res_human = runner.invoke(
             app,
-            ["commits", "search", "--repo", "meu-repo", "--workspace", "my-workspace"],
+            ["git", "commits", "search", "--repo", "meu-repo", "--workspace", "my-workspace"],
         )
         assert res_human.exit_code == 0
         assert "abcdef1" in res_human.output
@@ -75,7 +75,16 @@ def test_AC_5_commits_search_human_and_json():
         # Modo JSON
         res_json = runner.invoke(
             app,
-            ["--json", "commits", "search", "--repo", "meu-repo", "--workspace", "my-workspace"],
+            [
+                "--json",
+                "git",
+                "commits",
+                "search",
+                "--repo",
+                "meu-repo",
+                "--workspace",
+                "my-workspace",
+            ],
         )
         assert res_json.exit_code == 0
         data = json.loads(res_json.output)

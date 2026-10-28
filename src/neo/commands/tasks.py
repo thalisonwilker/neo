@@ -1,12 +1,20 @@
-"""Comandos de consulta e análise de stories no Shortcut (`neo story`)."""
+"""Comandos de tasks/demandas (`neo tasks`) — hoje integrado ao Shortcut (API v3)."""
 
 from __future__ import annotations
+
+from typing import Any
 
 import typer
 from rich.markup import escape
 from typer import Argument, Option
 
-from neo.config import get_credential
+from neo.commands._credentials import is_json_mode, remove_token, save_token, show_token
+from neo.config import (
+    DEFAULT_TASK_SERVICE,
+    SUPPORTED_TASK_SERVICES,
+    get_credential,
+    validate_task_service,
+)
 from neo.integrations.shortcut import (
     ShortcutClient,
     ShortcutError,
@@ -14,27 +22,93 @@ from neo.integrations.shortcut import (
 )
 from neo.output import print_error, print_json, print_panel, print_table
 
-story_app = typer.Typer(
-    name="story",
-    help="Consulta e análise de stories e demandas no Shortcut (API v3).",
+tasks_app = typer.Typer(
+    name="tasks",
+    help="Consulta e análise de tasks/demandas (Shortcut, API v3). Use --service para escolher o serviço.",
     no_args_is_help=True,
 )
 
+tasks_config_app = typer.Typer(
+    name="config",
+    help="Credenciais do serviço de tasks (Shortcut).",
+    no_args_is_help=True,
+)
+tasks_app.add_typer(tasks_config_app, name="config")
 
-def _get_shortcut_client(as_json: bool) -> ShortcutClient:
+
+def _service_option() -> Any:
+    return Option(
+        DEFAULT_TASK_SERVICE,
+        "--service",
+        "-s",
+        help=f"Serviço de tasks: {', '.join(SUPPORTED_TASK_SERVICES)}.",
+    )
+
+
+def _resolve_service(ctx: typer.Context, service: str) -> str:
+    try:
+        return validate_task_service(service)
+    except ValueError as e:
+        print_error(str(e), as_json=is_json_mode(ctx), code=1)
+        raise typer.Exit(code=1) from e
+
+
+def _get_client(service: str, as_json: bool) -> ShortcutClient:
+    try:
+        validate_task_service(service)
+    except ValueError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+
     token = get_credential("shortcut")
     if not token:
-        msg = "Credenciais do Shortcut não configuradas. Execute `neo config auth set shortcut`."
+        msg = "Credenciais do Shortcut não configuradas. Execute `neo tasks config set`."
         print_error(msg, as_json=as_json, code=1)
         raise typer.Exit(code=1)
     return ShortcutClient(token=token)
 
 
-@story_app.command("whoami")
-def story_whoami(ctx: typer.Context) -> None:
+@tasks_config_app.command("set")
+def config_set(
+    ctx: typer.Context,
+    service: str = _service_option(),
+    token: str = Option(
+        None,
+        "--token",
+        "-t",
+        help="Token de acesso da API. Se omitido, solicita via prompt seguro.",
+    ),
+) -> None:
+    """Configura o token do serviço de tasks de forma segura."""
+    save_token(ctx, _resolve_service(ctx, service), token)
+
+
+@tasks_config_app.command("get")
+def config_get(
+    ctx: typer.Context,
+    service: str = _service_option(),
+) -> None:
+    """Exibe o status e o token mascarado do serviço de tasks."""
+    show_token(ctx, _resolve_service(ctx, service))
+
+
+@tasks_config_app.command("delete")
+def config_delete(
+    ctx: typer.Context,
+    service: str = _service_option(),
+) -> None:
+    """Remove a credencial armazenada do serviço de tasks."""
+    remove_token(ctx, _resolve_service(ctx, service))
+
+
+@tasks_app.command("whoami")
+def tasks_whoami(
+    ctx: typer.Context,
+    service: str = _service_option(),
+) -> None:
     """Verifica e exibe o membro autenticado na API do Shortcut."""
     as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
-    client = _get_shortcut_client(as_json)
+    client = _get_client(service, as_json)
 
     try:
         member = client.get_current_member()
@@ -55,14 +129,15 @@ def story_whoami(ctx: typer.Context) -> None:
         )
 
 
-@story_app.command("list")
-def story_list(
+@tasks_app.command("list")
+def tasks_list(
     ctx: typer.Context,
+    service: str = _service_option(),
     mine: bool = Option(False, "--mine", "-m", help="Filtra apenas stories atribuídas a você."),
 ) -> None:
     """Lista stories ativas no workspace do Shortcut."""
     as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
-    client = _get_shortcut_client(as_json)
+    client = _get_client(service, as_json)
 
     owner_id: str | None = None
     if mine:
@@ -107,14 +182,15 @@ def story_list(
         print_table(title, columns, rows)
 
 
-@story_app.command("search")
-def story_search(
+@tasks_app.command("search")
+def tasks_search(
     ctx: typer.Context,
+    service: str = _service_option(),
     query: str = Argument(..., help="Termo de busca para pesquisar stories."),
 ) -> None:
     """Pesquisa stories por palavra-chave ou texto."""
     as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
-    client = _get_shortcut_client(as_json)
+    client = _get_client(service, as_json)
 
     try:
         stories = client.search_stories(query)
@@ -145,14 +221,15 @@ def story_search(
         print_table(f"Stories encontradas para '{query}'", columns, rows)
 
 
-@story_app.command("show")
-def story_show(
+@tasks_app.command("show")
+def tasks_show(
     ctx: typer.Context,
+    service: str = _service_option(),
     story_id: int = Argument(..., help="ID numérico da story no Shortcut."),
 ) -> None:
     """Exibe detalhes completos de uma story pelo ID."""
     as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
-    client = _get_shortcut_client(as_json)
+    client = _get_client(service, as_json)
 
     try:
         story = client.get_story(story_id)
@@ -178,14 +255,15 @@ def story_show(
         print_panel(f"Story #{story.id}: {story.name}", content)
 
 
-@story_app.command("analyze")
-def story_analyze(
+@tasks_app.command("analyze")
+def tasks_analyze(
     ctx: typer.Context,
+    service: str = _service_option(),
     story_id: int = Argument(..., help="ID da story a ser analisada."),
 ) -> None:
     """Analisa o contexto da story sugerindo branch git, prefixos e palavras-chave."""
     as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
-    client = _get_shortcut_client(as_json)
+    client = _get_client(service, as_json)
 
     try:
         analysis = client.analyze_story(story_id)

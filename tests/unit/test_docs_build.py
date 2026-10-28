@@ -65,7 +65,7 @@ def test_AC_2_docs_structure_and_pages():
     assert (docs_dir / "cli" / "workspace.md").exists()
     assert (docs_dir / "cli" / "repo.md").exists()
     assert (docs_dir / "cli" / "commits.md").exists()
-    assert (docs_dir / "cli" / "story.md").exists()
+    assert (docs_dir / "cli" / "tasks.md").exists()
     assert (docs_dir / "architecture.md").exists()
     assert (docs_dir / "assets" / "neo-logo.jpg").exists()
     assert (docs_dir / "stylesheets" / "extra.css").exists()

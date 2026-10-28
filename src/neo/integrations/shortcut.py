@@ -55,7 +55,7 @@ class ShortcutClient:
         if response.status_code in (401, 403):
             raise ShortcutAuthError(
                 f"Falha de autenticação no Shortcut ({response.status_code}). "
-                "Verifique seu token executando `neo config auth set shortcut`."
+                "Verifique seu token executando `neo tasks config set`."
             )
         if response.status_code == 404:
             raise ShortcutNotFoundError(

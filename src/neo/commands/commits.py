@@ -1,4 +1,4 @@
-"""Comandos de consulta e histórico de commits Git (Bitbucket e GitHub) (`neo commits`)."""
+"""Comandos de consulta e histórico de commits Git (Bitbucket e GitHub) (`neo git commits`)."""
 
 from __future__ import annotations
 

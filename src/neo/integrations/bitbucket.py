@@ -75,7 +75,7 @@ class BitbucketClient:
         if response.status_code in (401, 403):
             raise BitbucketAuthError(
                 f"Falha de autenticação no Bitbucket ({response.status_code}). "
-                "Verifique seu token executando `neo config auth set bitbucket`."
+                "Verifique seu token executando `neo git config auth set bitbucket`."
             )
         if response.status_code == 404:
             raise BitbucketNotFoundError(

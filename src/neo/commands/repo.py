@@ -1,4 +1,4 @@
-"""Comandos de gerenciamento de repositórios Git (Bitbucket e GitHub) (`neo repo`)."""
+"""Comandos de gerenciamento de repositórios Git (Bitbucket e GitHub) (`neo git repo`)."""
 
 from __future__ import annotations
 

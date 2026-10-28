@@ -1,4 +1,4 @@
-"""Comandos de gerenciamento e seleção de workspace/organização Git (Bitbucket e GitHub) (`neo workspace`)."""
+"""Comandos de gerenciamento e seleção de workspace/organização Git (Bitbucket e GitHub) (`neo git workspace`)."""
 
 from __future__ import annotations
 
