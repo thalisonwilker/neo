@@ -62,3 +62,4 @@ def test_config_show_displays_agent_roles() -> None:
     assert "roles" in data["agent"]
     assert "refine" in data["agent"]["roles"]
     assert "review-pr" in data["agent"]["roles"]
+

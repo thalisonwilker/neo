@@ -92,3 +92,4 @@ neo agent roles --json
 - [Executar Sessão do Agente (`neo agent run`)](run.md)
 - [Configuração de Modelos por Papel (`neo config agent`)](config.md)
 - [Visão Geral de Agente & SDD](index.md)
+
