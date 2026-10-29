@@ -206,10 +206,11 @@ def test_AC_4_and_AC_5_tasks_and_global_config_show():
 
     res_show_human = runner.invoke(app, ["config", "show"])
     assert res_show_human.exit_code == 0
-    assert "Status de Git & Tasks" in res_show_human.output
-    assert "Provedor de Git (git):" in res_show_human.output
-    assert "Gerenciador de Tarefas (tasks):" in res_show_human.output
-    assert "shortcut" in res_show_human.output
+    assert "GIT : STATUS CONFIGURAÇÃO" in res_show_human.output
+    assert "TASKS : DEMANDA ATIVA" in res_show_human.output
+    assert "AGENT : AGENTES & SDD" in res_show_human.output
+    assert "PROVEDOR:" in res_show_human.output
+    assert "shortcut" in res_show_human.output.lower()
 
 
 def test_AC_8_legacy_git_config_commands_fail_with_hint():

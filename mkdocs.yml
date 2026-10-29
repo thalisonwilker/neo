@@ -115,6 +115,7 @@ nav:
               - Pesquisar Stories: cli/tasks/search.md
               - Detalhes da Story: cli/tasks/show.md
           - Análise de Contexto: cli/tasks/analyze.md
+          - Vínculo com Repositório: cli/tasks/bind.md
           - Configuração do Shortcut: cli/tasks/config.md
       - Agente & SDD:
           - cli/agent/index.md

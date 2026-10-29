@@ -69,6 +69,7 @@ Para garantir previsibilidade, o Neo organiza suas ações em verbos consistente
 | `resume` | Renderiza visão consolidada em quadro Kanban no terminal | `tasks resume` |
 | `whoami` | Identifica a conta ou membro autenticado no serviço | `tasks whoami` |
 | `analyze` | Realiza análise contextual e gera sugestões de branch/commits | `tasks analyze` |
+| `bind` / `unbind` | Vincula ou desvincula manualmente uma demanda ao repositório local | `tasks bind`, `tasks unbind` |
 | `setup` | Prepara de forma idempotente arquivos de governança e skills | `agent setup` |
 | `run` | Inicia sessão interativa do agente de codificação | `agent run` |
 
@@ -104,7 +105,7 @@ Esta matriz resume todas as operações mapeadas no Neo, indicando disponibilida
 | | Branches (`branch`) 🚧 | 🚧 | 🚧 | ➖ | 🚧 | ➖ | ➖ | ➖ | `create` (🚧), `diff` (🚧) |
 | | Pull Requests (`pr`) 🚧 | 🚧 | 🚧 | 🚧 | ➖ | ➖ | ➖ | ➖ | `create` (🚧), `merge` (🚧) |
 | | Tags & Releases 🚧 | 🚧 | 🚧 | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (🚧) |
-| **`neo tasks`** | Demandas (`tasks`) | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | `resume` (✅), `whoami` (✅), `iterations` (✅), `analyze` (✅) |
+| **`neo tasks`** | Demandas (`tasks`) | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | `resume` (✅), `whoami` (✅), `iterations` (✅), `analyze` (✅), `bind` (✅), `unbind` (✅) |
 | | Configuração (`config`) | ➖ | ➖ | ➖ | ➖ | ✅ | ➖ | ➖ | `delete` (✅), `columns` (✅) |
 | **`neo agent`** | Agente (`agent`) | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ✅ | `setup` (✅), `run` (✅) |
 

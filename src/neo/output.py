@@ -55,6 +55,12 @@ def print_table(title: str, columns: list[str], rows: list[list[str]]) -> None:
     console.print(table)
 
 
-def print_panel(title: str, text: str) -> None:
+def print_panel(title: str, text: str, border_style: str = "cyan") -> None:
     """Renderiza um painel estilizado com Rich."""
-    console.print(Panel(text, title=f"[bold cyan]{title}[/bold cyan]", border_style="cyan"))
+    console.print(
+        Panel(
+            text,
+            title=f"[bold {border_style}]{title}[/bold {border_style}]",
+            border_style=border_style,
+        )
+    )

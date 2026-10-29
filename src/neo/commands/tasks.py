@@ -12,6 +12,7 @@ from neo.commands._credentials import is_json_mode, remove_token, save_token, sh
 from neo.config import (
     DEFAULT_TASK_SERVICE,
     SUPPORTED_TASK_SERVICES,
+    ExitCode,
     get_credential,
     get_task_columns_config,
     set_task_columns_config,
@@ -28,6 +29,7 @@ from neo.integrations.shortcut_models import (
     ShortcutWorkflowState,
 )
 from neo.output import print_error, print_json, print_panel, print_success, print_table
+from neo.services.active_context import bind_task_id, unbind_task_id
 
 tasks_app = typer.Typer(
     name="tasks",
@@ -720,3 +722,80 @@ def tasks_resume(
         headers,
         [[todo_cell, doing_cell, done_cell]],
     )
+
+
+@tasks_app.command("bind")
+def tasks_bind(
+    ctx: typer.Context,
+    story_id: int = Argument(
+        ...,
+        help="ID numérico da task/história a ser vinculada ao repositório local.",
+    ),
+    json_flag: bool = Option(
+        False,
+        "--json",
+        help="Emite a saída em formato JSON estruturado no stdout.",
+    ),
+) -> None:
+    """Vincula manualmente uma task/demanda ao repositório Git local em `.git/neo-context.json`."""
+    as_json = is_json_mode(ctx, json_flag)
+    try:
+        bind_path = bind_task_id(story_id)
+    except ValueError as exc:
+        print_error(str(exc), as_json=as_json, code=int(ExitCode.USAGE_ERROR))
+        raise typer.Exit(code=int(ExitCode.USAGE_ERROR)) from exc
+
+    # Tenta obter título da história se Shortcut estiver configurado
+    story_title: str | None = None
+    try:
+        token = get_credential("shortcut")
+        if token:
+            client = ShortcutClient(token=token)
+            story = client.get_story(story_id)
+            story_title = story.name
+    except (ShortcutError, OSError, ConnectionError, ValueError, TimeoutError):
+        pass
+
+    suffix = f" — '{story_title}'" if story_title else ""
+    print_success(
+        f"Task [bold]#{story_id}[/bold]{suffix} vinculada com sucesso ao repositório local ({bind_path.name}).",
+        as_json=as_json,
+        json_payload={
+            "status": "success",
+            "story_id": story_id,
+            "story_title": story_title,
+            "bound": True,
+            "path": str(bind_path),
+        },
+    )
+
+
+@tasks_app.command("unbind")
+def tasks_unbind(
+    ctx: typer.Context,
+    json_flag: bool = Option(
+        False,
+        "--json",
+        help="Emite a saída em formato JSON estruturado no stdout.",
+    ),
+) -> None:
+    """Remove a vinculação manual de task do repositório Git local."""
+    as_json = is_json_mode(ctx, json_flag)
+    try:
+        removed = unbind_task_id()
+    except ValueError as exc:
+        print_error(str(exc), as_json=as_json, code=int(ExitCode.USAGE_ERROR))
+        raise typer.Exit(code=int(ExitCode.USAGE_ERROR)) from exc
+
+    if removed:
+        print_success(
+            "Vínculo de task manual removido com sucesso do repositório local.",
+            as_json=as_json,
+            json_payload={"status": "success", "unbound": True},
+        )
+    else:
+        print_success(
+            "Nenhuma task vinculada manualmente encontrada no repositório.",
+            as_json=as_json,
+            json_payload={"status": "success", "unbound": False},
+        )

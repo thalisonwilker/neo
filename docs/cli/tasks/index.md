@@ -37,8 +37,9 @@ Pesquisa e detalhamento de cards:
 - [**Pesquisar Stories (`neo tasks search`)**](search.md): Busca de cards por palavra-chave em títulos ou descrições.
 - [**Detalhes da Story (`neo tasks show`)**](show.md): Descrição completa, tipo, proprietários e links.
 
-### 3. Análise de Contexto
+### 3. Análise e Vínculo de Contexto
 - [**Análise de Story (`neo tasks analyze`)**](analyze.md): Extrai critérios de aceite e sugere nomes de branches e mensagens de commit.
+- [**Vincular Demanda (`neo tasks bind` / `neo tasks unbind`)**](bind.md): Associa ou remove o vínculo explícito entre uma tarefa do Shortcut e o repositório Git local.
 
 ### 4. Configuração
 - [**Configurar Shortcut (`neo tasks config`)**](config.md): Gerencia token de acesso e mapeamento das colunas do workflow.
