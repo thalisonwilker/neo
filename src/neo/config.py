@@ -91,7 +91,7 @@ SDDProviderType = Literal["spec-driven", "spec-kit"]
 SUPPORTED_SDD_PROVIDERS: tuple[SDDProviderType, ...] = ("spec-driven", "spec-kit")
 DEFAULT_SDD_PROVIDER: SDDProviderType = "spec-driven"
 
-AgentConfigKey = Literal["command", "model", "sdd-provider", "adapter"]
+AgentConfigKey = str
 SUPPORTED_AGENT_CONFIG_KEYS: tuple[AgentConfigKey, ...] = (
     "command",
     "model",
@@ -211,10 +211,16 @@ def validate_agent_config_key(key: str) -> AgentConfigKey:
         )
     if normalized in AGENT_CONFIG_KEY_ALIASES:
         return AGENT_CONFIG_KEY_ALIASES[normalized]
+    if normalized.startswith("model."):
+        role_part = normalized[len("model.") :]
+        from neo.services.agent_roles import validate_agent_role
+
+        val_role = validate_agent_role(role_part)
+        return f"model.{val_role}"
     if normalized not in SUPPORTED_AGENT_CONFIG_KEYS:
         valid_keys = ", ".join(SUPPORTED_AGENT_CONFIG_KEYS)
         raise ValueError(
-            f"Chave de configuração de agente desconhecida: '{key}'. Chaves válidas: {valid_keys}"
+            f"Chave de configuração de agente desconhecida: '{key}'. Chaves válidas: {valid_keys} (ou model.<role>)"
         )
     return normalized
 
@@ -268,18 +274,19 @@ def _write_file_config(config_file: Path, data: dict[str, Any]) -> None:
             for k, v in values.items():
                 if v is None:
                     continue
+                key_repr = f'"{k}"' if "." in k else k
                 if isinstance(v, bool):
-                    lines.append(f"{k} = {str(v).lower()}")
+                    lines.append(f"{key_repr} = {str(v).lower()}")
                 elif isinstance(v, (int, float)):
-                    lines.append(f"{k} = {v}")
+                    lines.append(f"{key_repr} = {v}")
                 elif isinstance(v, list):
                     escaped_items = [
                         f'"{str(item).replace(chr(34), chr(92) + chr(34))}"' for item in v
                     ]
-                    lines.append(f"{k} = [{', '.join(escaped_items)}]")
+                    lines.append(f"{key_repr} = [{', '.join(escaped_items)}]")
                 else:
                     escaped_val = str(v).replace("\\", "\\\\").replace('"', '\\"')
-                    lines.append(f'{k} = "{escaped_val}"')
+                    lines.append(f'{key_repr} = "{escaped_val}"')
             lines.append("")
 
     content = "\n".join(lines).strip() + "\n" if lines else ""
@@ -405,14 +412,19 @@ def get_agent_config_value(
     """Recupera o valor efetivo de uma chave de `neo config agent` e sua fonte ('env', 'config', 'default')."""
     valid_key = validate_agent_config_key(key)
 
-    env_var = AGENT_ENV_VAR_MAPPING[valid_key]
-    env_val = os.environ.get(env_var, "").strip()
-    if env_val:
-        if valid_key == "sdd-provider":
-            return valid_key, validate_sdd_provider(env_val), "env"
-        if valid_key == "adapter":
-            return valid_key, validate_agent_adapter(env_val), "env"
-        return valid_key, env_val, "env"
+    env_var = (
+        AGENT_ENV_VAR_MAPPING.get(valid_key)
+        if not valid_key.startswith("model.")
+        else f"NEO_AGENT_MODEL_{valid_key[6:].upper().replace('-', '_')}"
+    )
+    if env_var:
+        env_val = os.environ.get(env_var, "").strip()
+        if env_val:
+            if valid_key == "sdd-provider":
+                return valid_key, validate_sdd_provider(env_val), "env"
+            if valid_key == "adapter":
+                return valid_key, validate_agent_adapter(env_val), "env"
+            return valid_key, env_val, "env"
 
     config_file = _get_config_path(config_dir)
     data = _read_file_config(config_file)
@@ -435,7 +447,21 @@ def get_agent_config_value(
             if isinstance(sdd_raw, str) and sdd_raw.strip():
                 return valid_key, validate_sdd_provider(sdd_raw.strip()), "config"
 
-    return valid_key, DEFAULT_AGENT_CONFIG_VALUES[valid_key], "default"
+    return valid_key, DEFAULT_AGENT_CONFIG_VALUES.get(valid_key), "default"
+
+
+def resolve_role_model(role: str, config_dir: Path | None = None) -> tuple[str | None, str]:
+    """Resolve o modelo para um papel específico, com fallback para o modelo geral."""
+    from neo.services.agent_roles import validate_agent_role
+
+    valid_role = validate_agent_role(role)
+    role_key = f"model.{valid_role}"
+    _, role_val, role_source = get_agent_config_value(role_key, config_dir=config_dir)
+    if role_val:
+        return role_val, role_source
+
+    _, gen_val, gen_source = get_agent_config_value("model", config_dir=config_dir)
+    return gen_val, gen_source
 
 
 def list_agent_config_values(config_dir: Path | None = None) -> dict[str, dict[str, str | None]]:
@@ -444,6 +470,15 @@ def list_agent_config_values(config_dir: Path | None = None) -> dict[str, dict[s
     for k in SUPPORTED_AGENT_CONFIG_KEYS:
         _, val, source = get_agent_config_value(k, config_dir=config_dir)
         result[k] = {"value": val, "source": source}
+
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    agent_cfg = data.get("agent", {})
+    if isinstance(agent_cfg, dict):
+        for k in agent_cfg:
+            if k.startswith("model.") and k not in result:
+                _, val, source = get_agent_config_value(k, config_dir=config_dir)
+                result[k] = {"value": val, "source": source}
     return result
 
 

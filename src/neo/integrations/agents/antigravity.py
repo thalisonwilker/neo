@@ -56,11 +56,18 @@ class AntigravityAdapter:
             )
 
     @classmethod
-    def build_run_args(cls, executable_path: str, model: str | None = None) -> list[str]:
+    def build_run_args(
+        cls,
+        executable_path: str,
+        model: str | None = None,
+        initial_prompt: str | None = None,
+    ) -> list[str]:
         """Constrói a lista estruturada de argumentos para iniciar o Antigravity CLI (sem shell=True)."""
         args: list[str] = [executable_path]
         if model and model.strip():
             args.extend(["--model", model.strip()])
+        if initial_prompt and initial_prompt.strip():
+            args.extend(["--prompt-interactive", initial_prompt.strip()])
         return args
 
     @classmethod

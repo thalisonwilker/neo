@@ -128,4 +128,3 @@ def test_count_task_commits_with_real_git(tmp_path: Path) -> None:
 
     count = count_task_commits(555, repo_path=tmp_path)
     assert count == 2
-

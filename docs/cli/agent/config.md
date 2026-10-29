@@ -45,7 +45,8 @@ As opções abaixo são específicas de `neo config agent`. Para opções globai
 | Chave | Padrão | Descrição |
 |---|---|---|
 | `command` | `agy` | Nome ou caminho absoluto do executável do Antigravity CLI. |
-| `model` | `Gemini 3.8 Flash` | Modelo padrão encaminhado para as sessões do agente. |
+| `model` | `Gemini 3.8 Flash` | Modelo padrão geral encaminhado para as sessões do agente. |
+| `model.<role>` | *(fallback para `model`)* | Modelo específico para um papel de agente (`model.refine`, `model.review-pr`, etc.). |
 | `sdd-provider` | `spec-driven` | Provedor de esteira SDD padrão (`spec-driven` ou `spec-kit`). |
 | `adapter` | `antigravity` | Adaptador do agente utilizado pelo Neo (atualmente: `antigravity`). |
 

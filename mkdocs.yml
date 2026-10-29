@@ -119,6 +119,7 @@ nav:
           - Configuração do Shortcut: cli/tasks/config.md
       - Agente & SDD:
           - cli/agent/index.md
+          - Papéis Especializados: cli/agent/roles.md
           - Configurações do Agente: cli/agent/config.md
           - Diagnóstico e Status: cli/agent/status.md
           - Preparação SDD: cli/agent/setup.md

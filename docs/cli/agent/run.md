@@ -33,6 +33,7 @@ As opções abaixo são específicas de `neo agent run`. Para opções globais, 
 
 | Opção | Obrigatório | Padrão | Descrição |
 |---|---|---|---|
+| `--role`, `-r` | Não | `code` | Papel especializado do agente (`code`, `refine`, `review-pr`, `review-task`). |
 | `--agent` | Não | *(config)* | Adaptador do agente apenas para esta execução (`antigravity`). |
 | `--command` | Não | *(config)* | Executável do agente para esta execução (ex.: `agy`). |
 | `--model` | Não | *(config)* | Identificador do modelo repassado ao agente (ex.: `Gemini 3.8 Pro`). |
@@ -43,17 +44,28 @@ As opções abaixo são específicas de `neo agent run`. Para opções globais, 
 
 ## Exemplos
 
-### 1. Iniciar sessão padrão no diretório atual
+### 1. Iniciar sessão padrão de codificação
 ```bash
 neo agent run
 ```
 
-### 2. Iniciar com modelo mais potente para tarefa complexa
+### 2. Iniciar agente de refinamento de demandas
+```bash
+neo agent run --role refine
+# Injeta o contexto da task ativa do Shortcut e instruções de refinamento
+```
+
+### 3. Iniciar agente de revisão de PR e diffs
+```bash
+neo agent run --role review-pr
+```
+
+### 4. Iniciar com modelo mais potente para tarefa complexa
 ```bash
 neo agent run --model "Gemini 3.8 Pro"
 ```
 
-### 3. Iniciar em outro diretório de projeto
+### 5. Iniciar em outro diretório de projeto
 ```bash
 neo agent run --dir ~/projetos/core-api
 ```

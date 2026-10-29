@@ -31,7 +31,7 @@ def get_all_typer_commands() -> list[str]:
 def test_every_typer_command_is_documented():
     """Garante que todo comando visível em `neo --help` tem cobertura nas páginas de documentação."""
     commands = get_all_typer_commands()
-    assert len(commands) == 38, f"Esperado 38 comandos na CLI, encontrado {len(commands)}"
+    assert len(commands) == 39, f"Esperado 39 comandos na CLI, encontrado {len(commands)}"
 
     docs_dir = PROJECT_ROOT / "docs" / "cli"
     markdown_files = list(docs_dir.rglob("*.md"))
@@ -71,6 +71,7 @@ def test_every_doc_page_corresponds_to_real_command_or_topic():
         "tasks/bind.md",
         "tasks/config.md",
         "agent/index.md",
+        "agent/roles.md",
         "agent/config.md",
         "agent/status.md",
         "agent/setup.md",

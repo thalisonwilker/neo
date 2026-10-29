@@ -54,4 +54,3 @@ def test_tasks_bind_outside_git(tmp_path: Path, monkeypatch) -> None:
     result = runner.invoke(app, ["tasks", "bind", "1234"])
     assert result.exit_code != 0
     assert "não é um repositório Git válido" in result.output
-

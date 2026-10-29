@@ -12,6 +12,8 @@ from neo.commands._credentials import is_json_mode
 from neo.config import (
     ExitCode,
     get_agent_config_value,
+    get_credential,
+    resolve_role_model,
     validate_agent_adapter,
     validate_sdd_provider,
 )
@@ -24,7 +26,15 @@ from neo.integrations.sdd.adapters import (
     inspect_project_sdd,
     plan_sdd_setup,
 )
-from neo.output import console, print_error, print_json, print_panel, print_success
+from neo.integrations.shortcut import ShortcutClient, ShortcutError
+from neo.output import console, print_error, print_json, print_panel, print_success, print_table
+from neo.services.active_context import resolve_active_task_id
+from neo.services.agent_roles import (
+    DEFAULT_AGENT_ROLE,
+    build_role_prompt,
+    list_role_definitions,
+    validate_agent_role,
+)
 from neo.services.agent_validator import AgentValidationError, validate_agent_executable
 
 agent_app = typer.Typer(
@@ -271,9 +281,59 @@ def agent_setup(
         )
 
 
+@agent_app.command("roles")
+def agent_roles(
+    ctx: typer.Context,
+    json_flag: bool = Option(
+        False,
+        "--json",
+        help="Emite o catálogo de papéis estruturado em formato JSON puro no stdout.",
+    ),
+) -> None:
+    """Lista todos os papéis especializados de agentes disponíveis e seus contextos."""
+    as_json = is_json_mode(ctx, json_flag)
+    roles = list_role_definitions()
+
+    payload = []
+    for r in roles:
+        role_model, _ = resolve_role_model(r.id)
+        payload.append(
+            {
+                "id": r.id,
+                "title": r.title,
+                "description": r.description,
+                "allows_code_edits": r.allows_code_edits,
+                "context_type": r.context_type,
+                "model": role_model,
+            }
+        )
+
+    if as_json:
+        print_json(payload)
+    else:
+        columns = ["Papel", "Título", "Modifica Código?", "Contexto Principal", "Modelo Efetivo"]
+        rows = [
+            [
+                f"[bold cyan]{item['id']}[/bold cyan]",
+                str(item["title"]),
+                "[green]Sim[/green]" if item["allows_code_edits"] else "[dim]Não[/dim]",
+                str(item["context_type"]),
+                f"[cyan]{item['model']}[/cyan]" if item["model"] else "[dim]padrão geral[/dim]",
+            ]
+            for item in payload
+        ]
+        print_table("Papéis de Agentes Especializados do Neo", columns, rows)
+
+
 @agent_app.command("run")
 def agent_run(
     ctx: typer.Context,
+    role: str = Option(
+        DEFAULT_AGENT_ROLE,
+        "--role",
+        "-r",
+        help="Papel especializado do agente (code, refine, review-pr, review-task).",
+    ),
     agent: str | None = Option(
         None,
         "--agent",
@@ -300,7 +360,7 @@ def agent_run(
         help="Diretório de trabalho onde a sessão do agente será iniciada.",
     ),
 ) -> None:
-    """Inicia uma sessão interativa do agente no diretório escolhido com overrides locais."""
+    """Inicia uma sessão interativa do agente no diretório escolhido com papel e overrides locais."""
     if is_json_mode(ctx):
         print_error(
             "O comando `neo agent run` inicia uma sessão interativa de terminal e não suporta `--json`.",
@@ -308,6 +368,13 @@ def agent_run(
             code=int(ExitCode.USAGE_ERROR),
         )
         raise typer.Exit(code=int(ExitCode.USAGE_ERROR))
+
+    # 1. Validação do papel (role)
+    try:
+        valid_role = validate_agent_role(role)
+    except ValueError as exc:
+        print_error(str(exc), as_json=False, code=int(ExitCode.USAGE_ERROR))
+        raise typer.Exit(code=int(ExitCode.USAGE_ERROR)) from exc
 
     try:
         runtime = resolve_agent_runtime(
@@ -322,10 +389,16 @@ def agent_run(
 
     eff_adapter = runtime["adapter"]
     eff_command = runtime["command"]
-    eff_model = runtime["model"]
+    # Se modelo não veio explicitamente via CLI, tenta modelo específico do papel
+    if model and model.strip():
+        eff_model = model.strip()
+    else:
+        role_model, _ = resolve_role_model(valid_role)
+        eff_model = role_model or runtime["model"]
+
     eff_sdd = runtime["sdd_provider"]
 
-    # 1. Valida compatibilidade da combinação agente × provedor SDD antes de iniciar
+    # 2. Valida compatibilidade da combinação agente × provedor SDD antes de iniciar
     try:
         AntigravityAdapter.validate_compatibility(eff_adapter, eff_sdd)
         validate_agent_adapter(eff_adapter)
@@ -337,7 +410,7 @@ def agent_run(
         print_error(str(exc), as_json=False, code=int(ExitCode.USAGE_ERROR))
         raise typer.Exit(code=int(ExitCode.USAGE_ERROR)) from exc
 
-    # 2. Valida diretório de trabalho
+    # 3. Valida diretório de trabalho
     target_dir = Path(directory).expanduser().resolve()
     if not target_dir.exists() or not target_dir.is_dir():
         print_error(
@@ -347,7 +420,7 @@ def agent_run(
         )
         raise typer.Exit(code=int(ExitCode.NOT_FOUND))
 
-    # 3. Revalida o executável antes da execução (usa código 4 se ausente no PATH)
+    # 4. Revalida o executável antes da execução (usa código 4 se ausente no PATH)
     try:
         check = validate_agent_executable(
             eff_command,
@@ -359,8 +432,32 @@ def agent_run(
         print_error(str(exc), as_json=False, code=exc.exit_code)
         raise typer.Exit(code=exc.exit_code) from exc
 
-    # 4. Constrói argumentos estruturados e inicia sessão interativa
-    args = AntigravityAdapter.build_run_args(check["resolved_path"], model=eff_model)
+    # 5. Resolução contextual de demanda ativa para o prompt inicial do papel
+    active_task = resolve_active_task_id(target_dir)
+    story_title: str | None = None
+    if active_task is not None:
+        try:
+            token = get_credential("shortcut")
+            if token:
+                sh_client = ShortcutClient(token=token)
+                story_obj = sh_client.get_story(active_task)
+                story_title = story_obj.name
+        except (ShortcutError, OSError, ConnectionError, ValueError, TimeoutError):
+            pass
+
+    initial_prompt = build_role_prompt(
+        valid_role,
+        repo_path=target_dir,
+        task_id=active_task,
+        story_title=story_title,
+    )
+
+    # 6. Constrói argumentos estruturados e inicia sessão interativa
+    args = AntigravityAdapter.build_run_args(
+        check["resolved_path"],
+        model=eff_model,
+        initial_prompt=initial_prompt,
+    )
     return_code = AntigravityAdapter.run_interactive_session(args, cwd=target_dir)
     if return_code != 0:
         raise typer.Exit(code=return_code)

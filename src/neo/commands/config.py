@@ -340,6 +340,7 @@ def config_show(
                     "available": agent_available,
                     "version": agent_version,
                     "usage": usage_obj,
+                    "roles": ["code", "refine", "review-pr", "review-task"],
                 },
                 "services": statuses,
             }
@@ -422,6 +423,7 @@ def config_show(
             f"[bold]PROVEDOR:[/bold] [cyan]{agent_adapter} / {agent_cmd}[/cyan]\n"
             f"[bold]STATUS:[/bold] {agent_status_colored}\n"
             f"[bold]MODELO:[/bold] {model_line}\n"
+            f"[bold]PAPÉIS:[/bold] [cyan]code, refine, review-pr, review-task[/cyan]\n"
             f"[bold]USAGE:[/bold] [green]{usage_display}[/green]\n"
             f"[bold]PROVEDOR SDD:[/bold] [cyan]{agent_sdd}[/cyan]",
             border_style="green",

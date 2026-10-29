@@ -25,17 +25,20 @@ neo config agent <ação> [chave] [valor]
 
 O módulo do agente está organizado nos seguintes submenus funcionais:
 
-### 1. Configuração do Agente
-- [**Configurações do Agente (`neo config agent`)**](config.md): Define preferências de execução em `~/.config/neo/config.toml` (`set`, `get`, `list`, `unset`).
+### 1. Papéis e Catálogo
+- [**Papéis Especializados (`neo agent roles`)**](roles.md): Lista os papéis suportados (`code`, `refine`, `review-pr`, `review-task`), responsabilidades e contextos.
 
-### 2. Diagnóstico e Status
+### 2. Configuração do Agente
+- [**Configurações do Agente (`neo config agent`)**](config.md): Define preferências de execução e modelos por papel em `~/.config/neo/config.toml` (`set`, `get`, `list`, `unset`).
+
+### 3. Diagnóstico e Status
 - [**Diagnóstico do Agente (`neo agent status`)**](status.md): Inspeciona disponibilidade do executável `agy`, versão, modelo configurado, provedor SDD e arquivos do projeto.
 
-### 3. Preparação SDD
+### 4. Preparação SDD
 - [**Preparação SDD (`neo agent setup`)**](setup.md): Inicializa e sincroniza instruções de projeto (`CLAUDE.md`), templates e skills SDD de forma idempotente.
 
-### 4. Execução Interativa
-- [**Execução Interativa (`neo agent run`)**](run.md): Inicia uma sessão de trabalho interativa com o Antigravity CLI no diretório escolhido.
+### 5. Execução Interativa
+- [**Execução Interativa (`neo agent run`)**](run.md): Inicia uma sessão de trabalho interativa aplicando o papel especializado e contexto de demanda.
 
 ---
 
