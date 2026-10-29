@@ -119,6 +119,6 @@ neo git repo list --limit 5 --json | jq '.[] | {name, slug, main_branch}'
 ## Próximos Passos
 
 - [Configuração & Credenciais](configuration.md): veja todas as chaves da seção `[git]` e `[agent]`, a ordem de precedência e as variáveis de ambiente para CI/CD.
-- [Agente & SDD (`neo agent`)](cli/agent.md): configure o Google Antigravity CLI (`agy`), selecione modelos e prepare os provedores `spec-driven` e `spec-kit`.
+- [Agente & SDD (`neo agent`)](cli/agent/index.md): configure o Google Antigravity CLI (`agy`), selecione modelos e prepare os provedores `spec-driven` e `spec-kit`.
 - [Visão Geral da CLI](cli/index.md): consulte a gramática, os verbos padronizados e a tabela de códigos de saída.
 - [Guia de Migração](migration.md): tabela de equivalência se você utilizava a versão `v0.1.0`/`v0.1.1`.

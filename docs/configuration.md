@@ -45,7 +45,7 @@ neo git config unset default-branch
 ```
 
 !!! info "Segurança: `token` não é uma chave de configuração"
-    A chave `token` é rejeitada por `neo git config` com erro de uso incorreto (código `2`). Use sempre [`neo git auth login`](cli/auth.md) ou variáveis de ambiente.
+    A chave `token` é rejeitada por `neo git config` com erro de uso incorreto (código `2`). Use sempre [`neo git auth login`](cli/git/auth.md) ou variáveis de ambiente.
 
 ---
 
@@ -154,4 +154,4 @@ neo config agent set sdd-provider spec-driven
 neo config agent list
 ```
 
-Consulte a referência completa em [`neo agent` & `neo config agent`](cli/agent.md).
+Consulte a referência completa em [`neo agent` & `neo config agent`](cli/agent/index.md).
