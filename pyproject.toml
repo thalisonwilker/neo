@@ -64,6 +64,7 @@ dev = [
 docs = [
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.6.7",
+    "mkdocs-redirects>=1.2.3",
     "pymdown-extensions>=10.14.3",
 ]
 

@@ -31,6 +31,7 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
+    - navigation.indexes
     - navigation.expand
     - navigation.top
     - navigation.tracking
@@ -38,6 +39,19 @@ theme:
     - search.suggest
     - content.code.copy
     - content.code.annotate
+
+plugins:
+  - search
+  - redirects:
+      redirect_maps:
+        cli/config.md: cli/git/config.md
+        cli/auth.md: cli/git/auth.md
+        cli/status.md: cli/git/status.md
+        cli/workspace.md: cli/git/workspace.md
+        cli/repo.md: cli/git/repo.md
+        cli/commits.md: cli/git/commits.md
+        cli/tasks.md: cli/tasks/index.md
+        cli/agent.md: cli/agent/index.md
 
 markdown_extensions:
   - admonition
@@ -77,16 +91,42 @@ nav:
   - Início: index.md
   - Primeiros Passos: getting-started.md
   - Configuração: configuration.md
-  - Comandos da CLI:
-      - Visão Geral: cli/index.md
-      - Configuração Git: cli/config.md
-      - Autenticação Git: cli/auth.md
-      - Workspaces: cli/workspace.md
-      - Repositórios: cli/repo.md
-      - Commits: cli/commits.md
-      - Status Git: cli/status.md
-      - Tasks & Demandas: cli/tasks.md
-      - Agente & SDD: cli/agent.md
+  - Referência da CLI:
+      - Conceitos Gerais: cli/index.md
+      - Git:
+          - cli/git/index.md
+          - Contexto e Acesso:
+              - Configurar Token / Autenticação: cli/git/auth.md
+              - Configurações Gerais: cli/git/config.md
+              - Diagnóstico de Contexto: cli/git/status.md
+              - Configurar Workspaces: cli/git/workspace.md
+          - Recursos:
+              - Repositórios: cli/git/repo.md
+              - Commits: cli/git/commits.md
+          - Recursos Planejados (🚧): cli/git/planejado.md
+      - Tasks:
+          - cli/tasks/index.md
+          - Visão do Dia:
+              - Quadro Kanban: cli/tasks/resume.md
+              - Membro Autenticado: cli/tasks/whoami.md
+              - Sprints e Iterações: cli/tasks/iterations.md
+          - Consulta de Demandas:
+              - Listar Stories: cli/tasks/list.md
+              - Pesquisar Stories: cli/tasks/search.md
+              - Detalhes da Story: cli/tasks/show.md
+          - Análise de Contexto: cli/tasks/analyze.md
+          - Configuração do Shortcut: cli/tasks/config.md
+      - Agente & SDD:
+          - cli/agent/index.md
+          - Configurações do Agente: cli/agent/config.md
+          - Diagnóstico e Status: cli/agent/status.md
+          - Preparação SDD: cli/agent/setup.md
+          - Execução Interativa: cli/agent/run.md
+  - Guias Práticos:
+      - guias/index.md
+      - Uso em CI com --json: guias/ci-json.md
+      - Trocar de Provedor (GitHub ↔ Bitbucket): guias/trocar-provedor.md
+      - Fluxo Diário (Tasks → Branch → Commit): guias/fluxo-diario.md
   - Engenharia & SDD:
       - Visão Geral: architecture.md
       - Glossário: glossary.md
