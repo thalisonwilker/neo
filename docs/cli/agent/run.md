@@ -71,3 +71,4 @@ neo agent run --dir ~/projetos/core-api
 - [neo agent status](status.md) — Diagnosticar se o executável `agy` está no `PATH`
 - [neo config agent](config.md) — Definir o modelo padrão em `config.toml`
 - [neo agent setup](setup.md) — Preparar as skills do projeto antes de rodar o agente
+

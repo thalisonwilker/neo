@@ -91,3 +91,4 @@ neo --json tasks resume | jq '{todo: (.todo | length), doing: (.doing | length),
 - [neo tasks list](list.md) — Exibir stories em formato de tabela simples
 - [neo tasks analyze](analyze.md) — Analisar uma história antes de codar
 - [neo tasks config](config.md) — Configurar credenciais e colunas do Shortcut
+

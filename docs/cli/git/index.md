@@ -59,3 +59,4 @@ Consulta e investigação de repositórios e commits:
 - [Conceitos Gerais da CLI](../index.md)
 - [Guia: Trocar de Provedor (GitHub ↔ Bitbucket)](../../guias/trocar-provedor.md)
 - [Guia: Uso em CI com `--json`](../../guias/ci-json.md)
+

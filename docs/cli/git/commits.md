@@ -87,3 +87,4 @@ neo git commits show 7f8c92a
 - [neo git repo](repo.md) — Consultar e listar repositórios remotos
 - [neo git status](status.md) — Verificar a branch atual e contexto de remote
 - [Guia: Fluxo Diário (Tasks → Branch → Commit)](../../guias/fluxo-diario.md)
+

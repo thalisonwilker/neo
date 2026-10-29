@@ -93,3 +93,4 @@ neo tasks config columns \
 - [neo tasks resume](resume.md) — Exibir quadro Kanban com as colunas configuradas
 - [neo tasks whoami](whoami.md) — Validar a identidade do usuário autenticado
 - [neo git auth](../git/auth.md) — Autenticação dos provedores Git
+

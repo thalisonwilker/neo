@@ -71,3 +71,4 @@ neo agent setup --dir ./meu-projeto --yes --json | jq .
 - [neo agent status](status.md) — Verificar se os arquivos foram criados com sucesso
 - [neo agent run](run.md) — Iniciar sessão do agente no projeto preparado
 - [Engenharia & SDD — Visão Geral](../../architecture.md)
+

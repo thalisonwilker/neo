@@ -46,3 +46,4 @@ Versionamento e publicação de artefatos:
 ## Rastreabilidade e Roadmap
 - Especificação em planejamento: `specs/0010-branches-prs-e-detalhes-repo/`
 - Para sugestões e acompanhamento, consulte o [Repositório Oficial do Neo](https://github.com/thalisonwilker/neo).
+

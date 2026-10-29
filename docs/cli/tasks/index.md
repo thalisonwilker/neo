@@ -60,3 +60,4 @@ Pesquisa e detalhamento de cards:
 - [Conceitos Gerais da CLI](../index.md)
 - [Guia: Fluxo Diário (Tasks → Branch → Commit)](../../guias/fluxo-diario.md)
 - [neo git status](../git/status.md)
+

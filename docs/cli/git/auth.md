@@ -114,3 +114,4 @@ neo git auth logout --provider github --yes --json
 - [neo git status](status.md) — Diagnóstico completo do repositório local e resolução de autenticação
 - [neo git config](config.md) — Configurações de preferências gerais do Git
 - [Guia: Trocar de Provedor (GitHub ↔ Bitbucket)](../../guias/trocar-provedor.md)
+

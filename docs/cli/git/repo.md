@@ -92,3 +92,4 @@ neo git repo show --repo payment-service --workspace acme-inc
 - [neo git workspace](workspace.md) — Gerenciar o workspace ativo
 - [neo git commits](commits.md) — Inspecionar histórico e commits do repositório
 - [neo git repo planejado](planejado.md) — Roadmap de ações de criação e clonagem
+

@@ -62,3 +62,4 @@ neo --json tasks show 2157 | jq '{id, name, estimate, labels: [.labels[].name]}'
 - [neo tasks analyze](analyze.md) — Analisar a story e extrair sugestões de branch e commits
 - [neo tasks list](list.md) — Listar histórias da sprint
 - [neo tasks search](search.md) — Localizar o ID de uma história por palavra-chave
+

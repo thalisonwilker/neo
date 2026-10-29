@@ -81,3 +81,4 @@ fi
 - [neo agent setup](setup.md) — Preparar e sincronizar arquivos de governança SDD
 - [neo agent run](run.md) — Iniciar sessão interativa do agente
 - [neo git status](../git/status.md) — Diagnóstico de contexto Git
+

@@ -62,3 +62,4 @@ neo --json tasks search "webhook" | jq '.[] | {id, name, url: .app_url}'
 - [neo tasks show](show.md) — Exibir todos os detalhes de um card encontrado
 - [neo tasks list](list.md) — Listar stories da sprint atual
 - [neo tasks analyze](analyze.md) — Analisar o contexto do card para desenvolvimento
+

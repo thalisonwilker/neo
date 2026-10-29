@@ -81,3 +81,4 @@ git checkout -b "$BRANCH"
 - [neo tasks show](show.md) — Exibir os dados brutos da história
 - [neo tasks resume](resume.md) — Quadro Kanban da sprint
 - [Guia: Fluxo Diário (Tasks → Branch → Commit)](../../guias/fluxo-diario.md)
+

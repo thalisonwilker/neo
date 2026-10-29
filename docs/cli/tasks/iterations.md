@@ -73,3 +73,4 @@ neo --json tasks iterations -l 3 | jq '.[0] | {name, status, id}'
 - [neo tasks resume](resume.md) — Visualizar quadro Kanban na sprint atual
 - [neo tasks list](list.md) — Listar stories filtrando por iteração
 - [neo tasks config](config.md) — Configurar credenciais do Shortcut
+

@@ -76,3 +76,4 @@ neo git repo list --provider bitbucket --workspace meu-workspace
 - [neo git auth](../cli/git/auth.md) — Gerenciamento de credenciais
 - [neo git config](../cli/git/config.md) — Configurações persistidas
 - [neo git workspace](../cli/git/workspace.md) — Gerenciamento de workspaces e organizações
+

@@ -18,3 +18,4 @@ Passo a passo para alternar o provedor Git padrão, selecionar workspaces e oper
 
 ## 3. [Fluxo Diário: Tasks → Branch → Commit](fluxo-diario.md)
 O roteiro ideal para um dia produtivo de desenvolvimento: inspecione sua sprint com `neo tasks resume`, analise a demanda com `neo tasks analyze`, crie a branch recomendada e comite com padrões semânticos.
+

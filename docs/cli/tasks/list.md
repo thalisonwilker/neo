@@ -71,3 +71,4 @@ neo --json tasks list -m | jq '.[] | {id, name, state: .workflow_state_id}'
 - [neo tasks show](show.md) — Exibir os detalhes completos de uma história
 - [neo tasks search](search.md) — Buscar histórias por texto livre
 - [neo tasks resume](resume.md) — Quadro Kanban visual da sprint
+

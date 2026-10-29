@@ -97,3 +97,4 @@ neo config agent list
 - [neo agent status](status.md) — Diagnóstico de prontidão do executável e modelo
 - [neo agent run](run.md) — Executar sessão interativa com overrides locais
 - [neo config show](../index.md#qual-comando-usar-homonimos) — Visão geral de todas as configurações
+

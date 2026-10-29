@@ -89,3 +89,4 @@ Reestrutura o menu lateral e as páginas de documentação da CLI Neo no MkDocs 
 ## Rastreabilidade
 - Tasks: `./tasks.md`
 - Contexto de documentação: `docs/architecture.md`, `mkdocs.yml`
+

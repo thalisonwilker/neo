@@ -70,3 +70,4 @@ neo --json tasks whoami | jq -r '{name: .profile.name, mention_name: .profile.me
 - [neo tasks config](config.md) — Configurar ou atualizar o token do Shortcut
 - [neo tasks resume](resume.md) — Visualizar quadro Kanban das suas tarefas
 - [neo git auth](../git/auth.md) — Autenticação dos provedores Git
+

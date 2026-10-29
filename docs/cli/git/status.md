@@ -100,3 +100,4 @@ Exemplo de visualização:
 - [neo git auth](auth.md) — Configurar ou verificar credenciais de acesso
 - [neo git workspace](workspace.md) — Listar e selecionar workspaces remotos
 - [neo agent status](../agent/status.md) — Diagnóstico da esteira SDD e agente Antigravity
+
