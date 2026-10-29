@@ -68,20 +68,38 @@ def test_AC_1_mkdocs_config():
 
 
 def test_AC_2_docs_structure_and_pages():
-    """Valida AC-2: Estrutura completa e páginas de navegação do portal."""
+    """Valida AC-2: Estrutura completa e páginas de navegação do portal em submenus."""
     docs_dir = PROJECT_ROOT / "docs"
     assert (docs_dir / "index.md").exists()
     assert (docs_dir / "getting-started.md").exists()
     assert (docs_dir / "configuration.md").exists()
     assert (docs_dir / "cli" / "index.md").exists()
-    assert (docs_dir / "cli" / "config.md").exists()
-    assert (docs_dir / "cli" / "auth.md").exists()
-    assert (docs_dir / "cli" / "workspace.md").exists()
-    assert (docs_dir / "cli" / "repo.md").exists()
-    assert (docs_dir / "cli" / "commits.md").exists()
-    assert (docs_dir / "cli" / "status.md").exists()
-    assert (docs_dir / "cli" / "tasks.md").exists()
-    assert (docs_dir / "cli" / "agent.md").exists()
+    assert (docs_dir / "cli" / "git" / "index.md").exists()
+    assert (docs_dir / "cli" / "git" / "config.md").exists()
+    assert (docs_dir / "cli" / "git" / "auth.md").exists()
+    assert (docs_dir / "cli" / "git" / "workspace.md").exists()
+    assert (docs_dir / "cli" / "git" / "repo.md").exists()
+    assert (docs_dir / "cli" / "git" / "commits.md").exists()
+    assert (docs_dir / "cli" / "git" / "status.md").exists()
+    assert (docs_dir / "cli" / "git" / "planejado.md").exists()
+    assert (docs_dir / "cli" / "tasks" / "index.md").exists()
+    assert (docs_dir / "cli" / "tasks" / "resume.md").exists()
+    assert (docs_dir / "cli" / "tasks" / "whoami.md").exists()
+    assert (docs_dir / "cli" / "tasks" / "iterations.md").exists()
+    assert (docs_dir / "cli" / "tasks" / "list.md").exists()
+    assert (docs_dir / "cli" / "tasks" / "search.md").exists()
+    assert (docs_dir / "cli" / "tasks" / "show.md").exists()
+    assert (docs_dir / "cli" / "tasks" / "analyze.md").exists()
+    assert (docs_dir / "cli" / "tasks" / "config.md").exists()
+    assert (docs_dir / "cli" / "agent" / "index.md").exists()
+    assert (docs_dir / "cli" / "agent" / "config.md").exists()
+    assert (docs_dir / "cli" / "agent" / "status.md").exists()
+    assert (docs_dir / "cli" / "agent" / "setup.md").exists()
+    assert (docs_dir / "cli" / "agent" / "run.md").exists()
+    assert (docs_dir / "guias" / "index.md").exists()
+    assert (docs_dir / "guias" / "ci-json.md").exists()
+    assert (docs_dir / "guias" / "trocar-provedor.md").exists()
+    assert (docs_dir / "guias" / "fluxo-diario.md").exists()
     assert (docs_dir / "migration.md").exists()
     assert (docs_dir / "architecture.md").exists()
     assert (docs_dir / "assets" / "neo-logo.jpg").exists()
@@ -107,12 +125,13 @@ def test_AC_9_docs_no_legacy_git_commands():
         docs_dir / "glossary.md",
         docs_dir / "architecture.md",
         docs_dir / "cli" / "index.md",
-        docs_dir / "cli" / "config.md",
-        docs_dir / "cli" / "auth.md",
-        docs_dir / "cli" / "workspace.md",
-        docs_dir / "cli" / "repo.md",
-        docs_dir / "cli" / "commits.md",
-        docs_dir / "cli" / "status.md",
+        docs_dir / "cli" / "git" / "index.md",
+        docs_dir / "cli" / "git" / "config.md",
+        docs_dir / "cli" / "git" / "auth.md",
+        docs_dir / "cli" / "git" / "workspace.md",
+        docs_dir / "cli" / "git" / "repo.md",
+        docs_dir / "cli" / "git" / "commits.md",
+        docs_dir / "cli" / "git" / "status.md",
     ]
     for page in portal_pages:
         content = page.read_text(encoding="utf-8")
@@ -126,7 +145,18 @@ def test_AC_9_docs_no_legacy_git_commands():
 
 def test_AC_16_agent_and_sdd_docs_consistency():
     """Valida AC-16 (0015): Documentação consistente com neo config agent e neo agent."""
-    agent_doc = (PROJECT_ROOT / "docs" / "cli" / "agent.md").read_text(encoding="utf-8")
+    docs_dir = PROJECT_ROOT / "docs" / "cli" / "agent"
+    combined_content = (
+        (docs_dir / "index.md").read_text(encoding="utf-8")
+        + "\n"
+        + (docs_dir / "config.md").read_text(encoding="utf-8")
+        + "\n"
+        + (docs_dir / "status.md").read_text(encoding="utf-8")
+        + "\n"
+        + (docs_dir / "setup.md").read_text(encoding="utf-8")
+        + "\n"
+        + (docs_dir / "run.md").read_text(encoding="utf-8")
+    )
     for expected in (
         "neo config agent set",
         "neo config agent get",
@@ -139,7 +169,7 @@ def test_AC_16_agent_and_sdd_docs_consistency():
         "spec-kit",
         "agy",
     ):
-        assert expected in agent_doc
+        assert expected in combined_content
 
 
 def test_AC_3_dockerfile_docs():

@@ -18,12 +18,15 @@ alwaysApply: false
 | **Lint & Formatação** | `uv run ruff check . && uv run ruff format --check .` | Pré-commit / CI |
 | **Análise Estática** | `uv run mypy src` | CI / Validação de types |
 | **Cobertura** | `uv run pytest --cov=neo --cov-report=term-missing --cov-fail-under=80` | Validação de PR / CI |
+| **Documentação Estrita** | `uv run mkdocs build --strict` | Ao alterar docs / CI |
+| **Auditoria da Esteira** | `node scripts/audit-esteira.mjs .` | Ao criar/editar docs e specs / CI |
 
 ## Convenções
 - Pirâmide: testes de unidade rápidos para lógica de análise e parsing; testes de integração para clientes de API com `respx` mockando respostas JSON; testes E2E executando o app Typer com `CliRunner`.
 - **Cada `AC-N` da spec tem um teste de aceite que é o seu gate.** Nomeie o teste com o ID (`test_AC_1_*` / `AC-1: ...`) para rastreabilidade spec → teste.
 - Zero chamadas externas reais para APIs durante a execução da suíte de testes.
 - **Análise estática estrita:** Mypy configurado com checagem de tipos sem retorno `Any` não tipado.
+- **Documentação viva e testada:** Toda alteração de comandos requer teste de paridade (`test_docs_parity.py`) e build estrito sem links quebrados.
 
 ## Gates (Definition of Done executável)
 - Uma **task** só vira `done` quando o **Gate (comando)** dela em `tasks.md` passa.
@@ -33,3 +36,5 @@ alwaysApply: false
   3. `uv run mypy src` passa sem erros de tipagem.
   4. Todos os testes de aceite (`AC-N`) passam.
   5. Cobertura mínima de 80% atingida.
+  6. `uv run mkdocs build --strict` compila sem erros nem advertências.
+  7. `node scripts/audit-esteira.mjs .` valida a integridade de frontmatter, links e specs.

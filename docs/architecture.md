@@ -18,10 +18,10 @@ As dependências apontam sempre para dentro:
 interfaces (CLI) → application (resolver/services) → domain (models/protocols) ← infrastructure (integrations/config)
 ```
 
-1. **`interfaces/` (`src/neo/cli.py` e `src/neo/commands/`):** Borda de entrada da CLI construída com **Typer** e **Rich**. Implementa a gramática `neo git <recurso> <ação> [--opções]`, valida parâmetros de uso (código `2`) e formata a saída em tabelas/painéis humanos ou JSON puro (`--json`).
-2. **`application/` (`src/neo/integrations/resolver.py` e `src/neo/services/`):** Orquestra a resolução de provedor e workspace seguindo a cadeia de precedência (`CLI > ENV > config.toml > remote > default`), detecta metadados do repositório Git local e traduz exceções de domínio em códigos de saída padronizados (`0` a `5`).
-3. **`domain/` (`src/neo/integrations/*_models.py` e protocolos):** Define os modelos de dados (`BitbucketRepo`, `BitbucketCommit`, `BitbucketWorkspace`) e o contrato comum de provedores Git.
-4. **`infrastructure/` (`src/neo/integrations/github.py`, `bitbucket.py`, `shortcut.py` e `src/neo/config.py`):** Clientes HTTP (`httpx`), integração com o **Keyring** do sistema operacional e persistência em arquivos TOML (`0600`).
+1. **`interfaces/` (`src/neo/cli.py` e `src/neo/commands/`):** Borda de entrada da CLI construída com **Typer** e **Rich**. Implementa a gramática dos módulos [`neo git`](cli/git/index.md), [`neo tasks`](cli/tasks/index.md), [`neo agent`](cli/agent/index.md) e [`neo config`](cli/index.md), valida parâmetros de uso (código `2`) e formata a saída em tabelas/painéis humanos ou JSON puro (`--json`).
+2. **`application/` (`src/neo/integrations/resolver.py` e `src/neo/services/`):** Orquestra a resolução de provedor e workspace seguindo a cadeia de precedência (`CLI > ENV > config.toml > remote > default`), valida o executável do agente (`agent_validator.py`), detecta metadados do repositório Git local e traduz exceções de domínio em códigos de saída padronizados (`0` a `5`).
+3. **`domain/` (`src/neo/integrations/*_models.py` e protocolos):** Define os modelos de dados e DTOs puros (`BitbucketRepo`, `BitbucketCommit`, `BitbucketWorkspace`, `GitHubRepo`, `ShortcutStory`) e os contratos comuns de provedores Git e adaptadores de agente.
+4. **`infrastructure/` (`src/neo/integrations/github.py`, `bitbucket.py`, `shortcut.py`, `agents/antigravity.py` e `src/neo/config.py`):** Clientes HTTP (`httpx`), integração com o **Keyring** do sistema operacional, execução de subprocessos seguros e persistência em arquivos TOML (`0600`).
 
 ---
 

@@ -34,6 +34,7 @@ alwaysApply: false
   - [ADR-0004: Gestão de Credenciais e Segurança Operacional](architecture/adr/0004-gestao-de-credenciais-e-seguranca.md)
   - [ADR-0005: Padrões de Qualidade de Código, Tipagem e Testes](architecture/adr/0005-padroes-de-qualidade-e-testes.md)
   - [ADR-0006: Observabilidade e UX Visual no Terminal](architecture/adr/0006-observabilidade-e-ux-cli.md)
+  - [ADR-0007: Integração de Agentes de Codificação e Provedores SDD](architecture/adr/0007-integracao-agente-antigravity-e-sdd.md)
 
 ## 🛠️ Engenharia — como construímos
 - **Testes e quality gates** (comandos e Definition of Done) → [engineering/TESTING.md](engineering/TESTING.md)
@@ -53,6 +54,9 @@ alwaysApply: false
 - [`specs/0011-tasks-resume-board/`](../specs/0011-tasks-resume-board/spec.md) — quadro Kanban `neo tasks resume` e configuração de colunas
 - [`specs/0012-filtro-iteracao-tasks/`](../specs/0012-filtro-iteracao-tasks/spec.md) — filtro por iteração em tasks (`neo tasks iterations`)
 - [`specs/0013-publicacao-pacote-pypi/`](../specs/0013-publicacao-pacote-pypi/spec.md) — pacote PyPI (`neo-cmd`) e publicação via GitHub Actions
+- [`specs/0014-gramatica-cli-git/`](../specs/0014-gramatica-cli-git/spec.md) — padronização da gramática neo git sem atalhos curtos
+- [`specs/0015-integracao-antigravity-e-provedores-sdd/`](../specs/0015-integracao-antigravity-e-provedores-sdd/spec.md) — integração com Google Antigravity CLI e seleção de provedores SDD
+- [`specs/0016-menus-e-submenus-documentacao/`](../specs/0016-menus-e-submenus-documentacao/spec.md) — reorganização da documentação MkDocs em menus e submenus hierárquicos
 
 ## 📖 Linguagem & convenções
 - **Glossário** (linguagem ubíqua) → [glossary.md](glossary.md)

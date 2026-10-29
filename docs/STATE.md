@@ -11,10 +11,11 @@ alwaysApply: true
 **Última atualização:** 2026-10-28 por Antigravity
 
 ## Em andamento / próximo passo
-- **Fase atual:** Onda 1 (MVP). Features concluídas: `0015-integracao-antigravity-e-provedores-sdd`, `0014-gramatica-cli-git`, `0013-publicacao-pacote-pypi`, `0012-filtro-iteracao-tasks`, `0011-tasks-resume-board`, `0009-refactor-cli-git-e-tasks`, `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket`, `0004-modulo-shortcut`, `0005-selecao-de-workspace-bitbucket`, `0006-modulo-github-e-multi-provedor-git`, `0007-documentacao-mkdocs-conteinerizada` e `0008-ci-cd-e-deploy-github-actions`. Backlog planejado: `0010-branches-prs-e-detalhes-repo`.
-- **Próximo passo concreto:** Aguardar aprovação final do usuário para commit e push da feature `0015-integracao-antigravity-e-provedores-sdd` ou iniciar `0010-branches-prs-e-detalhes-repo`.
+- **Fase atual:** Onda 1 (MVP). Features concluídas: `0016-menus-e-submenus-documentacao`, `0015-integracao-antigravity-e-provedores-sdd`, `0014-gramatica-cli-git`, `0013-publicacao-pacote-pypi`, `0012-filtro-iteracao-tasks`, `0011-tasks-resume-board`, `0009-refactor-cli-git-e-tasks`, `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket`, `0004-modulo-shortcut`, `0005-selecao-de-workspace-bitbucket`, `0006-modulo-github-e-multi-provedor-git`, `0007-documentacao-mkdocs-conteinerizada` e `0008-ci-cd-e-deploy-github-actions`. Backlog planejado: `0010-branches-prs-e-detalhes-repo`.
+- **Próximo passo concreto:** Review do usuário e merge da branch `docs/refactor-cli` com a reestruturação da documentação e submenus concluída.
 
 ## Decisões recentes
+- 2026-10-28: Reestruturação da documentação MkDocs em menus e submenus orientados a objetivos (`cli/git/`, `cli/tasks/`, `cli/agent/`, `guias/`), com `navigation.indexes` e redirects para preservação de URLs legadas (`0016-menus-e-submenus-documentacao`).
 - 2026-10-28: Integração de agentes de codificação (Antigravity CLI) e seleção de provedores SDD (`spec-driven` e `spec-kit`) — [ADR-0007](architecture/adr/0007-integracao-agente-antigravity-e-sdd.md).
 - 2026-10-27: Tech stack principal definido como Python >= 3.13, Typer, uv, Rich, httpx e keyring — [ADR-0002](architecture/adr/0002-tech-stack-core.md).
 - 2026-10-27: Arquitetura em Monolito Modular (DDD) com isolamento de integrações em `integrations/` (ACL) e lógica em `services/analysis.py` — [ADR-0003](architecture/adr/0003-arquitetura-modular-e-integracoes.md).
