@@ -18,6 +18,7 @@ alwaysApply: false
 | **Bitbucket Integration** | Supporting | Comunicação HTTP com API do Bitbucket via `GitProviderProtocol`, paginação e conversão de DTOs | `integrations/bitbucket.py` |
 | **Shortcut Integration** | Supporting | Comunicação HTTP com API do Shortcut, busca de stories, iterações e workflows | `integrations/shortcut.py` |
 | **Agent & SDD Orchestration** | Supporting | Diagnóstico, preparação e invocação do Antigravity CLI (`agy`) e esteiras SDD (`spec-driven` / `spec-kit`) | `services/agent_validator.py`, `integrations/agents/` |
+| **Personal Finance** | Supporting | Micro gerenciamento financeiro pessoal local: contas bancárias, categorias, despesas, receitas e resumos | `services/finance.py`, `integrations/finance_db.py` |
 | **Configuration & Secrets** | Generic | Leitura de preferências (`config.toml`), perfis de ambiente e persistência segura em Keyring | `config.py` |
 
 ## Relações entre contextos

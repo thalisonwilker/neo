@@ -122,6 +122,12 @@ nav:
           - Diagnóstico e Status: cli/agent/status.md
           - Preparação SDD: cli/agent/setup.md
           - Execução Interativa: cli/agent/run.md
+      - Financeiro:
+          - cli/fin/index.md
+          - Contas e Bancos: cli/fin/bank.md
+          - Categorias: cli/fin/category.md
+          - Transações e Atalhos: cli/fin/tx.md
+          - Balanço e Resumo: cli/fin/summary.md
   - Guias Práticos:
       - guias/index.md
       - Uso em CI com --json: guias/ci-json.md
