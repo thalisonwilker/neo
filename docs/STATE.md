@@ -8,13 +8,14 @@ alwaysApply: true
 
 > Memória de trabalho entre sessões. É volátil: atualizada o tempo todo. Decisão estrutural → ADR; estado do trabalho → aqui. Atualize ao pausar/encerrar; leia ao retomar. Use a skill `/handoff`.
 
-**Última atualização:** 2026-10-28 por Antigravity
+**Última atualização:** 2026-10-29 por Antigravity
 
 ## Em andamento / próximo passo
-- **Fase atual:** Onda 1 (MVP). Features concluídas: `0016-menus-e-submenus-documentacao`, `0015-integracao-antigravity-e-provedores-sdd`, `0014-gramatica-cli-git`, `0013-publicacao-pacote-pypi`, `0012-filtro-iteracao-tasks`, `0011-tasks-resume-board`, `0009-refactor-cli-git-e-tasks`, `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket`, `0004-modulo-shortcut`, `0005-selecao-de-workspace-bitbucket`, `0006-modulo-github-e-multi-provedor-git`, `0007-documentacao-mkdocs-conteinerizada` e `0008-ci-cd-e-deploy-github-actions`. Backlog planejado: `0010-branches-prs-e-detalhes-repo`.
-- **Próximo passo concreto:** Review do usuário e merge da branch `docs/refactor-cli` com a reestruturação da documentação e submenus concluída.
+- **Fase atual:** Onda 2 (Vida Pessoal). Features concluídas: `0019-micro-gerenciamento-financeiro`, `0018-agentes-especializados-multi-role`, `0017-contexto-ativo-e-config-show`, `0016-menus-e-submenus-documentacao`, `0015-integracao-antigravity-e-provedores-sdd`, `0014-gramatica-cli-git`, `0013-publicacao-pacote-pypi`, `0012-filtro-iteracao-tasks`, `0011-tasks-resume-board`, `0009-refactor-cli-git-e-tasks`, `0002-fundacao-cli-e-configuracao`, `0003-modulo-bitbucket`, `0004-modulo-shortcut`, `0005-selecao-de-workspace-bitbucket`, `0006-modulo-github-e-multi-provedor-git`, `0007-documentacao-mkdocs-conteinerizada` e `0008-ci-cd-e-deploy-github-actions`. Backlog planejado: `0010-branches-prs-e-detalhes-repo`.
+- **Próximo passo concreto:** Review do usuário e merge da branch `feature/0019-micro-gerenciamento-financeiro` ou avanço para transferências entre contas e conciliação.
 
 ## Decisões recentes
+- 2026-10-29: Micro gerenciamento financeiro pessoal local (`neo fin`) implementado com persistência relacional SQLite local em `~/.config/neo/finance.db`, cobrindo bancos/contas (`neo fin bank`), categorias (`neo fin category`), extrato e transações (`neo fin tx`), atalhos rápidos de alta velocidade (`neo fin expense` e `neo fin income`), e balanço/resumo mensal consolidado (`neo fin balance` e `neo fin summary`) com suporte a `--json` e paridade estrita na documentação (`0019-micro-gerenciamento-financeiro`).
 - 2026-10-28: Reestruturação da documentação MkDocs em menus e submenus orientados a objetivos (`cli/git/`, `cli/tasks/`, `cli/agent/`, `guias/`), com `navigation.indexes` e redirects para preservação de URLs legadas (`0016-menus-e-submenus-documentacao`).
 - 2026-10-28: Integração de agentes de codificação (Antigravity CLI) e seleção de provedores SDD (`spec-driven` e `spec-kit`) — [ADR-0007](architecture/adr/0007-integracao-agente-antigravity-e-sdd.md).
 - 2026-10-27: Tech stack principal definido como Python >= 3.13, Typer, uv, Rich, httpx e keyring — [ADR-0002](architecture/adr/0002-tech-stack-core.md).

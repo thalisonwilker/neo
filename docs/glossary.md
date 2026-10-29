@@ -25,3 +25,8 @@ alwaysApply: false
 | **Repository (Repo)** | Repositório de código hospedado no provedor Git, identificado por um `slug` dentro de um `workspace` | Diretório qualquer no sistema de arquivos sem Git | `Git Integration` |
 | **Story / Card** | Unidade de trabalho, feature, bug ou chore gerenciada no Shortcut | Issue de repositório Git | `Shortcut Integration` |
 | **Workspace** | Conceito unificado no Neo para o escopo proprietário dos repositórios: equivale a um **Workspace** no Bitbucket Cloud e a uma **Organization** ou **conta pessoal de usuário** no GitHub | Pasta local de trabalho no computador | `Git Integration` |
+| **Account / Conta** | Conta bancária ou carteira detentora de saldo (`checking`, `savings`, `investment`, `credit`, `cash`) | Provedor de Git ou usuário do sistema | `Personal Finance` |
+| **Category / Categoria** | Classificação de despesa ou receita financeira (ex.: `alimentacao`, `moradia`, `salario`) | Tag de commit ou rótulo de branch | `Personal Finance` |
+| **Transaction / Transação** | Movimentação financeira pontual registrada (despesa ou receita) com data, valor e conta | Transação de banco de dados ACID ou commit Git | `Personal Finance` |
+| **Balance / Balanço** | Saldo líquido apurado por conta e patrimônio consolidado | Limite de crédito ou orçamento futuro | `Personal Finance` |
+| **Monthly Summary / Resumo Mensal** | Apuração consolidada de entradas, saídas e resultado líquido de um mês com detalhamento por categoria | Extrato bancário de conta individual | `Personal Finance` |
