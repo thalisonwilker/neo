@@ -31,16 +31,22 @@ Comandos focados no início do expediente e acompanhamento da sprint:
 - [**Membro Autenticado (`neo tasks whoami`)**](whoami.md): Confirma identidade e valida o token ativo.
 - [**Sprints e Iterações (`neo tasks iterations`)**](iterations.md): Lista iterações cadastradas e identifica a sprint atual.
 
-### 2. Consulta de Demandas
+### 2. Gestão e Criação de Demandas
+Criação e acompanhamento ativo de cards:
+- [**Criar Story (`neo tasks create`)**](create.md): Cria uma nova story associada à iteração atual e ao seu usuário.
+- [**Checklist da Story (`neo tasks check`)**](check.md): Adiciona, conclui (`complete`/`done`) e reabre (`uncomplete`/`undone`) itens de checklist.
+- [**Comentários (`neo tasks comment`)**](comment.md): Registra notas e apontamentos (`add`) no card.
+
+### 3. Consulta de Demandas
 Pesquisa e detalhamento de cards:
 - [**Listar Stories (`neo tasks list`)**](list.md): Tabela de histórias da iteração com filtro opcional por atribuição (`--mine`).
 - [**Pesquisar Stories (`neo tasks search`)**](search.md): Busca de cards por palavra-chave em títulos ou descrições.
-- [**Detalhes da Story (`neo tasks show`)**](show.md): Descrição completa, tipo, proprietários e links.
+- [**Detalhes da Story (`neo tasks show`)**](show.md): Descrição completa, tipo, checklist, comentários e links.
 
-### 3. Análise de Contexto
+### 4. Análise de Contexto
 - [**Análise de Story (`neo tasks analyze`)**](analyze.md): Extrai critérios de aceite e sugere nomes de branches e mensagens de commit.
 
-### 4. Configuração
+### 5. Configuração
 - [**Configurar Shortcut (`neo tasks config`)**](config.md): Gerencia token de acesso e mapeamento das colunas do workflow.
 
 ---
