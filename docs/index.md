@@ -33,8 +33,8 @@ alwaysApply: false
 
 O **Neo** é um assistente pessoal de linha de comando feito por dev, para devs que resolvem tudo pelo teclado. Sem alternar abas no navegador, você consulta tarefas do Shortcut, investiga repositórios e commits no GitHub e Bitbucket Cloud, e orquestra agentes de IA no terminal.
 
-- **Disponível hoje:** integração unificada com **GitHub**, **Bitbucket Cloud** e **Shortcut** (`neo git` e `neo tasks`), orquestração do Google Antigravity CLI e esteiras SDD (`neo agent`), saída estruturada via `--json` e credenciais protegidas no Keyring nativo do sistema operacional.
-- **No roadmap:** módulos para organizar estudos, finanças e acompanhamento de branches e PRs.
+- **Disponível hoje:** integração unificada com **GitHub**, **Bitbucket Cloud** e **Shortcut** (`neo git` e `neo tasks`), orquestração do Google Antigravity CLI e esteiras SDD (`neo agent`), micro gerenciamento financeiro pessoal local (`neo fin`), saída estruturada via `--json` e credenciais protegidas no Keyring nativo do sistema operacional.
+- **No roadmap:** módulos para organizar estudos, hobbies e acompanhamento avançado de PRs.
 
 ---
 
@@ -51,6 +51,9 @@ O **Neo** é um assistente pessoal de linha de comando feito por dev, para devs 
 
 === "Credenciais Seguras no Keyring"
     `neo git auth login` solicita tokens com entrada oculta e salva no **Keyring nativo do SO** (macOS Keychain, Linux Secret Service, Windows Credential Manager), com fallback para variáveis de ambiente em CI.
+
+=== "Finanças Pessoais sem Sair do Terminal"
+    Registre despesas e receitas em menos de 2 segundos com `neo fin expense` e `neo fin income`. Seus dados são salvos localmente em banco SQLite (`~/.config/neo/finance.db`) com permissão restrita `0600`, total privacidade e resumo consolidado mensal por categoria (`neo fin summary`).
 
 ---
 
@@ -117,7 +120,7 @@ Configure seu ambiente e consulte suas demandas em menos de 1 minuto:
 
 ---
 
-## Cheat Sheet (Os 10 Comandos Mais Usados)
+## Cheat Sheet (Comandos Essenciais)
 
 | Comando | O que faz | Módulo |
 |---|---|---|
@@ -131,6 +134,10 @@ Configure seu ambiente e consulte suas demandas em menos de 1 minuto:
 | `neo git auth status` | Confere o estado de autenticação dos provedores Git | `git` |
 | `neo config show` | Visão agregada de todas as preferências e credenciais do Neo | `config` |
 | `neo agent run` | Inicia sessão interativa com o agente de IA (Antigravity CLI) | `agent` |
+| `neo fin expense <valor> <desc>` | Registra despesa rápida vinculada a conta e categoria | `fin` |
+| `neo fin income <valor> <desc>` | Registra receita rápida creditada na conta indicada | `fin` |
+| `neo fin balance` | Balanço consolidado de patrimônio por conta e total geral | `fin` |
+| `neo fin summary` | Painel consolidado do mês com distribuição por categoria | `fin` |
 
 ---
 

@@ -109,6 +109,11 @@ Esta matriz resume todas as operações mapeadas no Neo, indicando disponibilida
 | **`neo tasks`** | Demandas (`tasks`) | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | `resume` (✅), `whoami` (✅), `iterations` (✅), `analyze` (✅) |
 | | Configuração (`config`) | ➖ | ➖ | ➖ | ➖ | ✅ | ➖ | ➖ | `delete` (✅), `columns` (✅) |
 | **`neo agent`** | Agente (`agent`) | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ✅ | `setup` (✅), `run` (✅) |
+| **`neo fin`** | Contas (`bank`) | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (✅), `update` (✅), `delete` (✅) |
+| | Categorias (`category`) | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (✅), `delete` (✅) |
+| | Transações (`tx`) | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (✅), `update` (✅), `delete` (✅) |
+| | Movimentações Rápidas | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | `expense` (✅), `income` (✅) |
+| | Consolidação | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | `balance` (✅), `summary` (✅) |
 
 **Legenda:**
 * ✅ **Disponível:** Funcionalidade implementada e testada no código atual.
