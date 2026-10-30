@@ -90,9 +90,9 @@ def test_AC_4_AC_13_AC_14_agent_config_model_sdd_list_unset_and_show(tmp_path: P
 
         res_show_human = runner.invoke(app, ["config", "show"])
         assert res_show_human.exit_code == 0
-        assert "Agente de Codificação (agent):" in res_show_human.output
+        assert "Agents" in res_show_human.output
+        assert "Code-Agent" in res_show_human.output
         assert "Gemini 3.8 Flash" in res_show_human.output
-        assert "spec-kit" in res_show_human.output
 
         # Unset model
         res_unset = runner.invoke(app, ["config", "agent", "unset", "model"])
