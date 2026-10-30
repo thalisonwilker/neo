@@ -63,8 +63,12 @@ neo git workspace list
 neo git repo list --limit 10
 neo git commits search --query "fix" --limit 5
 
-# 4. Veja o quadro Kanban (A fazer | Fazendo | Feito) e analise tasks no Shortcut
+# 4. Acompanhe a sprint, crie tasks, checklists e comentários no Shortcut
 neo tasks resume
+neo tasks create "Nova feature" -d "Descrição da tarefa"
+neo tasks check add 2108 "Escrever testes unitários"
+neo tasks check complete 2108 1001
+neo tasks comment add 2108 "PR aberto para revisão"
 neo tasks analyze 2108
 
 # 5. Configure e inicie o agente de codificação (Google Antigravity CLI) e provedores SDD

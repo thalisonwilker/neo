@@ -7,7 +7,7 @@ alwaysApply: false
 # neo tasks show
 > Exibe detalhes completos de uma story pelo ID numérico no Shortcut.
 
-O comando `neo tasks show` busca todas as informações de um card: título, descrição em markdown formatada no terminal, status de workflow, tipo (`feature`, `bug`, `chore`), estimativa de pontos, proprietários atribuídos, labels e URL web direta.
+O comando `neo tasks show` busca todas as informações de um card: título, descrição em markdown formatada no terminal, status de workflow, tipo (`feature`, `bug`, `chore`), estimativa de pontos, itens de checklist (com contagem de progresso), comentários e URL web direta.
 
 ---
 

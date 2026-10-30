@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 import httpx
 
 from neo.integrations.shortcut_models import (
+    ShortcutComment,
     ShortcutIteration,
     ShortcutMember,
     ShortcutStory,
+    ShortcutTask,
     ShortcutWorkflow,
     ShortcutWorkflowState,
     StoryAnalysis,
@@ -208,3 +211,80 @@ class ShortcutClient:
             f"Iteração '{clean}' não encontrada. "
             "Execute `neo tasks iterations` para ver as iterações disponíveis."
         )
+
+    # 8. Função 8: Criar Story
+    def create_story(
+        self,
+        name: str,
+        description: str | None = None,
+        story_type: str = "feature",
+        iteration_id: int | None = None,
+        owner_ids: list[str] | None = None,
+        workflow_state_id: int | None = None,
+    ) -> ShortcutStory:
+        """Cria uma nova story no Shortcut (POST /api/v3/stories)."""
+        url = f"{self.base_url}/stories"
+        payload: dict[str, Any] = {
+            "name": name,
+            "story_type": story_type,
+        }
+        if description is not None:
+            payload["description"] = description
+        if iteration_id is not None:
+            payload["iteration_id"] = iteration_id
+        if owner_ids:
+            payload["owner_ids"] = owner_ids
+        if workflow_state_id is not None:
+            payload["workflow_state_id"] = workflow_state_id
+
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(url, headers=self._get_headers(), json=payload)
+            self._handle_response_error(resp, f"criar story '{name}'")
+            return ShortcutStory.from_api_dict(resp.json())
+
+    # 9. Função 9: Checklist Items (Tasks)
+    def create_task(
+        self,
+        story_id: int | str,
+        description: str,
+        complete: bool = False,
+    ) -> ShortcutTask:
+        """Adiciona um item de checklist a uma story (POST /api/v3/stories/{story_id}/tasks)."""
+        url = f"{self.base_url}/stories/{story_id}/tasks"
+        payload = {"description": description, "complete": complete}
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(url, headers=self._get_headers(), json=payload)
+            self._handle_response_error(resp, f"adicionar checklist item na story #{story_id}")
+            return ShortcutTask.from_api_dict(resp.json(), story_id=int(story_id))
+
+    def update_task(
+        self,
+        story_id: int | str,
+        task_id: int | str,
+        complete: bool | None = None,
+        description: str | None = None,
+    ) -> ShortcutTask:
+        """Atualiza um item de checklist de uma story (PUT /api/v3/stories/{story_id}/tasks/{task_id})."""
+        url = f"{self.base_url}/stories/{story_id}/tasks/{task_id}"
+        payload: dict[str, Any] = {}
+        if complete is not None:
+            payload["complete"] = complete
+        if description is not None:
+            payload["description"] = description
+
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.put(url, headers=self._get_headers(), json=payload)
+            self._handle_response_error(
+                resp, f"atualizar checklist item #{task_id} na story #{story_id}"
+            )
+            return ShortcutTask.from_api_dict(resp.json(), story_id=int(story_id))
+
+    # 10. Função 10: Comentários
+    def create_comment(self, story_id: int | str, text: str) -> ShortcutComment:
+        """Adiciona um comentário a uma story (POST /api/v3/stories/{story_id}/comments)."""
+        url = f"{self.base_url}/stories/{story_id}/comments"
+        payload = {"text": text}
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(url, headers=self._get_headers(), json=payload)
+            self._handle_response_error(resp, f"adicionar comentário na story #{story_id}")
+            return ShortcutComment.from_api_dict(resp.json(), story_id=int(story_id))

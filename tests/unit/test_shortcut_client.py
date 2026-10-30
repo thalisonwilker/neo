@@ -224,3 +224,88 @@ def test_list_and_resolve_iterations(sc_client: ShortcutClient):
 
     with pytest.raises(ShortcutNotFoundError, match="não encontrada"):
         sc_client.resolve_iteration("Sprint 999")
+
+
+@respx.mock
+def test_create_story(sc_client: ShortcutClient):
+    respx.post("https://api.app.shortcut.com/api/v3/stories").mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "id": 501,
+                "name": "Nova Story de Teste",
+                "story_type": "feature",
+                "description": "Descrição detalhada",
+                "iteration_id": 21002,
+                "owner_ids": ["member-uuid-123"],
+                "app_url": "https://app.shortcut.com/story/501",
+                "tasks": [],
+                "comments": [],
+            },
+        )
+    )
+
+    story = sc_client.create_story(
+        name="Nova Story de Teste",
+        description="Descrição detalhada",
+        story_type="feature",
+        iteration_id=21002,
+        owner_ids=["member-uuid-123"],
+    )
+    assert isinstance(story, ShortcutStory)
+    assert story.id == 501
+    assert story.name == "Nova Story de Teste"
+    assert story.iteration_id == 21002
+    assert story.owner_ids == ["member-uuid-123"]
+
+
+@respx.mock
+def test_create_and_update_task(sc_client: ShortcutClient):
+    respx.post("https://api.app.shortcut.com/api/v3/stories/501/tasks").mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "id": 1001,
+                "description": "Item 1 do checklist",
+                "complete": False,
+            },
+        )
+    )
+    respx.put("https://api.app.shortcut.com/api/v3/stories/501/tasks/1001").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "id": 1001,
+                "description": "Item 1 do checklist",
+                "complete": True,
+            },
+        )
+    )
+
+    task = sc_client.create_task(501, "Item 1 do checklist")
+    assert task.id == 1001
+    assert task.description == "Item 1 do checklist"
+    assert task.complete is False
+
+    updated = sc_client.update_task(501, 1001, complete=True)
+    assert updated.id == 1001
+    assert updated.complete is True
+
+
+@respx.mock
+def test_create_comment(sc_client: ShortcutClient):
+    respx.post("https://api.app.shortcut.com/api/v3/stories/501/comments").mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "id": 2001,
+                "text": "Comentário importante sobre o PR",
+                "author_id": "member-uuid-123",
+            },
+        )
+    )
+
+    comment = sc_client.create_comment(501, "Comentário importante sobre o PR")
+    assert comment.id == 2001
+    assert comment.text == "Comentário importante sobre o PR"
+    assert comment.author_id == "member-uuid-123"

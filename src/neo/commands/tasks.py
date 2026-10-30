@@ -42,6 +42,20 @@ tasks_config_app = typer.Typer(
 )
 tasks_app.add_typer(tasks_config_app, name="config")
 
+tasks_check_app = typer.Typer(
+    name="check",
+    help="Gerencia itens de checklist (tasks) de uma story no Shortcut.",
+    no_args_is_help=True,
+)
+tasks_app.add_typer(tasks_check_app, name="check")
+
+tasks_comment_app = typer.Typer(
+    name="comment",
+    help="Adiciona comentários em stories no Shortcut.",
+    no_args_is_help=True,
+)
+tasks_app.add_typer(tasks_comment_app, name="comment")
+
 
 def _service_option() -> Any:
     return Option(
@@ -360,6 +374,118 @@ def _resolve_target_iteration(
         raise
 
 
+def _resolve_create_iteration(
+    client: ShortcutClient,
+    iteration_opt: str | None,
+    as_json: bool,
+) -> ShortcutIteration | None:
+    """Resolve a iteração para a nova story (padrão = última iteração; 'none' = sem iteração; ou termo)."""
+    if iteration_opt and iteration_opt.strip().lower() in ("none", "null", "false"):
+        return None
+    try:
+        if iteration_opt in ("current", "latest", None):
+            return client.get_latest_iteration()
+        return client.resolve_iteration(iteration_opt)
+    except ShortcutNotFoundError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+    except ShortcutError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+    except AssertionError:
+        return None
+
+
+def _resolve_create_owner(
+    client: ShortcutClient,
+    owner_opt: str | None,
+) -> list[str] | None:
+    """Resolve o owner para a nova story (padrão = usuário logado 'me'; 'none' = sem owner; ou ID)."""
+    if not owner_opt or owner_opt.strip().lower() in ("none", "null", "false"):
+        return None
+    if owner_opt.strip().lower() == "me":
+        try:
+            member = client.get_current_member()
+            return [member.id] if member and member.id else None
+        except ShortcutError:
+            return None
+    return [owner_opt.strip()]
+
+
+@tasks_app.command("create")
+def tasks_create(
+    ctx: typer.Context,
+    title: str = Argument(..., help="Título / nome da nova task (story)."),
+    description: str | None = Option(
+        None, "-d", "--description", help="Descrição detalhada da task."
+    ),
+    story_type: str = Option("feature", "--type", "-t", help="Tipo da story: feature, bug, chore."),
+    iteration: str | None = Option(
+        "current",
+        "--iteration",
+        "-i",
+        help="Iteração (Sprint): 'current' (padrão), 'none' (sem iteração) ou ID/nome da iteração.",
+    ),
+    owner: str | None = Option(
+        "me",
+        "--owner",
+        help="Responsável: 'me' (padrão, usuário logado), 'none' (sem owner) ou ID do membro.",
+    ),
+    workflow_state_id: int | None = Option(
+        None,
+        "--workflow-state-id",
+        help="ID do estado inicial no workflow.",
+    ),
+    service: str = _service_option(),
+) -> None:
+    """Cria uma nova story no Shortcut, associada por padrão à iteração atual."""
+    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    client = _get_client(service, as_json)
+
+    it = _resolve_create_iteration(client, iteration, as_json)
+    target_iteration_id = it.id if it else None
+    target_iteration_name = it.name if it else None
+
+    owner_ids = _resolve_create_owner(client, owner)
+
+    try:
+        story = client.create_story(
+            name=title,
+            description=description,
+            story_type=story_type,
+            iteration_id=target_iteration_id,
+            owner_ids=owner_ids,
+            workflow_state_id=workflow_state_id,
+        )
+    except ShortcutError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+
+    if as_json:
+        print_json(story.model_dump())
+    else:
+        app_url = story.app_url or f"https://app.shortcut.com/story/{story.id}"
+        iter_str = (
+            f"[cyan]{target_iteration_name}[/cyan] (#{target_iteration_id})"
+            if target_iteration_id
+            else "[dim]Nenhuma[/dim]"
+        )
+        owners_str = ", ".join(story.owner_ids) if story.owner_ids else "[dim]Nenhum[/dim]"
+        desc_preview = (
+            f"\n\n[bold]Descrição:[/bold]\n{story.description}" if story.description else ""
+        )
+        content = (
+            f"[bold]ID:[/bold] #{story.id}\n"
+            f"[bold]Título:[/bold] {story.name}\n"
+            f"[bold]Tipo:[/bold] {story.story_type.upper()}\n"
+            f"[bold]Iteração:[/bold] {iter_str}\n"
+            f"[bold]Owner:[/bold] {owners_str}\n"
+            f"[bold]URL Web:[/bold] [cyan]{app_url}[/cyan]"
+            f"{desc_preview}"
+        )
+        print_panel(f"Task #{story.id} criada com sucesso!", content)
+
+
 @tasks_app.command("list")
 def tasks_list(
     ctx: typer.Context,
@@ -493,13 +619,151 @@ def tasks_show(
         desc = story.description or "[dim]Sem descrição.[/dim]"
         labels_str = ", ".join(story.labels) if story.labels else "Nenhuma"
         app_url = story.app_url or f"https://app.shortcut.com/story/{story.id}"
+
+        checklist_parts: list[str] = []
+        if story.tasks:
+            done_cnt = sum(1 for t in story.tasks if t.complete)
+            checklist_parts.append(f"\n\n[bold]Checklist ({done_cnt}/{len(story.tasks)}):[/bold]")
+            for t in story.tasks:
+                box = "[green][✓][/green]" if t.complete else "[yellow][ ][/yellow]"
+                checklist_parts.append(f"\n  {box} #{t.id} {escape(t.description)}")
+
+        comment_parts: list[str] = []
+        if story.comments:
+            comment_parts.append(f"\n\n[bold]Comentários ({len(story.comments)}):[/bold]")
+            for c in story.comments:
+                comment_parts.append(f"\n  [cyan]•[/cyan] #{c.id}: {escape(c.text)}")
+
         content = (
             f"[bold]Tipo:[/bold] {story.story_type.upper()}\n"
             f"[bold]Labels:[/bold] {labels_str}\n"
             f"[bold]URL Web:[/bold] [cyan]{app_url}[/cyan]\n\n"
             f"[bold]Descrição:[/bold]\n{desc}"
+            f"{''.join(checklist_parts)}"
+            f"{''.join(comment_parts)}"
         )
         print_panel(f"Story #{story.id}: {story.name}", content)
+
+
+# Comandos de Checklist (neo tasks check ...)
+@tasks_check_app.command("add")
+def check_add(
+    ctx: typer.Context,
+    story_id: int = Argument(..., help="ID da story/task pai no Shortcut."),
+    description: str = Argument(..., help="Descrição do item de checklist."),
+    service: str = _service_option(),
+) -> None:
+    """Adiciona um item de checklist a uma story."""
+    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    client = _get_client(service, as_json)
+    try:
+        task = client.create_task(story_id, description)
+    except ShortcutNotFoundError as e:
+        print_error(f"Story #{story_id} não encontrada: {e}", as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+    except ShortcutError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+
+    if as_json:
+        print_json(task.model_dump())
+    else:
+        print_success(
+            f"Checklist item #{task.id} adicionado à story #{story_id}: [yellow][ ][/yellow] {escape(task.description)}"
+        )
+
+
+@tasks_check_app.command("complete")
+@tasks_check_app.command("done", hidden=True)
+def check_complete(
+    ctx: typer.Context,
+    story_id: int = Argument(..., help="ID da story/task pai no Shortcut."),
+    task_id: int = Argument(..., help="ID do item de checklist a concluir."),
+    service: str = _service_option(),
+) -> None:
+    """Marca um item de checklist como concluído."""
+    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    client = _get_client(service, as_json)
+    try:
+        task = client.update_task(story_id, task_id, complete=True)
+    except ShortcutNotFoundError as e:
+        print_error(f"Recurso não encontrado: {e}", as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+    except ShortcutError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+
+    if as_json:
+        print_json(task.model_dump())
+    else:
+        print_success(
+            f"Checklist item #{task.id} marcado como [green][✓] Concluído[/green] na story #{story_id}."
+        )
+
+
+@tasks_check_app.command("uncomplete")
+@tasks_check_app.command("undone", hidden=True)
+def check_uncomplete(
+    ctx: typer.Context,
+    story_id: int = Argument(..., help="ID da story/task pai no Shortcut."),
+    task_id: int = Argument(..., help="ID do item de checklist a reabrir."),
+    service: str = _service_option(),
+) -> None:
+    """Desmarca um item de checklist (reabre como pendente)."""
+    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    client = _get_client(service, as_json)
+    try:
+        task = client.update_task(story_id, task_id, complete=False)
+    except ShortcutNotFoundError as e:
+        print_error(f"Recurso não encontrado: {e}", as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+    except ShortcutError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+
+    if as_json:
+        print_json(task.model_dump())
+    else:
+        print_success(
+            f"Checklist item #{task.id} reaberto como [yellow][ ] Aberto[/yellow] na story #{story_id}."
+        )
+
+
+# Comandos de Comentário (neo tasks comment ...)
+def _add_comment_impl(
+    ctx: typer.Context,
+    story_id: int,
+    text: str,
+    service: str,
+) -> None:
+    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    client = _get_client(service, as_json)
+    try:
+        comment = client.create_comment(story_id, text)
+    except ShortcutNotFoundError as e:
+        print_error(f"Story #{story_id} não encontrada: {e}", as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+    except ShortcutError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+
+    if as_json:
+        print_json(comment.model_dump())
+    else:
+        print_success(
+            f'Comentário #{comment.id} adicionado à story #{story_id}: [cyan]"{escape(comment.text)}"[/cyan]'
+        )
+
+
+@tasks_comment_app.command("add")
+def comment_add(
+    ctx: typer.Context,
+    story_id: int = Argument(..., help="ID da story no Shortcut."),
+    text: str = Argument(..., help="Texto do comentário."),
+    service: str = _service_option(),
+) -> None:
+    """Adiciona um comentário a uma story."""
+    _add_comment_impl(ctx, story_id, text, service)
 
 
 @tasks_app.command("analyze")

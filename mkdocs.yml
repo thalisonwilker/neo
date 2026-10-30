@@ -110,6 +110,10 @@ nav:
               - Quadro Kanban: cli/tasks/resume.md
               - Membro Autenticado: cli/tasks/whoami.md
               - Sprints e Iterações: cli/tasks/iterations.md
+          - Gestão e Criação:
+              - Criar Story: cli/tasks/create.md
+              - Checklist da Story: cli/tasks/check.md
+              - Comentários: cli/tasks/comment.md
           - Consulta de Demandas:
               - Listar Stories: cli/tasks/list.md
               - Pesquisar Stories: cli/tasks/search.md

@@ -92,6 +92,42 @@ class ShortcutIteration(BaseModel):
         )
 
 
+class ShortcutTask(BaseModel):
+    """Representa um item de checklist (task) de uma story no Shortcut."""
+
+    id: int
+    description: str
+    complete: bool = False
+    story_id: int | None = None
+
+    @classmethod
+    def from_api_dict(cls, data: dict[str, Any], story_id: int | None = None) -> ShortcutTask:
+        return cls(
+            id=int(data.get("id", 0)),
+            description=str(data.get("description", "")),
+            complete=bool(data.get("complete", False)),
+            story_id=story_id or data.get("story_id"),
+        )
+
+
+class ShortcutComment(BaseModel):
+    """Representa um comentário em uma story no Shortcut."""
+
+    id: int
+    text: str
+    author_id: str | None = None
+    story_id: int | None = None
+
+    @classmethod
+    def from_api_dict(cls, data: dict[str, Any], story_id: int | None = None) -> ShortcutComment:
+        return cls(
+            id=int(data.get("id", 0)),
+            text=str(data.get("text", "")),
+            author_id=data.get("author_id"),
+            story_id=story_id or data.get("story_id"),
+        )
+
+
 class ShortcutStory(BaseModel):
     """Representa uma Story no Shortcut."""
 
@@ -108,10 +144,24 @@ class ShortcutStory(BaseModel):
     owner_ids: list[str] = Field(default_factory=list)
     labels: list[str] = Field(default_factory=list)
     estimate: float | None = None
+    tasks: list[ShortcutTask] = Field(default_factory=list)
+    comments: list[ShortcutComment] = Field(default_factory=list)
 
     @classmethod
     def from_api_dict(cls, data: dict[str, Any]) -> ShortcutStory:
         label_names = [lb.get("name", "") for lb in data.get("labels", []) if isinstance(lb, dict)]
+        raw_tasks = data.get("tasks", [])
+        tasks = [
+            ShortcutTask.from_api_dict(t, story_id=data.get("id"))
+            for t in raw_tasks
+            if isinstance(t, dict)
+        ]
+        raw_comments = data.get("comments", [])
+        comments = [
+            ShortcutComment.from_api_dict(c, story_id=data.get("id"))
+            for c in raw_comments
+            if isinstance(c, dict)
+        ]
         return cls(
             id=data.get("id", 0),
             name=data.get("name", ""),
@@ -125,6 +175,8 @@ class ShortcutStory(BaseModel):
             owner_ids=data.get("owner_ids", []),
             labels=label_names,
             estimate=data.get("estimate"),
+            tasks=tasks,
+            comments=comments,
         )
 
 
