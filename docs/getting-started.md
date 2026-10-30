@@ -116,8 +116,29 @@ neo git repo list --limit 5 --json | jq '.[] | {name, slug, main_branch}'
 
 ---
 
+## 5. Comece o Gerenciamento Financeiro Pessoal (`neo fin`)
+
+O Neo organiza não apenas seu código e tarefas, mas também suas finanças com persistência local SQLite automática (`~/.config/neo/finance.db`):
+
+```bash
+# 1. Crie sua conta ou carteira inicial com saldo
+neo fin bank create nubank --name "Nubank Principal" --type checking --balance 1200.00
+
+# 2. Registre despesas ou receitas do dia a dia em menos de 2 segundos
+neo fin expense 32.50 "Almoço executivo" -a nubank -c alimentacao
+neo fin income 4500.00 "Salário do mês" -a nubank -c salario
+
+# 3. Consulte o balanço patrimonial e o resumo mensal consolidado
+neo fin balance
+neo fin summary
+```
+
+---
+
 ## Próximos Passos
 
+- [Gerenciamento Financeiro (`neo fin`)](cli/fin/index.md): documentação detalhada de contas, categorias, extrato e atalhos.
+- [Guia Prático de Gestão Financeira](guias/gestao-financeira.md): passo a passo do fluxo financeiro pessoal diário.
 - [Configuração & Credenciais](configuration.md): veja todas as chaves da seção `[git]` e `[agent]`, a ordem de precedência e as variáveis de ambiente para CI/CD.
 - [Agente & SDD (`neo agent`)](cli/agent/index.md): configure o Google Antigravity CLI (`agy`), selecione modelos e prepare os provedores `spec-driven` e `spec-kit`.
 - [Visão Geral da CLI](cli/index.md): consulte a gramática, os verbos padronizados e a tabela de códigos de saída.

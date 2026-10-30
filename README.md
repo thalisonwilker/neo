@@ -20,8 +20,8 @@
 
 O **Neo** (`neo-cmd`) é um assistente pessoal de linha de comando feito por dev, para devs que resolvem tudo pelo teclado. Desenvolvido em **Python 3.13** com **Typer** e **Rich**:
 
-- **Disponível hoje:** integração unificada com **GitHub**, **Bitbucket Cloud** e **Shortcut** (`neo git` e `neo tasks`), quadros Kanban no terminal, saída estruturada via `--json` e credenciais protegidas no Keyring do SO.
-- **No roadmap:** módulos para estudos, hobbies, lazer, finanças pessoais (receitas e despesas) e uma API para conectar qualquer ferramenta ao seu fluxo.
+- **Disponível hoje:** integração unificada com **GitHub**, **Bitbucket Cloud** e **Shortcut** (`neo git` e `neo tasks`), orquestração do Google Antigravity CLI e esteiras SDD (`neo agent`), micro gerenciamento financeiro pessoal local (`neo fin`), quadros Kanban no terminal, saída estruturada via `--json` e credenciais protegidas no Keyring do SO.
+- **No roadmap:** módulos para estudos, hobbies, lazer e acompanhamento avançado de PRs.
 
 📚 **Documentação Completa:** **[thalisonwilker.github.io/neo](https://thalisonwilker.github.io/neo/)**
 
@@ -75,7 +75,14 @@ neo agent status
 neo agent setup --yes
 neo agent run
 
-# 6. Combine com --json e jq para criar scripts e automações
+# 6. Gerencie suas finanças pessoais em menos de 2 segundos direto do terminal
+neo fin bank create nubank --name "Nubank Principal" --balance 1500.00
+neo fin expense 45.90 "Almoço de trabalho" -a nubank -c alimentacao
+neo fin income 5000.00 "Salário" -a nubank -c salario
+neo fin balance
+neo fin summary
+
+# 7. Combine com --json e jq para criar scripts e automações
 neo git repo list --json | jq '.[] | {slug, main_branch}'
 ```
 

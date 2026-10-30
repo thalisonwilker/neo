@@ -130,6 +130,7 @@ nav:
           - Balanço e Resumo: cli/fin/summary.md
   - Guias Práticos:
       - guias/index.md
+      - Gestão Financeira Pessoal: guias/gestao-financeira.md
       - Uso em CI com --json: guias/ci-json.md
       - Trocar de Provedor (GitHub ↔ Bitbucket): guias/trocar-provedor.md
       - Fluxo Diário (Tasks → Branch → Commit): guias/fluxo-diario.md
