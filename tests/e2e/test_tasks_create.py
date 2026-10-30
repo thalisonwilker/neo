@@ -38,10 +38,24 @@ MOCK_ITERATIONS = [
     },
 ]
 
+MOCK_WORKFLOWS = [
+    {
+        "id": 500001,
+        "name": "Atual",
+        "states": [
+            {"id": 500010, "name": "Backlog", "type": "unstarted"},
+            {"id": 500012, "name": "Em Progresso", "type": "started"},
+        ],
+    }
+]
+
 
 @pytest.fixture
 def mock_sc_auth():
     with patch("neo.commands.tasks.get_credential", return_value="mock-token"):
+        respx.get("https://api.app.shortcut.com/api/v3/workflows").mock(
+            return_value=httpx.Response(200, json=MOCK_WORKFLOWS)
+        )
         yield
 
 

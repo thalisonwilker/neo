@@ -159,6 +159,18 @@ class ShortcutClient:
             states.extend(wf.states)
         return states
 
+    def get_default_workflow_state_id(self) -> int | None:
+        """Retorna o ID do estado inicial padrão (primeiro estado 'unstarted' dos workflows)."""
+        workflows = self.list_workflows()
+        for wf in workflows:
+            for s in wf.states:
+                if s.type == "unstarted":
+                    return s.id
+        for wf in workflows:
+            if wf.states:
+                return wf.states[0].id
+        return None
+
     # 7. Função 7: Listar e resolver Iterações (Sprints)
     def list_iterations(self) -> list[ShortcutIteration]:
         """Lista todas as iterações do Shortcut ordenadas da mais recente para a mais antiga."""
@@ -234,8 +246,16 @@ class ShortcutClient:
             payload["iteration_id"] = iteration_id
         if owner_ids:
             payload["owner_ids"] = owner_ids
-        if workflow_state_id is not None:
-            payload["workflow_state_id"] = workflow_state_id
+
+        actual_state_id = workflow_state_id
+        if actual_state_id is None:
+            try:
+                actual_state_id = self.get_default_workflow_state_id()
+            except (ShortcutError, httpx.RequestError, AssertionError):
+                actual_state_id = None
+
+        if actual_state_id is not None:
+            payload["workflow_state_id"] = actual_state_id
 
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(url, headers=self._get_headers(), json=payload)

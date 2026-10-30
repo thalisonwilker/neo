@@ -309,3 +309,25 @@ def test_create_comment(sc_client: ShortcutClient):
     assert comment.id == 2001
     assert comment.text == "Comentário importante sobre o PR"
     assert comment.author_id == "member-uuid-123"
+
+
+@respx.mock
+def test_get_default_workflow_state_id(sc_client: ShortcutClient):
+    respx.get("https://api.app.shortcut.com/api/v3/workflows").mock(
+        return_value=httpx.Response(
+            200,
+            json=[
+                {
+                    "id": 500001,
+                    "name": "Engenharia",
+                    "states": [
+                        {"id": 500010, "name": "Backlog", "type": "unstarted"},
+                        {"id": 500011, "name": "Doing", "type": "started"},
+                    ],
+                }
+            ],
+        )
+    )
+
+    state_id = sc_client.get_default_workflow_state_id()
+    assert state_id == 500010
