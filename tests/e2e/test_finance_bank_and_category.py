@@ -112,3 +112,61 @@ def test_category_lifecycle_and_json() -> None:
     # Remove non-existent fails with NOT_FOUND
     res_rm_nf = runner.invoke(app, ["fin", "category", "rm", "games", "--type", "expense"])
     assert res_rm_nf.exit_code == int(ExitCode.NOT_FOUND)
+
+
+def test_standard_verbs_bank_and_category() -> None:
+    # 1. Bank create
+    res_create = runner.invoke(
+        app,
+        [
+            "fin",
+            "bank",
+            "create",
+            "c6",
+            "--name",
+            "C6 Bank",
+            "--type",
+            "checking",
+            "--balance",
+            "200.0",
+        ],
+    )
+    assert res_create.exit_code == int(ExitCode.SUCCESS)
+
+    # 2. Bank get (and show)
+    res_get = runner.invoke(app, ["fin", "bank", "get", "c6", "--json"])
+    assert res_get.exit_code == int(ExitCode.SUCCESS)
+    data = json.loads(res_get.output)
+    assert data["slug"] == "c6"
+    assert data["name"] == "C6 Bank"
+    assert data["initial_balance"] == 200.0
+
+    res_show = runner.invoke(app, ["fin", "bank", "show", "c6"])
+    assert res_show.exit_code == int(ExitCode.SUCCESS)
+    assert "C6 Bank" in res_show.output
+
+    # 3. Bank update
+    res_update = runner.invoke(
+        app,
+        ["fin", "bank", "update", "c6", "--name", "C6 Carbon", "--type", "credit"],
+    )
+    assert res_update.exit_code == int(ExitCode.SUCCESS)
+
+    # 4. Bank delete
+    res_del = runner.invoke(app, ["fin", "bank", "delete", "c6"])
+    assert res_del.exit_code == int(ExitCode.SUCCESS)
+
+    # 5. Category create, get, delete
+    res_cat_create = runner.invoke(
+        app,
+        ["fin", "category", "create", "livros", "--name", "Livros e Ebooks", "--type", "expense"],
+    )
+    assert res_cat_create.exit_code == int(ExitCode.SUCCESS)
+
+    res_cat_get = runner.invoke(app, ["fin", "category", "get", "livros", "--json"])
+    assert res_cat_get.exit_code == int(ExitCode.SUCCESS)
+    cat_data = json.loads(res_cat_get.output)
+    assert cat_data["slug"] == "livros"
+
+    res_cat_del = runner.invoke(app, ["fin", "category", "delete", "livros", "--type", "expense"])
+    assert res_cat_del.exit_code == int(ExitCode.SUCCESS)

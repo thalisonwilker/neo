@@ -30,13 +30,13 @@ neo fin income <valor> <descrição> [-a <conta>] [-c <categoria>] [-d <YYYY-MM-
 O gerenciamento financeiro do Neo é estruturado em submenus modulares:
 
 ### 1. Bancos e Contas
-- [**Contas Bancárias e Carteiras (`neo fin bank`)**](bank.md): Cadastro, edição, remoção e listagem de contas (`checking`, `savings`, `investment`, `credit`, `cash`).
+- [**Contas Bancárias e Carteiras (`neo fin bank`)**](bank.md): Cadastro, consulta, listagem, atualização e exclusão de contas (`checking`, `savings`, `investment`, `credit`, `cash`).
 
 ### 2. Categorias
-- [**Categorias (`neo fin category`)**](category.md): Gestão de categorias personalizadas de despesas e receitas com categorias padrão semeadas no primeiro uso.
+- [**Categorias (`neo fin category`)**](category.md): Gestão de categorias personalizadas de despesas e receitas (`create`, `get`, `list`, `delete`), com categorias padrão semeadas no primeiro uso.
 
 ### 3. Transações e Atalhos
-- [**Transações (`neo fin tx`)**](tx.md): Extrato detalhado com filtros por data, conta, categoria e tipo, além de atalhos ergonômicos `neo fin expense` e `neo fin income`.
+- [**Transações (`neo fin tx`)**](tx.md): Extrato detalhado com filtros por data, conta, categoria e tipo (`create`, `get`, `list`, `update`, `delete`), além de atalhos ergonômicos `neo fin expense` e `neo fin income`.
 
 ### 4. Balanço e Resumos
 - [**Balanço e Resumo Mensal (`neo fin balance` e `neo fin summary`)**](summary.md): Visão consolidada de patrimônio por conta e detalhamento mensal de gastos por categoria.

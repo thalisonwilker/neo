@@ -13,11 +13,11 @@ O comando `neo fin category` organiza suas movimentações financeiras em grupos
 
 ## Comandos Disponíveis
 
-### `neo fin category add`
-Cadastra uma nova categoria personalizada.
+### `neo fin category create`
+Cadastra uma nova categoria personalizada (alias: `neo fin category add`).
 
 ```bash
-neo fin category add <slug> --name <nome> --type <expense|income> [--json]
+neo fin category create <slug> --name <nome> --type <expense|income> [--json]
 ```
 
 **Parâmetros e Opções:**
@@ -28,7 +28,21 @@ neo fin category add <slug> --name <nome> --type <expense|income> [--json]
 
 **Exemplo:**
 ```bash
-neo fin category add jogos --name "Jogos & Steam" --type expense
+neo fin category create jogos --name "Jogos & Steam" --type expense
+```
+
+---
+
+### `neo fin category get`
+Exibe os detalhes de uma categoria cadastrada (alias: `neo fin category show`).
+
+```bash
+neo fin category get <slug> [--type <expense|income>] [--json]
+```
+
+**Exemplo:**
+```bash
+neo fin category get alimentacao --type expense
 ```
 
 ---
@@ -47,11 +61,11 @@ neo fin category list --type expense
 
 ---
 
-### `neo fin category rm`
-Remove uma categoria cadastrada.
+### `neo fin category delete`
+Remove uma categoria cadastrada (alias: `neo fin category rm`).
 
 ```bash
-neo fin category rm <slug> [--type <expense|income>] [--json]
+neo fin category delete <slug> [--type <expense|income>] [--json]
 ```
 
 > [!NOTE]
@@ -59,5 +73,5 @@ neo fin category rm <slug> [--type <expense|income>] [--json]
 
 **Exemplo:**
 ```bash
-neo fin category rm jogos --type expense
+neo fin category delete jogos --type expense
 ```

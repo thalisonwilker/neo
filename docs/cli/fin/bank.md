@@ -5,7 +5,7 @@ alwaysApply: false
 ---
 
 # neo fin bank
-> Cadastro, listagem, edição e exclusão de contas bancárias e carteiras financeiras.
+> Cadastro, consulta, listagem, atualização e exclusão de contas bancárias e carteiras financeiras.
 
 O comando `neo fin bank` gerencia os locais onde seu dinheiro está guardado (bancos tradicionais, fintechs, corretoras, dinheiro em espécie ou cartões). Cada conta possui um saldo inicial e um saldo atual calculado automaticamente com base nas receitas e despesas registradas.
 
@@ -13,11 +13,11 @@ O comando `neo fin bank` gerencia os locais onde seu dinheiro está guardado (ba
 
 ## Comandos Disponíveis
 
-### `neo fin bank add`
-Cadastra uma nova conta bancária ou carteira.
+### `neo fin bank create`
+Cadastra uma nova conta bancária ou carteira (alias: `neo fin bank add`).
 
 ```bash
-neo fin bank add <slug> --name <nome> [--type <tipo>] [--balance <saldo_inicial>] [--json]
+neo fin bank create <slug> --name <nome> [--type <tipo>] [--balance <saldo_inicial>] [--json]
 ```
 
 **Parâmetros e Opções:**
@@ -29,7 +29,21 @@ neo fin bank add <slug> --name <nome> [--type <tipo>] [--balance <saldo_inicial>
 
 **Exemplo:**
 ```bash
-neo fin bank add nubank --name "Nubank Roxinho" --type checking --balance 1500.00
+neo fin bank create nubank --name "Nubank Roxinho" --type checking --balance 1500.00
+```
+
+---
+
+### `neo fin bank get`
+Exibe os detalhes completos de uma conta bancária específica (alias: `neo fin bank show`).
+
+```bash
+neo fin bank get <slug> [--json]
+```
+
+**Exemplo:**
+```bash
+neo fin bank get nubank
 ```
 
 ---
@@ -48,25 +62,25 @@ neo fin bank list
 
 ---
 
-### `neo fin bank edit`
-Atualiza o nome de exibição ou o tipo de uma conta existente.
+### `neo fin bank update`
+Atualiza o nome de exibição ou o tipo de uma conta existente (alias: `neo fin bank edit`).
 
 ```bash
-neo fin bank edit <slug> [--name <novo_nome>] [--type <novo_tipo>] [--json]
+neo fin bank update <slug> [--name <novo_nome>] [--type <novo_tipo>] [--json]
 ```
 
 **Exemplo:**
 ```bash
-neo fin bank edit nubank --name "Nubank PJ" --type checking
+neo fin bank update nubank --name "Nubank PJ" --type checking
 ```
 
 ---
 
-### `neo fin bank rm`
-Remove uma conta bancária cadastrada.
+### `neo fin bank delete`
+Remove uma conta bancária cadastrada (alias: `neo fin bank rm`).
 
 ```bash
-neo fin bank rm <slug> [--json]
+neo fin bank delete <slug> [--json]
 ```
 
 > [!NOTE]
@@ -74,5 +88,5 @@ neo fin bank rm <slug> [--json]
 
 **Exemplo:**
 ```bash
-neo fin bank rm inter
+neo fin bank delete inter
 ```

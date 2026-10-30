@@ -184,6 +184,7 @@ def workspace_select(
 
 
 @workspace_app.command("show")
+@workspace_app.command("get", hidden=True)
 def workspace_show(
     ctx: typer.Context,
     workspace: str | None = Option(

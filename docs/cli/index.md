@@ -56,13 +56,16 @@ Para garantir previsibilidade, o Neo organiza suas ações em verbos consistente
 
 | Verbo | Propósito | Recursos que utilizam |
 |---|---|---|
-| `list` | Lista registros tabulares de um recurso | `git config`, `git workspace`, `git repo`, `git commits`, `config agent`, `tasks list`, `tasks iterations` |
+| `list` | Lista registros tabulares de um recurso | `git config`, `git workspace`, `git repo`, `git commits`, `config agent`, `tasks list`, `tasks iterations`, `fin bank`, `fin category`, `fin tx` |
 | `show` | Exibe todos os detalhes e metadados de um registro específico | `git workspace`, `git repo`, `git commits`, `tasks show`, `config show` |
+| `get` | Consulta o registro detalhado ou chave de configuração de um recurso | `git config`, `config agent`, `tasks config`, `fin bank`, `fin category`, `fin tx` |
+| `create` | Criação de novos recursos locais ou remotos | `fin bank`, `fin category`, `fin tx` |
+| `update` | Atualização de metadados ou propriedades de um recurso existente | `fin bank`, `fin tx` |
+| `delete` | Remove um recurso existente ou credencial salva | `fin bank`, `fin category`, `fin tx`, `tasks config` |
 | `search` | Pesquisa registros por termo ou palavra-chave | `git repo`, `git commits`, `tasks search` |
 | `select` | Escolhe o registro ativo de forma interativa ou via flag | `git workspace` |
 | `set` | Grava ou atualiza uma chave de configuração | `git config`, `config agent`, `tasks config` |
-| `get` | Consulta o valor efetivo e a camada de origem de uma chave | `git config`, `config agent`, `tasks config` |
-| `unset` / `delete` | Remove uma chave personalizada ou credencial salva | `git config`, `config agent`, `tasks config` |
+| `unset` | Remove uma chave de configuração personalizada | `git config`, `config agent` |
 | `login` | Autentica um provedor solicitando segredo com digitação oculta | `git auth` |
 | `logout` | Remove credenciais armazenadas de um provedor | `git auth` |
 | `status` | Diagnostica o estado do repositório, credenciais ou agente | `git status`, `git auth status`, `agent status` |
@@ -79,7 +82,6 @@ Para garantir previsibilidade, o Neo organiza suas ações em verbos consistente
 
 | Verbo | Propósito planejado | Recursos pretendidos |
 |---|---|---|
-| `create` 🚧 | Criação de novos recursos remotos | `git repo`, `git branch`, `git pr`, `git tag`, `git release` |
 | `clone` 🚧 | Clonagem assistida de repositórios | `git repo` |
 | `open` 🚧 | Abertura do recurso na interface web do provedor | `git repo`, `git pr`, `tasks` |
 | `diff` 🚧 | Comparação entre branches ou commits | `git repo`, `git branch` |

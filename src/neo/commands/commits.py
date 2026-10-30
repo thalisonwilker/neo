@@ -198,6 +198,7 @@ def commits_search(
 
 
 @commits_app.command("show")
+@commits_app.command("get", hidden=True)
 def commits_show(
     ctx: typer.Context,
     sha: str = Argument(..., help="Hash completo ou curto (SHA) do commit."),

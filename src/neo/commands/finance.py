@@ -9,7 +9,7 @@ from typer import Argument, Option
 
 from neo.commands._credentials import is_json_mode
 from neo.config import ExitCode
-from neo.output import console, print_error, print_json, print_success, print_table
+from neo.output import console, print_error, print_json, print_panel, print_success, print_table
 from neo.services.finance import (
     AccountInUseError,
     AccountNotFoundError,
@@ -29,19 +29,19 @@ fin_app = typer.Typer(
 
 bank_app = typer.Typer(
     name="bank",
-    help="Gerenciamento de contas bancárias e carteiras (add, list, edit, rm).",
+    help="Gerenciamento de contas bancárias e carteiras (create, get, list, update, delete).",
     no_args_is_help=True,
 )
 
 category_app = typer.Typer(
     name="category",
-    help="Gerenciamento de categorias de despesas e receitas (add, list, rm).",
+    help="Gerenciamento de categorias de despesas e receitas (create, get, list, delete).",
     no_args_is_help=True,
 )
 
 tx_app = typer.Typer(
     name="tx",
-    help="Gerenciamento de transações financeiras (add, list, edit, rm).",
+    help="Gerenciamento de transações financeiras (create, get, list, update, delete).",
     no_args_is_help=True,
 )
 
@@ -59,8 +59,9 @@ def _get_service() -> FinanceService:
 # -----------------------------------------------------------------------------
 
 
-@bank_app.command("add")
-def bank_add(
+@bank_app.command("create")
+@bank_app.command("add", hidden=True)
+def bank_create(
     ctx: typer.Context,
     slug: str = Argument(..., help="Identificador único da conta (ex: nubank, inter, carteira)."),
     name: str = Option(..., "--name", "-n", help="Nome de exibição da conta."),
@@ -98,6 +99,40 @@ def bank_add(
         )
 
 
+@bank_app.command("get")
+@bank_app.command("show", hidden=True)
+def bank_get(
+    ctx: typer.Context,
+    slug: str = Argument(..., help="Slug da conta bancária."),
+    json_output: bool = Option(
+        False, "--json", help="Emite a saída estruturada em JSON no stdout."
+    ),
+) -> None:
+    """Exibe detalhes de uma conta bancária específica."""
+    as_json = is_json_mode(ctx, json_output)
+    service = _get_service()
+
+    try:
+        acc = service.get_account(slug)
+    except AccountNotFoundError as err:
+        print_error(str(err), as_json=as_json, code=int(ExitCode.NOT_FOUND))
+        raise typer.Exit(code=int(ExitCode.NOT_FOUND))
+
+    if as_json:
+        print_json(acc.to_dict())
+    else:
+        cor_saldo = "green" if acc.current_balance >= 0 else "red"
+        text = (
+            f"[bold]Slug:[/bold] {acc.slug}\n"
+            f"[bold]Nome:[/bold] {acc.name}\n"
+            f"[bold]Tipo:[/bold] {acc.account_type}\n"
+            f"[bold]Saldo Inicial:[/bold] R$ {acc.initial_balance:.2f}\n"
+            f"[bold]Saldo Atual:[/bold] [{cor_saldo}]R$ {acc.current_balance:.2f}[/{cor_saldo}]\n"
+            f"[bold]Criado em:[/bold] {acc.created_at}"
+        )
+        print_panel(f"Conta: {acc.name}", text)
+
+
 @bank_app.command("list")
 def bank_list(
     ctx: typer.Context,
@@ -115,7 +150,7 @@ def bank_list(
     else:
         if not accounts:
             console.print(
-                "[yellow]Nenhuma conta bancária cadastrada. Use 'neo fin bank add' para criar uma.[/yellow]"
+                "[yellow]Nenhuma conta bancária cadastrada. Use 'neo fin bank create' para criar uma.[/yellow]"
             )
             return
 
@@ -136,8 +171,9 @@ def bank_list(
         )
 
 
-@bank_app.command("edit")
-def bank_edit(
+@bank_app.command("update")
+@bank_app.command("edit", hidden=True)
+def bank_update(
     ctx: typer.Context,
     slug: str = Argument(..., help="Slug da conta a editar."),
     name: str | None = Option(None, "--name", "-n", help="Novo nome de exibição da conta."),
@@ -164,8 +200,9 @@ def bank_edit(
         )
 
 
-@bank_app.command("rm")
-def bank_rm(
+@bank_app.command("delete")
+@bank_app.command("rm", hidden=True)
+def bank_delete(
     ctx: typer.Context,
     slug: str = Argument(..., help="Slug da conta a remover."),
     json_output: bool = Option(
@@ -196,8 +233,9 @@ def bank_rm(
 # -----------------------------------------------------------------------------
 
 
-@category_app.command("add")
-def category_add(
+@category_app.command("create")
+@category_app.command("add", hidden=True)
+def category_create(
     ctx: typer.Context,
     slug: str = Argument(..., help="Slug único da categoria (ex: jogos, cursos, mercado)."),
     name: str = Option(..., "--name", "-n", help="Nome de exibição da categoria."),
@@ -231,6 +269,42 @@ def category_add(
     else:
         tipo_lbl = "Despesa" if cat.category_type == "expense" else "Receita"
         print_success(f"Categoria '{cat.name}' ({cat.slug}) criada para {tipo_lbl}.")
+
+
+@category_app.command("get")
+@category_app.command("show", hidden=True)
+def category_get(
+    ctx: typer.Context,
+    slug: str = Argument(..., help="Slug da categoria."),
+    category_type: str | None = Option(
+        None, "--type", "-t", help="Tipo da categoria ('expense' ou 'income')."
+    ),
+    json_output: bool = Option(
+        False, "--json", help="Emite a saída estruturada em JSON no stdout."
+    ),
+) -> None:
+    """Exibe detalhes de uma categoria específica."""
+    as_json = is_json_mode(ctx, json_output)
+    service = _get_service()
+
+    try:
+        cat = service.get_category(slug, category_type=category_type)
+    except CategoryNotFoundError as err:
+        print_error(str(err), as_json=as_json, code=int(ExitCode.NOT_FOUND))
+        raise typer.Exit(code=int(ExitCode.NOT_FOUND))
+
+    if as_json:
+        print_json(cat.to_dict())
+    else:
+        tipo_lbl = "Despesa" if cat.category_type == "expense" else "Receita"
+        text = (
+            f"[bold]Slug:[/bold] {cat.slug}\n"
+            f"[bold]Nome:[/bold] {cat.name}\n"
+            f"[bold]Tipo:[/bold] {tipo_lbl}\n"
+            f"[bold]Categoria Padrão:[/bold] {'Sim' if cat.is_default else 'Não'}\n"
+            f"[bold]Criado em:[/bold] {cat.created_at}"
+        )
+        print_panel(f"Categoria: {cat.name}", text)
 
 
 @category_app.command("list")
@@ -273,8 +347,9 @@ def category_list(
         print_table(titulo, ["Slug", "Nome", "Tipo", "Padrão"], rows)
 
 
-@category_app.command("rm")
-def category_rm(
+@category_app.command("delete")
+@category_app.command("rm", hidden=True)
+def category_delete(
     ctx: typer.Context,
     slug: str = Argument(..., help="Slug da categoria a remover."),
     category_type: str | None = Option(
@@ -308,8 +383,9 @@ def category_rm(
 # -----------------------------------------------------------------------------
 
 
-@tx_app.command("add")
-def tx_add(
+@tx_app.command("create")
+@tx_app.command("add", hidden=True)
+def tx_create(
     ctx: typer.Context,
     amount: float = Argument(..., help="Valor da movimentação (positivo)."),
     description: str = Argument(..., help="Descrição da transação."),
@@ -360,6 +436,49 @@ def tx_add(
         print_success(
             f"{tipo_lbl} de [{cor}]R$ {tx.amount:.2f}[/{cor}] registrada na conta '{tx.account_name}' ({tx.category_name})."
         )
+
+
+@tx_app.command("get")
+@tx_app.command("show", hidden=True)
+def tx_get(
+    ctx: typer.Context,
+    tx_id: int = Argument(..., help="ID numérico da transação."),
+    json_output: bool = Option(
+        False, "--json", help="Emite a saída estruturada em JSON no stdout."
+    ),
+) -> None:
+    """Exibe detalhes completos de uma transação específica."""
+    as_json = is_json_mode(ctx, json_output)
+    service = _get_service()
+
+    try:
+        tx = service.get_transaction(tx_id)
+    except TransactionNotFoundError as err:
+        print_error(str(err), as_json=as_json, code=int(ExitCode.NOT_FOUND))
+        raise typer.Exit(code=int(ExitCode.NOT_FOUND))
+
+    if as_json:
+        print_json(tx.to_dict())
+    else:
+        tipo_lbl = (
+            "[red]Despesa[/red]" if tx.transaction_type == "expense" else "[green]Receita[/green]"
+        )
+        val_str = (
+            f"[red]-R$ {tx.amount:.2f}[/red]"
+            if tx.transaction_type == "expense"
+            else f"[green]+R$ {tx.amount:.2f}[/green]"
+        )
+        text = (
+            f"[bold]ID:[/bold] #{tx.id}\n"
+            f"[bold]Data:[/bold] {tx.date}\n"
+            f"[bold]Tipo:[/bold] {tipo_lbl}\n"
+            f"[bold]Valor:[/bold] {val_str}\n"
+            f"[bold]Descrição:[/bold] {tx.description}\n"
+            f"[bold]Conta:[/bold] {tx.account_name} ({tx.account_slug})\n"
+            f"[bold]Categoria:[/bold] {tx.category_name} ({tx.category_slug})\n"
+            f"[bold]Registrado em:[/bold] {tx.created_at}"
+        )
+        print_panel(f"Transação #{tx.id}", text)
 
 
 @tx_app.command("list")
@@ -425,8 +544,9 @@ def tx_list(
         console.print(table)
 
 
-@tx_app.command("edit")
-def tx_edit(
+@tx_app.command("update")
+@tx_app.command("edit", hidden=True)
+def tx_update(
     ctx: typer.Context,
     tx_id: int = Argument(..., help="ID da transação a ser editada."),
     amount: float | None = Option(None, "--amount", help="Novo valor da transação."),
@@ -469,8 +589,9 @@ def tx_edit(
         )
 
 
-@tx_app.command("rm")
-def tx_rm(
+@tx_app.command("delete")
+@tx_app.command("rm", hidden=True)
+def tx_delete(
     ctx: typer.Context,
     tx_id: int = Argument(..., help="ID da transação a ser removida."),
     yes: bool = Option(False, "--yes", "-y", help="Pula confirmação interativa."),

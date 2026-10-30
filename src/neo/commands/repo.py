@@ -143,6 +143,7 @@ def repo_search(
 
 
 @repo_app.command("show")
+@repo_app.command("get", hidden=True)
 def repo_show(
     ctx: typer.Context,
     slug: str | None = Argument(

@@ -468,6 +468,7 @@ def tasks_search(
 
 
 @tasks_app.command("show")
+@tasks_app.command("get", hidden=True)
 def tasks_show(
     ctx: typer.Context,
     service: str = _service_option(),

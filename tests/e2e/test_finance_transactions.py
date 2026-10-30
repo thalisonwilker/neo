@@ -122,6 +122,55 @@ def test_transactions_lifecycle_and_shortcuts() -> None:
     assert res_rm_nf.exit_code == int(ExitCode.NOT_FOUND)
 
 
+def test_standard_verbs_transactions() -> None:
+    runner.invoke(
+        app, ["fin", "bank", "create", "bb", "--name", "Banco do Brasil", "--balance", "500.0"]
+    )
+
+    # 1. tx create
+    res_create = runner.invoke(
+        app,
+        [
+            "fin",
+            "tx",
+            "create",
+            "80.0",
+            "Farmácia remédios",
+            "--type",
+            "expense",
+            "-a",
+            "bb",
+            "-c",
+            "saude",
+        ],
+    )
+    assert res_create.exit_code == int(ExitCode.SUCCESS)
+
+    # 2. tx list and get
+    res_list = runner.invoke(app, ["fin", "tx", "list", "-a", "bb", "--json"])
+    assert res_list.exit_code == int(ExitCode.SUCCESS)
+    tx_list = json.loads(res_list.output)
+    tx_id = tx_list[0]["id"]
+
+    res_get = runner.invoke(app, ["fin", "tx", "get", str(tx_id), "--json"])
+    assert res_get.exit_code == int(ExitCode.SUCCESS)
+    tx_data = json.loads(res_get.output)
+    assert tx_data["amount"] == 80.0
+    assert tx_data["description"] == "Farmácia remédios"
+
+    res_show = runner.invoke(app, ["fin", "tx", "show", str(tx_id)])
+    assert res_show.exit_code == int(ExitCode.SUCCESS)
+    assert "Farmácia remédios" in res_show.output
+
+    # 3. tx update
+    res_up = runner.invoke(app, ["fin", "tx", "update", str(tx_id), "--amount", "95.0"])
+    assert res_up.exit_code == int(ExitCode.SUCCESS)
+
+    # 4. tx delete
+    res_del = runner.invoke(app, ["fin", "tx", "delete", str(tx_id), "--yes"])
+    assert res_del.exit_code == int(ExitCode.SUCCESS)
+
+
 def test_transactions_validation_errors() -> None:
     runner.invoke(app, ["fin", "bank", "add", "itau", "--name", "Itaú"])
 
