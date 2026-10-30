@@ -646,6 +646,54 @@ def tasks_show(
 
 
 # Comandos de Checklist (neo tasks check ...)
+@tasks_check_app.command("list")
+def check_list(
+    ctx: typer.Context,
+    story_id: int = Argument(..., help="ID da story/task pai no Shortcut."),
+    service: str = _service_option(),
+) -> None:
+    """Lista todos os itens de checklist de uma story."""
+    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    client = _get_client(service, as_json)
+    try:
+        story = client.get_story(story_id)
+    except ShortcutNotFoundError as e:
+        print_error(f"Story #{story_id} não encontrada: {e}", as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+    except ShortcutError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+
+    if as_json:
+        print_json([t.model_dump() for t in story.tasks])
+        return
+
+    if not story.tasks:
+        print_panel(
+            f"Checklist da Story #{story.id}",
+            "Nenhum item de checklist encontrado nesta story.\n"
+            'Use `neo tasks check add <id> "descrição"` para adicionar.',
+        )
+        return
+
+    done_cnt = sum(1 for t in story.tasks if t.complete)
+    columns = ["ID", "Status", "Descrição"]
+    rows: list[list[str]] = []
+    for t in story.tasks:
+        status_label = (
+            "[bold green][✓] Concluído[/bold green]"
+            if t.complete
+            else "[bold yellow][ ] Aberto[/bold yellow]"
+        )
+        rows.append([f"#{t.id}", status_label, escape(t.description)])
+
+    print_table(
+        f"Checklist da Story #{story.id} ({done_cnt}/{len(story.tasks)} concluídos)",
+        columns,
+        rows,
+    )
+
+
 @tasks_check_app.command("add")
 def check_add(
     ctx: typer.Context,
@@ -753,6 +801,49 @@ def _add_comment_impl(
         print_success(
             f'Comentário #{comment.id} adicionado à story #{story_id}: [cyan]"{escape(comment.text)}"[/cyan]'
         )
+
+
+@tasks_comment_app.command("list")
+def comment_list(
+    ctx: typer.Context,
+    story_id: int = Argument(..., help="ID da story no Shortcut."),
+    service: str = _service_option(),
+) -> None:
+    """Lista todos os comentários de uma story."""
+    as_json = getattr(ctx.obj, "json_mode", False) if ctx.obj else False
+    client = _get_client(service, as_json)
+    try:
+        story = client.get_story(story_id)
+    except ShortcutNotFoundError as e:
+        print_error(f"Story #{story_id} não encontrada: {e}", as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+    except ShortcutError as e:
+        print_error(str(e), as_json=as_json, code=1)
+        raise typer.Exit(code=1) from e
+
+    if as_json:
+        print_json([c.model_dump() for c in story.comments])
+        return
+
+    if not story.comments:
+        print_panel(
+            f"Comentários da Story #{story.id}",
+            "Nenhum comentário encontrado nesta story.\n"
+            'Use `neo tasks comment add <id> "texto"` para adicionar.',
+        )
+        return
+
+    columns = ["ID", "Autor", "Comentário"]
+    rows: list[list[str]] = []
+    for c in story.comments:
+        author = c.author_id or "-"
+        rows.append([f"#{c.id}", author, escape(c.text)])
+
+    print_table(
+        f"Comentários da Story #{story.id} ({len(story.comments)})",
+        columns,
+        rows,
+    )
 
 
 @tasks_comment_app.command("add")

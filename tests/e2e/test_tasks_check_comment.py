@@ -23,6 +23,42 @@ def mock_sc_auth():
 
 
 @respx.mock
+def test_tasks_check_list(mock_sc_auth):
+    """Lista itens de checklist com tabela Rich e em modo JSON."""
+    respx.get("https://api.app.shortcut.com/api/v3/stories/501").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "id": 501,
+                "name": "Story de Teste",
+                "tasks": [
+                    {"id": 1001, "description": "Item 1", "complete": True},
+                    {"id": 1002, "description": "Item 2", "complete": False},
+                ],
+            },
+        )
+    )
+
+    # 1. Modo Rich
+    result = runner.invoke(app, ["tasks", "check", "list", "501"])
+    assert result.exit_code == 0
+    assert "Checklist da Story #501" in result.output
+    assert "concluídos" in result.output
+    assert "#1001" in result.output
+    assert "Concluído" in result.output
+    assert "#1002" in result.output
+    assert "Aberto" in result.output
+
+    # 2. Modo JSON
+    result_json = runner.invoke(app, ["--json", "tasks", "check", "list", "501"])
+    assert result_json.exit_code == 0
+    data = json.loads(result_json.output)
+    assert len(data) == 2
+    assert data[0]["id"] == 1001
+    assert data[0]["complete"] is True
+
+
+@respx.mock
 def test_tasks_check_add(mock_sc_auth):
     """AC-2: neo tasks check add adiciona item de checklist à story."""
     respx.post("https://api.app.shortcut.com/api/v3/stories/501/tasks").mock(
@@ -139,6 +175,38 @@ def test_tasks_check_uncomplete_and_alias(mock_sc_auth):
 
 
 # --- Testes de Comentários (AC-4) ---
+
+
+@respx.mock
+def test_tasks_comment_list(mock_sc_auth):
+    """Lista comentários com tabela Rich e em modo JSON."""
+    respx.get("https://api.app.shortcut.com/api/v3/stories/501").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "id": 501,
+                "name": "Story de Teste",
+                "comments": [
+                    {"id": 3001, "text": "Primeiro comentário", "author_id": "user-1"},
+                ],
+            },
+        )
+    )
+
+    # 1. Modo Rich
+    result = runner.invoke(app, ["tasks", "comment", "list", "501"])
+    assert result.exit_code == 0
+    assert "Comentários da Story #501 (1)" in result.output
+    assert "#3001" in result.output
+    assert "Primeiro comentário" in result.output
+
+    # 2. Modo JSON
+    result_json = runner.invoke(app, ["--json", "tasks", "comment", "list", "501"])
+    assert result_json.exit_code == 0
+    data = json.loads(result_json.output)
+    assert len(data) == 1
+    assert data[0]["id"] == 3001
+    assert data[0]["text"] == "Primeiro comentário"
 
 
 @respx.mock

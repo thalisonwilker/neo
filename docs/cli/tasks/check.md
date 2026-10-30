@@ -23,6 +23,7 @@ neo tasks check <ação> [argumentos] [--opções]
 
 | Comando | Descrição | Exemplo de comando |
 |---|---|---|
+| `list` | Lista todos os itens de checklist da story | `neo tasks check list <task-id>` |
 | `add` | Adiciona um item de checklist à story | `neo tasks check add <task-id> "<descrição>"` |
 | `complete` | Marca o item de checklist como concluído (alias `done`) | `neo tasks check complete <task-id> <check-id>` |
 | `uncomplete` | Desmarca o item de checklist, reabrindo-o (alias `undone`) | `neo tasks check uncomplete <task-id> <check-id>` |
@@ -31,7 +32,14 @@ neo tasks check <ação> [argumentos] [--opções]
 
 ## Exemplos
 
-### 1. Adicionar itens de checklist a uma story
+### 1. Listar itens de checklist de uma story
+```bash
+neo tasks check list 2153
+# ou em modo JSON:
+neo --json tasks check list 2153
+```
+
+### 2. Adicionar itens de checklist a uma story
 ```bash
 neo tasks check add 2153 "Criar migration do banco de dados"
 neo tasks check add 2153 "Implementar endpoints REST"

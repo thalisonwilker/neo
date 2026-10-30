@@ -107,8 +107,8 @@ Esta matriz resume todas as operações mapeadas no Neo, indicando disponibilida
 | | Pull Requests (`pr`) 🚧 | 🚧 | 🚧 | 🚧 | ➖ | ➖ | ➖ | ➖ | `create` (🚧), `merge` (🚧) |
 | | Tags & Releases 🚧 | 🚧 | 🚧 | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (🚧) |
 | **`neo tasks`** | Demandas (`tasks`) | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | `create` (✅), `resume` (✅), `whoami` (✅), `iterations` (✅), `analyze` (✅) |
-| | Checklist (`check`) | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | `add` (✅), `complete` (✅), `uncomplete` (✅) |
-| | Comentários (`comment`) | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | `add` (✅) |
+| | Checklist (`check`) | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | `add` (✅), `complete` (✅), `uncomplete` (✅) |
+| | Comentários (`comment`) | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | `add` (✅) |
 | | Configuração (`config`) | ➖ | ➖ | ➖ | ➖ | ✅ | ➖ | ➖ | `delete` (✅), `columns` (✅) |
 | **`neo agent`** | Agente (`agent`) | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ✅ | `setup` (✅), `run` (✅) |
 | **`neo fin`** | Contas (`bank`) | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (✅), `update` (✅), `delete` (✅) |

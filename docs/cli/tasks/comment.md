@@ -23,13 +23,21 @@ neo tasks comment add <task-id> "<texto>" [--service shortcut]
 
 | Comando | Descrição | Exemplo de comando |
 |---|---|---|
+| `list` | Lista todos os comentários da story | `neo tasks comment list <task-id>` |
 | `add` | Adiciona um comentário à story | `neo tasks comment add <task-id> "<comentário>"` |
 
 ---
 
 ## Exemplos
 
-### 1. Adicionar comentário com link do PR
+### 1. Listar comentários de uma story
+```bash
+neo tasks comment list 2153
+# ou em modo JSON:
+neo --json tasks comment list 2153
+```
+
+### 2. Adicionar comentário com link do PR
 ```bash
 neo tasks comment add 2153 "PR aberto para revisão: https://github.com/empresa/repo/pull/42"
 ```
