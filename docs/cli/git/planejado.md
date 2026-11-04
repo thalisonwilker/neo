@@ -14,12 +14,9 @@ alwaysApply: false
 
 ## Recursos Planejados
 
-### 1. Branches (`neo git branch`)
-Gerenciamento de ramificações remotas e locais integradas ao contexto do workspace:
+### 1. Branches remotas
 
-* `neo git branch list`: Lista branches ativas do repositório remoto com autor do último commit.
-* `neo git branch create <nome>`: Cria branch remota a partir da branch principal configurada.
-* `neo git branch diff <branch>`: Exibe comparação sintética entre branches.
+Operações em branches remotas e comparação entre branches continuam planejadas. Para operações locais já disponíveis, consulte [branches](branch.md).
 
 ### 2. Pull Requests (`neo git pr`)
 Fluxo completo de code review e abertura de PRs unificado para GitHub e Bitbucket:
@@ -37,9 +34,8 @@ Versionamento e publicação de artefatos:
 * `neo git release list`: Lista releases publicadas com changelog e notas de versão.
 * `neo git release create <versão>`: Gera notas automáticas de release e publica no provedor.
 
-### 4. Ações Complementares de Repositório (`clone` e `create`)
+### 4. Clonagem de Repositório (`clone`)
 * `neo git repo clone <slug>`: Clona repositório remoto via SSH/HTTPS no diretório local. *(Hoje, utilize `neo git repo show` para consultar as URLs de clone).*
-* `neo git repo create <nome>`: Cria um novo repositório diretamente no workspace ativo.
 
 ---
 

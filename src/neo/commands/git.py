@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
 from typing import NoReturn
+from urllib.parse import urlsplit, urlunsplit
 
+import httpx
 import typer
 from keyring.errors import KeyringError
 from typer import Argument, Option
 
 from neo.commands._credentials import is_json_mode
+from neo.commands.branch import branch_app, current_branch, select_branch
 from neo.commands.commits import commits_app
 from neo.commands.repo import repo_app
 from neo.commands.workspace import workspace_app
@@ -30,16 +34,27 @@ from neo.config import (
     validate_git_config_key,
     validate_git_provider,
 )
+from neo.git_context import (
+    get_task,
+    resolve_repo_path,
+    select_repo,
+    selected_repo,
+    set_task,
+    unset_repo,
+    unset_task,
+)
+from neo.integrations.bitbucket import BitbucketClient, BitbucketError
+from neo.integrations.github import GitHubClient
 from neo.integrations.resolver import (
     detect_git_remote_details,
     resolve_git_provider_and_source,
     resolve_git_workspace_and_source,
 )
-from neo.output import console, print_error, print_json, print_panel, print_success, print_table
+from neo.output import print_error, print_json, print_panel, print_success, print_table
 
 git_app = typer.Typer(
     name="git",
-    help="Comandos Git unificados para GitHub e Bitbucket Cloud (config, auth, workspace, repo, commits, status).",
+    help="Gerencia configuração, repositórios e branches no GitHub e Bitbucket Cloud.",
     no_args_is_help=True,
 )
 
@@ -60,6 +75,7 @@ git_app.add_typer(git_auth_app, name="auth")
 git_app.add_typer(workspace_app, name="workspace")
 git_app.add_typer(repo_app, name="repo")
 git_app.add_typer(commits_app, name="commits")
+git_app.add_typer(branch_app, name="branch")
 
 
 def _fail_usage(message: str, as_json: bool) -> NoReturn:
@@ -83,6 +99,71 @@ def _validate_provider_option(
         _fail_usage(str(e), as_json=as_json)
 
 
+def _configured_provider(as_json: bool) -> GitProviderType:
+    """Obtém apenas um provedor explicitamente configurado, sem inferir do remote."""
+    try:
+        _, provider, source = get_git_config_value("provider")
+        if not provider or source not in ("config", "env"):
+            _fail_usage(
+                "Configure primeiro o provedor com `neo git config set provider <github|bitbucket>`.",
+                as_json=as_json,
+            )
+        return validate_git_provider(provider)
+    except ValueError as exc:
+        _fail_usage(str(exc), as_json=as_json)
+
+
+def _api_key_info() -> dict[str, str | None]:
+    """Retorna estado e origem, sem ler ou expor o segredo."""
+    try:
+        _, provider, source = get_git_config_value("provider")
+        if not provider or source not in ("env", "config"):
+            return {"value": None, "source": "none"}
+        valid_provider = validate_git_provider(provider)
+        credential_source = get_credential_source(valid_provider)
+    except ValueError:
+        credential_source = None
+    return {
+        "value": "Configurado" if credential_source else None,
+        "source": credential_source or "none",
+    }
+
+
+def _set_api_key(as_json: bool) -> None:
+    """Valida a credencial fornecida antes de substituir a credencial armazenada."""
+    provider = _configured_provider(as_json)
+    if as_json:
+        _fail_usage("`config set api-key` requer entrada interativa oculta.", as_json=True)
+    email: str | None = None
+    if provider == "bitbucket":
+        email = typer.prompt("E-mail da conta Bitbucket").strip()
+        if not email:
+            _fail_usage("O e-mail da conta Bitbucket não pode ser vazio.", as_json=False)
+    token = typer.prompt("Chave de API", hide_input=True).strip()
+    if not token:
+        _fail_usage("A chave de API não pode ser vazia.", as_json=False)
+    try:
+        if provider == "github":
+            GitHubClient(token=token).get_current_user()
+        else:
+            BitbucketClient(token=token, username=email).list_workspaces()
+    except (BitbucketError, httpx.HTTPError, OSError, ValueError):
+        print_error(
+            "Não foi possível validar a chave de API no provedor. A credencial anterior foi preservada.",
+            as_json=False,
+            code=int(ExitCode.AUTH_ERROR),
+        )
+        raise typer.Exit(code=int(ExitCode.AUTH_ERROR)) from None
+    try:
+        set_credential(provider, token, email=email)
+    except (KeyringError, OSError, RuntimeError, ValueError):
+        print_error(
+            "Não foi possível salvar a credencial.", as_json=False, code=int(ExitCode.ERROR)
+        )
+        raise typer.Exit(code=int(ExitCode.ERROR)) from None
+    print_success(f"Credencial de {provider} validada e salva.", as_json=False)
+
+
 # ============================================================================
 # neo git config (set | get | list | unset)
 # ============================================================================
@@ -95,10 +176,37 @@ def git_config_set(
         ...,
         help=f"Chave de configuração ({', '.join(SUPPORTED_GIT_CONFIG_KEYS)}).",
     ),
-    value: str = Argument(..., help="Valor a ser atribuído à chave."),
+    value: str | None = Argument(None, help="Valor a ser atribuído à chave (exceto api-key)."),
 ) -> None:
     """Define o valor de uma chave na seção [git] do config.toml."""
     as_json = is_json_mode(ctx)
+    if key.strip().lower() == "api-key":
+        if value is not None:
+            _fail_usage(
+                "Não informe a chave como argumento; ela será solicitada com entrada oculta.",
+                as_json,
+            )
+        _set_api_key(as_json)
+        return
+    if value is None:
+        _fail_usage("Informe o valor da configuração.", as_json)
+    normalized = key.strip().lower()
+    if normalized in ("repo", "task", "branch"):
+        try:
+            if normalized == "repo":
+                value = str(select_repo(Path(value)))
+            elif normalized == "task":
+                set_task(value)
+            else:
+                select_branch(value)
+        except (ValueError, OSError) as exc:
+            _fail_usage(str(exc), as_json)
+        print_success(
+            f"Configuração Git atualizada: {normalized} = {value}",
+            as_json=as_json,
+            json_payload={"status": "success", "key": normalized, "value": value},
+        )
+        return
     try:
         valid_key, clean_val = set_git_config_value(key, value)
     except ValueError as e:
@@ -126,6 +234,33 @@ def git_config_get(
 ) -> None:
     """Exibe o valor atual e a origem de uma chave de configuração Git."""
     as_json = is_json_mode(ctx, json_output)
+    if key.strip().lower() == "api-key":
+        info = _api_key_info()
+        if as_json:
+            print_json({"key": "api-key", **info})
+        else:
+            print_panel(
+                "Configuração Git: api-key",
+                f"Estado: {info['value'] or 'Não configurado'}\nOrigem: {info['source']}",
+            )
+        return
+    normalized = key.strip().lower()
+    if normalized in ("repo", "task", "branch"):
+        try:
+            if normalized == "repo":
+                selected = selected_repo()
+                val = str(selected) if selected else None
+            elif normalized == "task":
+                val = get_task()
+            else:
+                val = current_branch()
+        except ValueError as exc:
+            _fail_usage(str(exc), as_json)
+        if as_json:
+            print_json({"key": normalized, "value": val, "source": "context"})
+        else:
+            print_panel(f"Configuração Git: {normalized}", f"Valor: {val or '-'}\nOrigem: context")
+        return
     try:
         valid_key, val, source = get_git_config_value(key)
     except ValueError as e:
@@ -155,6 +290,16 @@ def git_config_list(
     """Lista todas as chaves da seção [git] com seus valores e origens."""
     as_json = is_json_mode(ctx, json_output)
     values = list_git_config_values()
+    values["api-key"] = _api_key_info()
+    try:
+        selected = selected_repo()
+        values["repo"] = {"value": str(selected) if selected else None, "source": "context"}
+        values["task"] = {"value": get_task(), "source": "context"}
+        values["branch"] = {"value": current_branch(), "source": "context"}
+    except ValueError:
+        values.setdefault("repo", {"value": None, "source": "context"})
+        values["task"] = {"value": None, "source": "context"}
+        values["branch"] = {"value": None, "source": "context"}
 
     if as_json:
         print_json(values)
@@ -175,9 +320,46 @@ def git_config_unset(
         ...,
         help=f"Chave de configuração a remover ({', '.join(SUPPORTED_GIT_CONFIG_KEYS)}).",
     ),
+    yes: bool = Option(False, "--yes", help="Confirma a remoção da credencial armazenada."),
 ) -> None:
     """Remove uma chave personalizada da seção [git] do config.toml."""
     as_json = is_json_mode(ctx)
+    normalized = key.strip().lower()
+    if normalized in ("repo", "task", "branch"):
+        if normalized == "branch":
+            _fail_usage(
+                "A branch ativa é estado do Git e não pode ser removida; selecione outra branch.",
+                as_json,
+            )
+        try:
+            existed = unset_repo() if normalized == "repo" else unset_task()
+        except (ValueError, OSError) as exc:
+            _fail_usage(str(exc), as_json)
+        print_success(
+            f"Configuração Git removida: {normalized}",
+            as_json=as_json,
+            json_payload={"status": "success", "key": normalized, "existed": existed},
+        )
+        return
+    if key.strip().lower() == "api-key":
+        provider = _configured_provider(as_json)
+        if not yes:
+            if as_json:
+                _fail_usage("Use --yes para remover a credencial em modo JSON.", as_json=True)
+            if not typer.confirm(f"Deseja remover a credencial salva de '{provider}'?"):
+                print_error(
+                    "Operação cancelada pelo usuário.", as_json=False, code=int(ExitCode.ERROR)
+                )
+                raise typer.Exit(code=int(ExitCode.ERROR))
+        removed = delete_credential(provider)
+        print_success(
+            "Credencial armazenada removida."
+            if removed
+            else "Nenhuma credencial armazenada encontrada.",
+            as_json=as_json,
+            json_payload={"status": "success", "key": "api-key", "removed": removed},
+        )
+        return
     try:
         valid_key = validate_git_config_key(key)
     except ValueError as e:
@@ -200,7 +382,7 @@ def git_config_unset(
 def _legacy_config_auth(ctx: typer.Context) -> None:
     _fail_usage(
         "O comando `neo git config auth` foi removido. "
-        "Use `neo git auth login --provider <github|bitbucket>`, "
+        "Use `neo git config set api-key`, "
         "`neo git auth status` ou `neo git auth logout --provider <github|bitbucket>`.",
         as_json=is_json_mode(ctx),
     )
@@ -239,47 +421,17 @@ def _legacy_config_get_provider(ctx: typer.Context) -> None:
 @git_auth_app.command("login")
 def git_auth_login(
     ctx: typer.Context,
-    provider: str = Option(
-        ...,
+    provider: str | None = Option(
+        None,
         "--provider",
         help=f"Provedor Git para autenticar: {', '.join(SUPPORTED_GIT_PROVIDERS)}.",
     ),
 ) -> None:
-    """Autentica um provedor Git solicitando o token com entrada oculta."""
+    """Orienta a migração para o novo comando de autenticação."""
     as_json = is_json_mode(ctx)
-    prov = _validate_provider_option(ctx, provider)
-
-    if as_json:
-        _fail_usage(
-            "O comando `neo git auth login` exige entrada interativa oculta e não pode ser usado com `--json`. "
-            "Para automação, defina `NEO_GITHUB_TOKEN` ou `NEO_BITBUCKET_EMAIL` e `NEO_BITBUCKET_TOKEN`.",
-            as_json=True,
-        )
-
-    email: str | None = None
-    if prov == "bitbucket":
-        console.print(
-            "[yellow]Aviso:[/yellow] App Passwords do Bitbucket Cloud foram descontinuadas. "
-            "Informe o e-mail da sua conta Atlassian e um API Token."
-        )
-        email = typer.prompt("E-mail da conta Bitbucket").strip()
-        if not email:
-            _fail_usage("O e-mail da conta Bitbucket não pode ser vazio.", as_json=False)
-        token = typer.prompt("API Token do Bitbucket", hide_input=True)
-    else:
-        token = typer.prompt("Personal Access Token do GitHub", hide_input=True)
-
-    try:
-        set_credential(prov, token, email=email)
-        source = get_credential_source(prov) or "keyring"
-        prov_label = "GitHub" if prov == "github" else "Bitbucket Cloud"
-        print_success(
-            f"Credencial de {prov_label} salva com segurança (origem: {source}).",
-            as_json=False,
-        )
-    except (KeyringError, OSError, RuntimeError, ValueError) as e:
-        print_error(f"Falha ao salvar credencial: {e}", as_json=False, code=int(ExitCode.ERROR))
-        raise typer.Exit(code=int(ExitCode.ERROR)) from e
+    if provider is not None:
+        _validate_provider_option(ctx, provider)
+    _fail_usage("`neo git auth login` foi substituído por `neo git config set api-key`.", as_json)
 
 
 @git_auth_app.command("status")
@@ -387,11 +539,14 @@ def git_auth_logout(
 def _inspect_local_git_status() -> dict[str, object]:
     """Inspeciona o diretório atual via comandos git locais."""
     try:
+        selected = selected_repo()
+        cwd = resolve_repo_path() if selected else None
         res_inside = subprocess.run(
             ["git", "rev-parse", "--is-inside-work-tree"],
             capture_output=True,
             text=True,
             check=False,
+            cwd=cwd,
         )
         if res_inside.returncode != 0 or res_inside.stdout.strip().lower() != "true":
             return {
@@ -407,6 +562,7 @@ def _inspect_local_git_status() -> dict[str, object]:
             capture_output=True,
             text=True,
             check=False,
+            cwd=cwd,
         )
         branch = res_branch.stdout.strip() if res_branch.returncode == 0 else None
 
@@ -415,6 +571,7 @@ def _inspect_local_git_status() -> dict[str, object]:
             capture_output=True,
             text=True,
             check=False,
+            cwd=cwd,
         )
         lines = (
             [ln for ln in res_status.stdout.splitlines() if ln.strip()]
@@ -427,8 +584,14 @@ def _inspect_local_git_status() -> dict[str, object]:
             capture_output=True,
             text=True,
             check=False,
+            cwd=cwd,
         )
         remote_url = res_remote.stdout.strip() if res_remote.returncode == 0 else None
+        if remote_url and "://" in remote_url:
+            parts = urlsplit(remote_url)
+            remote_url = urlunsplit(
+                (parts.scheme, parts.netloc.rsplit("@", 1)[-1], parts.path, "", "")
+            )
 
         return {
             "is_git_repo": True,
@@ -437,7 +600,7 @@ def _inspect_local_git_status() -> dict[str, object]:
             "modified_files": len(lines),
             "remote_url": remote_url or None,
         }
-    except (subprocess.SubprocessError, OSError):
+    except (subprocess.SubprocessError, OSError, ValueError):
         return {
             "is_git_repo": False,
             "current_branch": None,
@@ -469,6 +632,12 @@ def git_status(
     _rem_prov, _rem_ws, detected_repo = detect_git_remote_details()
     auth_source = get_credential_source(provider)
     authenticated = auth_source is not None
+    try:
+        task = get_task()
+        selected_path = selected_repo()
+    except ValueError:
+        task = None
+        selected_path = None
 
     payload = {
         "local": local_info,
@@ -479,6 +648,8 @@ def git_status(
         "repo": detected_repo,
         "authenticated": authenticated,
         "auth_source": auth_source or "none",
+        "task": task,
+        "selected_repo": str(selected_path) if selected_path else None,
     }
 
     if as_json:
@@ -498,7 +669,7 @@ def git_status(
         auth_line = (
             f"[bold green]Autenticado[/bold green] ({auth_source})"
             if authenticated
-            else f"[bold red]Não autenticado[/bold red] (execute `neo git auth login --provider {provider}`)"
+            else "[bold red]Não autenticado[/bold red] (execute `neo git config set api-key`)"
         )
         ws_line = (
             f"[cyan]{workspace}[/cyan] ({workspace_source})"
@@ -514,5 +685,7 @@ def git_status(
             f"[bold]Provedor Ativo:[/bold] [cyan]{provider}[/cyan] ({provider_source})\n"
             f"[bold]Workspace Ativo:[/bold] {ws_line}\n"
             f"[bold]Repositório Detectado:[/bold] {rem_repo_line}\n"
+            f"[bold]Repositório Selecionado:[/bold] {selected_path or '-'}\n"
+            f"[bold]Task:[/bold] {task or '-'}\n"
             f"[bold]Autenticação:[/bold] {auth_line}",
         )

@@ -61,14 +61,14 @@ class GitHubClient:
         if response.status_code == 401:
             raise GitHubAuthError(
                 "Falha de autenticação no GitHub (401). "
-                "Execute `neo git auth login --provider github` para atualizar seu Personal Access Token."
+                "Execute `neo git config set api-key` para atualizar seu Personal Access Token."
             )
         if response.status_code == 403:
             if "rate limit" in response.text.lower():
                 raise GitHubRateLimitError(f"Limite de requisições atingido no GitHub ({context}).")
             raise GitHubAuthError(
                 f"Acesso negado no GitHub (403 em {context}). "
-                "Verifique os escopos do seu Personal Access Token com `neo git auth login --provider github`."
+                "Verifique os escopos do seu Personal Access Token com `neo git config set api-key`."
             )
         if response.status_code == 404:
             raise GitHubNotFoundError(
@@ -219,6 +219,17 @@ class GitHubClient:
 
             resp = client.post(url, headers=self._get_headers(), json=payload)
             self._handle_response_error(resp, f"criar repositório '{name}' em '{target_ws}'")
+            return parse_github_repo(resp.json())
+
+    def update_repository_description(
+        self, repo_slug: str, description: str, workspace: str | None = None
+    ) -> BitbucketRepo:
+        """Atualiza a descrição do repositório no GitHub."""
+        ws = workspace or self.get_default_workspace()
+        url = f"{self.base_url}/repos/{ws}/{repo_slug}"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.patch(url, headers=self._get_headers(), json={"description": description})
+            self._handle_response_error(resp, f"atualizar descrição de '{ws}/{repo_slug}'")
             return parse_github_repo(resp.json())
 
     def list_commits(

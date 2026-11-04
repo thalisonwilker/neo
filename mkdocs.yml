@@ -102,6 +102,7 @@ nav:
               - Configurar Workspaces: cli/git/workspace.md
           - Recursos:
               - Repositórios: cli/git/repo.md
+              - Branches locais: cli/git/branch.md
               - Commits: cli/git/commits.md
           - Recursos Planejados (🚧): cli/git/planejado.md
       - Tasks:

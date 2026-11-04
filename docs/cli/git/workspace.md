@@ -95,4 +95,4 @@ neo git workspace list
 ## Veja também
 - [neo git repo](repo.md) — Listar e buscar repositórios no workspace ativo
 - [neo git config](config.md) — Definir o workspace padrão no `config.toml`
-- [neo git status](status.md) — Verificar o workspace resolvido no diretório atual
+- [neo git status](status.md) — Verificar o workspace resolvido para o contexto Git

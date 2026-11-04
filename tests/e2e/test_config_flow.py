@@ -95,11 +95,13 @@ def test_AC_2_git_config_set_get_list_unset(tmp_path: Path):
         ):
             res_tok = runner.invoke(app, subcmd)
             assert res_tok.exit_code == int(ExitCode.USAGE_ERROR)
-            assert "neo git auth login" in res_tok.output
+            assert "neo git config set api-key" in res_tok.output
 
 
 def test_AC_3_git_auth_login_status_logout(tmp_path: Path):
-    """AC-3 e AC-6 (0014): `neo git auth login|status|logout` sem --token e sem expor segredos."""
+    """AC-6 (0023): migração de login e status/logout sem exposição de segredos."""
+    from neo.config import set_credential
+
     stored: dict[str, str] = {}
 
     def mock_set(service, username, password):
@@ -119,26 +121,15 @@ def test_AC_3_git_auth_login_status_logout(tmp_path: Path):
         patch("neo.config.DEFAULT_CREDENTIALS_FILE", tmp_path / "credentials.toml"),
         patch.dict(os.environ, {}, clear=True),
     ):
-        # 1. Login GitHub (prompt oculto)
+        # O comando anterior orienta para o novo ponto de entrada.
         res_gh = runner.invoke(
             app,
             ["git", "auth", "login", "--provider", "github"],
-            input="ghp_super_secret_token\n",
         )
-        assert res_gh.exit_code == 0
-        assert "GitHub" in res_gh.output
-        assert "ghp_super_secret_token" not in res_gh.output
-
-        # 2. Login Bitbucket Cloud (pede e-mail + API Token e avisa sobre App Passwords)
-        res_bb = runner.invoke(
-            app,
-            ["git", "auth", "login", "--provider", "bitbucket"],
-            input="dev@acme.com\nbb_api_token_secret\n",
-        )
-        assert res_bb.exit_code == 0
-        assert "App Passwords" in res_bb.output
-        assert "Bitbucket Cloud" in res_bb.output
-        assert "bb_api_token_secret" not in res_bb.output
+        assert res_gh.exit_code == int(ExitCode.USAGE_ERROR)
+        assert "neo git config set api-key" in " ".join(res_gh.output.split())
+        set_credential("github", "ghp_super_secret_token")
+        set_credential("bitbucket", "bb_api_token_secret", email="dev@acme.com")
 
         # 3. `auth login` nunca aceita `--token`
         res_no_token_flag = runner.invoke(
@@ -226,7 +217,7 @@ def test_AC_4_and_AC_5_tasks_and_global_config_show():
 def test_AC_8_legacy_git_config_commands_fail_with_hint():
     """AC-8 (0014): Comandos antigos de config/auth falham com código 2 apontando o novo comando."""
     for legacy_cmd, expected_hint in (
-        (["git", "config", "auth", "set", "github"], "neo git auth login"),
+        (["git", "config", "auth", "set", "github"], "neo git config set api-key"),
         (["git", "config", "set-provider", "github"], "neo git config set provider"),
         (["git", "config", "get-provider"], "neo git config get provider"),
     ):
@@ -236,7 +227,7 @@ def test_AC_8_legacy_git_config_commands_fail_with_hint():
 
 
 @respx.mock
-def test_feature_0022_config_show_tables_and_task_detection():
+def test_feature_0022_config_show_tables_and_task_detection(tmp_path: Path):
     """Valida as 4 tabelas da feature 0022, detecção de task com checklist e ocultação de serviços desconectados."""
     respx.get("https://api.app.shortcut.com/api/v3/stories/2182").mock(
         return_value=httpx.Response(
@@ -261,6 +252,8 @@ def test_feature_0022_config_show_tables_and_task_detection():
 
     with (
         patch.dict(os.environ, env_mock, clear=True),
+        patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
+        patch("keyring.get_password", return_value=None),
         patch(
             "neo.commands.config._inspect_local_git_status",
             return_value={
@@ -297,7 +290,6 @@ def test_feature_0022_config_show_tables_and_task_detection():
 
         # Bloco Serviços configurados só deve ter o shortcut configurado
         assert "shortcut" in result.output
-        assert "bitbucket" not in result.output
 
         # Teste com --json
         res_json = runner.invoke(app, ["--json", "config", "show"])

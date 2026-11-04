@@ -7,7 +7,7 @@ alwaysApply: false
 # neo git status
 > Exibe o diagnóstico do repositório Git local, provedor resolvido, workspace e estado de autenticação.
 
-O comando `neo git status` inspeciona o diretório atual de trabalho e consolida em uma única chamada todas as informações do contexto de desenvolvimento: se o diretório é um repositório Git válido, qual branch está ativa, quais são os remotes configurados, qual provedor foi inferido (`github` ou `bitbucket`) e se as credenciais necessárias estão presentes.
+O comando `neo git status` inspeciona o repositório selecionado (ou o diretório atual quando não há seleção) e consolida em uma única chamada todas as informações do contexto de desenvolvimento: se o diretório é um repositório Git válido, qual branch está ativa, quais são os remotes configurados, qual provedor foi inferido (`github` ou `bitbucket`) e se as credenciais necessárias estão presentes.
 
 ---
 
@@ -101,3 +101,5 @@ Exemplo de visualização:
 - [neo git workspace](workspace.md) — Listar e selecionar workspaces remotos
 - [neo agent status](../agent/status.md) — Diagnóstico da esteira SDD e agente Antigravity
 
+
+A saída também apresenta a task associada ao repositório selecionado. Use `neo git config set task <id>` para associá-la.

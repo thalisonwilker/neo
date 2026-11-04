@@ -54,7 +54,7 @@ def mock_bitbucket_auth(tmp_path: Path):
 
 
 def test_AC_4_workspace_without_credentials(tmp_path: Path):
-    """AC-4 e AC-8 (0014): Sem credenciais retorna código 3 (AUTH_ERROR) apontando `neo git auth login`."""
+    """AC-4 e AC-8 (0014): Sem credenciais retorna código 3 e aponta para `config set api-key`."""
     with (
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
@@ -63,7 +63,7 @@ def test_AC_4_workspace_without_credentials(tmp_path: Path):
     ):
         result = runner.invoke(app, ["git", "workspace", "list"])
         assert result.exit_code == int(ExitCode.AUTH_ERROR)
-        assert "neo git auth login --provider bitbucket" in result.output
+        assert "neo git config set api-key" in result.output
 
 
 @respx.mock
