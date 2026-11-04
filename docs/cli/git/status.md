@@ -92,13 +92,13 @@ Exemplo de visualização:
 ## Erros comuns e códigos de saída
 
 * **Código 0 (Sucesso):** Diagnóstico concluído com sucesso (mesmo fora de uma pasta Git, os dados resolvidos de configuração e autenticação são reportados).
-* **Código 3 (Erro de autenticação):** O provedor resolvido não possui token configurado ou a credencial falhou no teste de validação.
+* O diagnóstico informa se uma credencial está configurada; ele não testa a validade da chave no provedor.
 
 ---
 
 ## Veja também
-- [neo git auth](auth.md) — Configurar ou verificar credenciais de acesso
-- [neo git workspace](workspace.md) — Listar e selecionar workspaces remotos
+- [Autenticação Git](auth.md) — Configurar ou verificar credenciais de acesso
+- [Configuração de workspace](workspace.md) — Definir o workspace padrão
 - [neo agent status](../agent/status.md) — Diagnóstico da esteira SDD e agente Antigravity
 
 

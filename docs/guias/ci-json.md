@@ -49,8 +49,8 @@ O Neo retorna códigos de saída de `0` a `5`. Você pode utilizá-los para cont
 #!/usr/bin/env bash
 set -e
 
-# Verifica se a autenticação está válida (código 3 se falhar)
-if ! neo git auth status --provider github --json > /dev/null 2>&1; then
+# Verifica se há credencial configurada; isso não testa sua validade remotamente
+if ! neo git status --json | jq -e '.authenticated' > /dev/null; then
   echo "Erro: GitHub não autenticado no ambiente de CI!"
   exit 1
 fi

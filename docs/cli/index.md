@@ -33,8 +33,8 @@ O Neo possui comandos com nomes semelhantes que atuam em contextos e fronteiras 
 
 | Comando | O que inspeciona | Quando usar |
 |---|---|---|
-| **`neo git status`** | O repositório Git local onde o comando é executado. | Para checar branch atual, alterações locais, detecção automática do provedor e workspace pelo `remote origin`, e se há autenticação válida para o repositório. |
-| **`neo git auth status`** | O cofre de credenciais dos provedores Git. | Para verificar se o GitHub e o Bitbucket Cloud estão autenticados (no Keyring ou variáveis de ambiente), sem depender de estar dentro de uma pasta Git. |
+| **`neo git status`** | O repositório Git selecionado ou, na sua ausência, o diretório atual. | Para checar branch atual, alterações locais, provedor, workspace e presença de credencial configurada. |
+| **`neo git config get api-key`** | Estado e origem da credencial do provedor configurado. | Para verificar se há credencial configurada sem expor o segredo. |
 | **`neo agent status`** | A prontidão do ambiente de IA e Spec-Driven Development. | Para validar se o executável do Antigravity CLI (`agy`) está instalado no `PATH`, checar a versão, o modelo configurado e a presença dos arquivos de governança SDD (`spec.md`, `CLAUDE.md`, etc.). |
 
 ### Comparativo dos comandos de configuração (`config`)
@@ -56,19 +56,17 @@ Para garantir previsibilidade, o Neo organiza suas ações em verbos consistente
 
 | Verbo | Propósito | Recursos que utilizam |
 |---|---|---|
-| `list` | Lista registros tabulares de um recurso | `git config`, `git workspace`, `git repo`, `git commits`, `config agent`, `tasks list`, `tasks iterations`, `fin bank`, `fin category`, `fin tx` |
-| `show` | Exibe todos os detalhes e metadados de um registro específico | `git workspace`, `git repo`, `git commits`, `tasks show`, `config show` |
+| `list` | Lista registros tabulares de um recurso | `git config`, `git repo`, `git commits`, `config agent`, `tasks list`, `tasks iterations`, `fin bank`, `fin category`, `fin tx` |
+| `show` | Exibe todos os detalhes e metadados de um registro específico | `git repo`, `git commits`, `tasks show`, `config show` |
 | `get` | Consulta o registro detalhado ou chave de configuração de um recurso | `git config`, `config agent`, `tasks config`, `fin bank`, `fin category`, `fin tx` |
 | `create` | Criação de novos recursos locais ou remotos | `fin bank`, `fin category`, `fin tx` |
 | `update` | Atualização de metadados ou propriedades de um recurso existente | `fin bank`, `fin tx` |
 | `delete` | Remove um recurso existente ou credencial salva | `fin bank`, `fin category`, `fin tx`, `tasks config` |
 | `search` | Pesquisa registros por termo ou palavra-chave | `git repo`, `git commits`, `tasks search` |
-| `select` | Escolhe o registro ativo de forma interativa ou via flag | `git workspace` |
+| `select` | Seleciona um repositório ou branch local | `git repo`, `git branch` |
 | `set` | Grava ou atualiza uma chave de configuração | `git config`, `config agent`, `tasks config` |
 | `unset` | Remove uma chave de configuração personalizada | `git config`, `config agent` |
-| `login` | Autentica um provedor solicitando segredo com digitação oculta | `git auth` |
-| `logout` | Remove credenciais armazenadas de um provedor | `git auth` |
-| `status` | Diagnostica o estado do repositório, credenciais ou agente | `git status`, `git auth status`, `agent status` |
+| `status` | Diagnostica o estado do repositório, credenciais ou agente | `git status`, `agent status` |
 | `resume` | Renderiza visão consolidada em quadro Kanban no terminal | `tasks resume` |
 | `whoami` | Identifica a conta ou membro autenticado no serviço | `tasks whoami` |
 | `analyze` | Realiza análise contextual e gera sugestões de branch/commits | `tasks analyze` |
@@ -98,12 +96,10 @@ Esta matriz resume todas as operações mapeadas no Neo, indicando disponibilida
 | **`neo config`** | Geral (`show`) | ➖ | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | — |
 | | Agente (`agent`) | ✅ | ➖ | ➖ | ➖ | ✅ | ➖ | ➖ | `unset` (✅) |
 | **`neo git`** | Configuração (`config`) | ✅ | ➖ | ➖ | ➖ | ✅ | ➖ | ➖ | `unset` (✅) |
-| | Autenticação (`auth`) | ➖ | ➖ | ➖ | ➖ | ➖ | ✅ | ✅ | `login` (✅), `logout` (✅) |
 | | Contexto (`status`) | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ✅ | — |
-| | Workspaces (`workspace`) | ✅ | ✅ | ➖ | ✅ | ➖ | ➖ | ➖ | — |
-| | Repositórios (`repo`) | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | `clone` (🚧), `create` (🚧) |
+| | Repositórios (`repo`) | ✅ | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | `clone` (🚧), `create` (✅), `edit` (✅) |
 | | Commits (`commits`) | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | — |
-| | Branches (`branch`) 🚧 | 🚧 | 🚧 | ➖ | 🚧 | ➖ | ➖ | ➖ | `create` (🚧), `diff` (🚧) |
+| | Branches locais (`branch`) | ✅ | ➖ | ➖ | ✅ | ➖ | ➖ | ➖ | `create` (✅), `delete` (✅) |
 | | Pull Requests (`pr`) 🚧 | 🚧 | 🚧 | 🚧 | ➖ | ➖ | ➖ | ➖ | `create` (🚧), `merge` (🚧) |
 | | Tags & Releases 🚧 | 🚧 | 🚧 | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (🚧) |
 | **`neo tasks`** | Demandas (`tasks`) | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | `create` (✅), `resume` (✅), `whoami` (✅), `iterations` (✅), `analyze` (✅) |

@@ -1,4 +1,4 @@
-"""Guarda-chuva dos comandos Git (`neo git`): `config`, `auth`, `workspace`, `repo`, `commits` e `status`."""
+"""Comandos Git: configuração, branches, repositórios, commits e status."""
 
 from __future__ import annotations
 
@@ -16,15 +16,11 @@ from neo.commands._credentials import is_json_mode
 from neo.commands.branch import branch_app, current_branch, select_branch
 from neo.commands.commits import commits_app
 from neo.commands.repo import repo_app
-from neo.commands.workspace import workspace_app
 from neo.config import (
     SUPPORTED_GIT_CONFIG_KEYS,
-    SUPPORTED_GIT_PROVIDERS,
-    SUPPORTED_TASK_SERVICES,
     ExitCode,
     GitProviderType,
     delete_credential,
-    get_bitbucket_email,
     get_credential_source,
     get_git_config_value,
     list_git_config_values,
@@ -64,15 +60,7 @@ git_config_app = typer.Typer(
     no_args_is_help=True,
 )
 
-git_auth_app = typer.Typer(
-    name="auth",
-    help="Gerencia autenticação segura dos provedores Git (login, status, logout).",
-    no_args_is_help=True,
-)
-
 git_app.add_typer(git_config_app, name="config")
-git_app.add_typer(git_auth_app, name="auth")
-git_app.add_typer(workspace_app, name="workspace")
 git_app.add_typer(repo_app, name="repo")
 git_app.add_typer(commits_app, name="commits")
 git_app.add_typer(branch_app, name="branch")
@@ -81,22 +69,6 @@ git_app.add_typer(branch_app, name="branch")
 def _fail_usage(message: str, as_json: bool) -> NoReturn:
     print_error(message, as_json=as_json, code=int(ExitCode.USAGE_ERROR))
     raise typer.Exit(code=int(ExitCode.USAGE_ERROR))
-
-
-def _validate_provider_option(
-    ctx: typer.Context, provider: str, json_flag: bool = False
-) -> GitProviderType:
-    as_json = is_json_mode(ctx, json_flag)
-    if provider.strip().lower() in SUPPORTED_TASK_SERVICES:
-        _fail_usage(
-            f"'{provider}' é um serviço de tasks, não um provedor Git. "
-            "Use `neo tasks config` para configurá-lo.",
-            as_json=as_json,
-        )
-    try:
-        return validate_git_provider(provider)
-    except ValueError as e:
-        _fail_usage(str(e), as_json=as_json)
 
 
 def _configured_provider(as_json: bool) -> GitProviderType:
@@ -382,8 +354,8 @@ def git_config_unset(
 def _legacy_config_auth(ctx: typer.Context) -> None:
     _fail_usage(
         "O comando `neo git config auth` foi removido. "
-        "Use `neo git config set api-key`, "
-        "`neo git auth status` ou `neo git auth logout --provider <github|bitbucket>`.",
+        "Use `neo git config set api-key`, `neo git config get api-key` ou "
+        "`neo git config unset api-key`.",
         as_json=is_json_mode(ctx),
     )
 
@@ -411,124 +383,6 @@ def _legacy_config_get_provider(ctx: typer.Context) -> None:
         "O comando `neo git config get-provider` foi removido. Use `neo git config get provider`.",
         as_json=is_json_mode(ctx),
     )
-
-
-# ============================================================================
-# neo git auth (login | status | logout)
-# ============================================================================
-
-
-@git_auth_app.command("login")
-def git_auth_login(
-    ctx: typer.Context,
-    provider: str | None = Option(
-        None,
-        "--provider",
-        help=f"Provedor Git para autenticar: {', '.join(SUPPORTED_GIT_PROVIDERS)}.",
-    ),
-) -> None:
-    """Orienta a migração para o novo comando de autenticação."""
-    as_json = is_json_mode(ctx)
-    if provider is not None:
-        _validate_provider_option(ctx, provider)
-    _fail_usage("`neo git auth login` foi substituído por `neo git config set api-key`.", as_json)
-
-
-@git_auth_app.command("status")
-def git_auth_status(
-    ctx: typer.Context,
-    provider: str | None = Option(
-        None,
-        "--provider",
-        help="Filtra o status por provedor ('github' ou 'bitbucket').",
-    ),
-    json_output: bool = Option(
-        False,
-        "--json",
-        help="Emite a saída em formato JSON estruturado no stdout.",
-    ),
-) -> None:
-    """Exibe o estado de autenticação dos provedores Git sem expor tokens."""
-    as_json = is_json_mode(ctx, json_output)
-    providers_to_check: tuple[GitProviderType, ...]
-    if provider is not None:
-        providers_to_check = (_validate_provider_option(ctx, provider, json_output),)
-    else:
-        providers_to_check = ("github", "bitbucket")
-
-    items: list[dict[str, object]] = []
-    for prov in providers_to_check:
-        source = get_credential_source(prov)
-        entry: dict[str, object] = {
-            "provider": prov,
-            "authenticated": source is not None,
-            "source": source or "none",
-        }
-        if prov == "bitbucket":
-            entry["email"] = get_bitbucket_email()
-        items.append(entry)
-
-    if as_json:
-        print_json(items if provider is None else items[0])
-    else:
-        columns = ["Provedor", "Autenticado", "Origem", "Conta / E-mail"]
-        rows: list[list[str]] = []
-        for item in items:
-            auth_ok = bool(item["authenticated"])
-            status_str = "[bold green]Sim[/bold green]" if auth_ok else "[red]Não[/red]"
-            src_str = str(item["source"]) if auth_ok else "[dim]none[/dim]"
-            email_val = str(item.get("email") or "-")
-            rows.append([str(item["provider"]), status_str, src_str, email_val])
-        print_table("Status de Autenticação Git", columns, rows)
-
-
-@git_auth_app.command("logout")
-def git_auth_logout(
-    ctx: typer.Context,
-    provider: str = Option(
-        ...,
-        "--provider",
-        help=f"Provedor Git para desconectar: {', '.join(SUPPORTED_GIT_PROVIDERS)}.",
-    ),
-    yes: bool = Option(
-        False,
-        "--yes",
-        help="Pula a confirmação interativa.",
-    ),
-    json_output: bool = Option(
-        False,
-        "--json",
-        help="Emite a saída em formato JSON estruturado no stdout.",
-    ),
-) -> None:
-    """Remove as credenciais salvas de um provedor Git."""
-    as_json = is_json_mode(ctx, json_output)
-    prov = _validate_provider_option(ctx, provider, json_output)
-
-    if not yes:
-        if as_json:
-            _fail_usage(
-                "A opção `--yes` é obrigatória em `neo git auth logout` quando `--json` está ativo.",
-                as_json=True,
-            )
-        confirmed = typer.confirm(f"Deseja remover as credenciais salvas de '{prov}'?")
-        if not confirmed:
-            print_error("Operação cancelada pelo usuário.", as_json=False, code=int(ExitCode.ERROR))
-            raise typer.Exit(code=int(ExitCode.ERROR))
-
-    if delete_credential(prov):
-        print_success(
-            f"Credenciais de '{prov}' removidas com sucesso.",
-            as_json=as_json,
-            json_payload={"status": "success", "provider": prov, "logged_out": True},
-        )
-    else:
-        print_error(
-            f"Nenhuma credencial salva encontrada para '{prov}'.",
-            as_json=as_json,
-            code=int(ExitCode.NOT_FOUND),
-        )
-        raise typer.Exit(code=int(ExitCode.NOT_FOUND))
 
 
 # ============================================================================
