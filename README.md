@@ -13,7 +13,7 @@
 <p align="center">
   <a href="https://github.com/thalisonwilker/neo/actions/workflows/ci.yml?query=branch%3Amain"><img src="https://github.com/thalisonwilker/neo/actions/workflows/ci.yml/badge.svg?event=push&branch=main" alt="CI & Deploy" /></a>
   <a href="https://thalisonwilker.github.io/neo/"><img src="https://img.shields.io/endpoint?url=https://thalisonwilker.github.io/neo/coverage-badge.json" alt="Coverage" /></a>
-  <a href="https://pypi.org/project/neo-cmd/"><img src="https://img.shields.io/badge/pypi%20package-v0.1.1-34D058" alt="PyPI Package" /></a>
+  <a href="https://pypi.org/project/neo-cmd/"><img src="https://img.shields.io/pypi/v/neo-cmd?color=34D058" alt="Versão no PyPI" /></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.13+-34D058" alt="Python 3.13+" /></a>
   <a href="https://github.com/thalisonwilker/neo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-34D058" alt="License: MIT" /></a>
 </p>
@@ -28,6 +28,8 @@ O **Neo** (`neo-cmd`) é um assistente pessoal de linha de comando feito por dev
 ---
 
 ## Instalação
+
+É necessário ter **Python 3.13 ou superior** e o [uv](https://docs.astral.sh/uv/) ou o [pipx](https://pipx.pypa.io/) instalado.
 
 ```bash
 # Recomendado: instalar globalmente em ambiente isolado com uv ou pipx
@@ -53,6 +55,9 @@ uv run neo --help
 neo git auth login --provider github
 neo git config set provider github
 neo git config set workspace minha-organizacao
+
+# Configure também o Shortcut; o token é solicitado com entrada oculta
+neo tasks config set
 
 # 2. Confira o diagnóstico do repositório local e das integrações
 neo git status
@@ -81,6 +86,8 @@ neo agent run
 
 # 6. Gerencie suas finanças pessoais em menos de 2 segundos direto do terminal
 neo fin bank create nubank --name "Nubank Principal" --balance 1500.00
+neo fin category create alimentacao --name "Alimentação" --type expense
+neo fin category create salario --name "Salário" --type income
 neo fin expense 45.90 "Almoço de trabalho" -a nubank -c alimentacao
 neo fin income 5000.00 "Salário" -a nubank -c salario
 neo fin balance
@@ -96,7 +103,8 @@ neo git repo list --json | jq '.[] | {slug, main_branch}'
 
 ```bash
 uv run pytest --cov=neo     # Testes unitários e E2E (cobertura >= 80%)
-uv run ruff check .         # Linter e formatação
+uv run ruff check .         # Linter
+uv run ruff format --check . # Verificação de formatação
 uv run mypy src             # Checagem estática de tipos (strict)
 ```
 
