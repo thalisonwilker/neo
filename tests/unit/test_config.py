@@ -193,7 +193,7 @@ def test_AC_2_git_config_keys_and_token_rejection(tmp_path: Path):
         "commit-format",
     }
 
-    with pytest.raises(ValueError, match="neo git auth login"):
+    with pytest.raises(ValueError, match="neo git config set api-key"):
         validate_git_config_key("token")
 
     with pytest.raises(ValueError, match="Chave de configuração desconhecida"):

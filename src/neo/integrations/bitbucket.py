@@ -90,7 +90,7 @@ class BitbucketClient:
         if response.status_code in (401, 403):
             raise BitbucketAuthError(
                 f"Falha de autenticação no Bitbucket ({response.status_code}). "
-                "Execute `neo git auth login --provider bitbucket` para atualizar seu API Token."
+                "Execute `neo git config set api-key` para atualizar seu API Token."
             )
         if response.status_code == 404:
             raise BitbucketNotFoundError(
@@ -212,6 +212,19 @@ class BitbucketClient:
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(url, headers=self._get_headers(), json=payload)
             self._handle_response_error(resp, f"criar repositório '{slug}' em '{ws}'")
+            return BitbucketRepo.from_api_dict(resp.json())
+
+    def update_repository_description(
+        self, repo_slug: str, description: str, workspace: str | None = None
+    ) -> BitbucketRepo:
+        """Atualiza a descrição do repositório no Bitbucket Cloud."""
+        ws = workspace or self.get_default_workspace()
+        # O endpoint PUT também pode criar repositórios; verifique primeiro que já existe.
+        self.get_repository(repo_slug, workspace=ws)
+        url = f"{self.base_url}/repositories/{ws}/{repo_slug}"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.put(url, headers=self._get_headers(), json={"description": description})
+            self._handle_response_error(resp, f"atualizar descrição de '{ws}/{repo_slug}'")
             return BitbucketRepo.from_api_dict(resp.json())
 
     def list_commits(

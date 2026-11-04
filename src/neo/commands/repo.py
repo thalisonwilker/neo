@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import typer
 from typer import Argument, Option
 
 from neo.commands._credentials import is_json_mode
+from neo.commands.local_repo import create_repo, edit_repo
 from neo.config import ExitCode
+from neo.git_context import list_repos, select_repo
 from neo.integrations.bitbucket import BitbucketError
 from neo.integrations.resolver import (
     detect_git_remote_info,
@@ -18,12 +22,14 @@ from neo.output import print_error, print_json, print_panel, print_table
 
 repo_app = typer.Typer(
     name="repo",
-    help="Lista, pesquisa e exibe detalhes de repositórios no GitHub e Bitbucket Cloud (list, search, show).",
+    help="Gerencia repositórios locais e no GitHub ou Bitbucket Cloud.",
     no_args_is_help=True,
 )
+repo_app.command("create")(create_repo)
+repo_app.command("edit")(edit_repo)
 
 
-@repo_app.command("list")
+@repo_app.command("remote-list")
 def repo_list(
     ctx: typer.Context,
     workspace: str | None = Option(
@@ -73,6 +79,49 @@ def repo_list(
 
         prov_title = "GitHub" if prov_name == "github" else "Bitbucket"
         print_table(f"Repositórios no {prov_title}", columns, rows)
+
+
+@repo_app.command("list")
+def repo_list_local(
+    ctx: typer.Context,
+    json_output: bool = Option(False, "--json", help="Emite JSON."),
+) -> None:
+    """Lista os repositórios locais registrados no Neo."""
+    as_json = is_json_mode(ctx, json_output)
+    try:
+        repos = list_repos()
+    except ValueError as exc:
+        print_error(str(exc), as_json=as_json, code=int(ExitCode.ERROR))
+        raise typer.Exit(code=int(ExitCode.ERROR)) from exc
+    if as_json:
+        print_json(repos)
+    else:
+        print_table(
+            "Repositórios locais",
+            ["Caminho", "Selecionado", "Task"],
+            [
+                [str(r["path"]), "Sim" if r["selected"] else "Não", str(r["task"] or "-")]
+                for r in repos
+            ],
+        )
+
+
+@repo_app.command("select")
+def repo_select(
+    ctx: typer.Context,
+    path: Path = Argument(..., help="Caminho do repositório."),  # noqa: B008
+) -> None:
+    """Registra e seleciona um repositório local."""
+    as_json = is_json_mode(ctx)
+    try:
+        selected = select_repo(path)
+    except (ValueError, OSError) as exc:
+        print_error(str(exc), as_json=as_json, code=int(ExitCode.ERROR))
+        raise typer.Exit(code=int(ExitCode.ERROR)) from exc
+    if as_json:
+        print_json({"path": str(selected), "selected": True})
+    else:
+        print_panel("Repositório selecionado", str(selected))
 
 
 @repo_app.command("search")
@@ -230,21 +279,6 @@ def _legacy_repo_clone(ctx: typer.Context) -> None:
     print_error(
         "O comando `neo git repo clone` está no backlog planejado desta versão. "
         "Use `neo git repo show --repo <slug>` para consultar as URLs de clone.",
-        as_json=as_json,
-        code=int(ExitCode.USAGE_ERROR),
-    )
-    raise typer.Exit(code=int(ExitCode.USAGE_ERROR))
-
-
-@repo_app.command(
-    "create",
-    hidden=True,
-    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
-)
-def _legacy_repo_create(ctx: typer.Context) -> None:
-    as_json = is_json_mode(ctx)
-    print_error(
-        "O comando `neo git repo create` está no backlog planejado desta versão.",
         as_json=as_json,
         code=int(ExitCode.USAGE_ERROR),
     )

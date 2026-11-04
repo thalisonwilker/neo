@@ -60,3 +60,5 @@ Consulta e investigação de repositórios e commits:
 - [Guia: Trocar de Provedor (GitHub ↔ Bitbucket)](../../guias/trocar-provedor.md)
 - [Guia: Uso em CI com `--json`](../../guias/ci-json.md)
 
+
+- [**Branches locais (`neo git branch`)**](branch.md): lista, cria, seleciona e remove branches no repositório selecionado.

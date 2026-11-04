@@ -18,6 +18,7 @@ from neo.config import (
     get_default_workspace_config,
     validate_git_provider,
 )
+from neo.git_context import resolve_repo_path, selected_repo
 from neo.integrations.bitbucket import BitbucketClient, BitbucketError
 from neo.integrations.bitbucket_models import (
     BitbucketCommit,
@@ -52,6 +53,10 @@ class GitProviderProtocol(Protocol):
         description: str | None = None,
     ) -> BitbucketRepo: ...
 
+    def update_repository_description(
+        self, repo_slug: str, description: str, workspace: str | None = None
+    ) -> BitbucketRepo: ...
+
     def list_commits(
         self,
         repo_slug: str,
@@ -73,11 +78,14 @@ class GitProviderProtocol(Protocol):
 def detect_git_remote_details() -> tuple[GitProviderType | None, str | None, str | None]:
     """Detecta (provedor, workspace/owner, slug do repositório) a partir do remote origin local."""
     try:
+        selected = selected_repo()
+        cwd = resolve_repo_path() if selected else None
         res = subprocess.run(
             ["git", "remote", "get-url", "origin"],
             capture_output=True,
             text=True,
             check=False,
+            cwd=cwd,
         )
         if res.returncode == 0 and isinstance(res.stdout, str):
             url = res.stdout.strip()
@@ -88,7 +96,7 @@ def detect_git_remote_details() -> tuple[GitProviderType | None, str | None, str
             m_bb = re.search(r"bitbucket\.org[:/]([^/]+)/([^/.]+)(?:\.git)?", url)
             if m_bb:
                 return "bitbucket", m_bb.group(1), m_bb.group(2)
-    except (subprocess.SubprocessError, OSError) as exc:
+    except (subprocess.SubprocessError, OSError, ValueError) as exc:
         logger.debug("Falha ao consultar git remote: %s", exc)
 
     return None, None, None
@@ -178,7 +186,7 @@ def resolve_git_provider(
         service_label = "GitHub" if provider_name == "github" else "Bitbucket"
         msg = (
             f"Credenciais do {service_label} não configuradas. "
-            f"Execute `neo git auth login --provider {provider_name}`."
+            "Configure o provedor e execute `neo git config set api-key`."
         )
         print_error(msg, as_json=as_json, code=int(ExitCode.AUTH_ERROR))
         raise typer.Exit(code=int(ExitCode.AUTH_ERROR))

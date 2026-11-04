@@ -50,7 +50,7 @@ O **Neo** é um assistente pessoal de linha de comando feito por dev, para devs 
     Todo comando de leitura aceita `--json`. Combine o Neo com `jq`, scripts shell e pipelines de CI/CD usando códigos de saída semânticos (`0` a `5`).
 
 === "Credenciais Seguras no Keyring"
-    `neo git auth login` solicita tokens com entrada oculta e salva no **Keyring nativo do SO** (macOS Keychain, Linux Secret Service, Windows Credential Manager), com fallback para variáveis de ambiente em CI.
+    `neo git config set api-key` solicita tokens com entrada oculta e salva no **Keyring nativo do SO** (macOS Keychain, Linux Secret Service, Windows Credential Manager), com fallback para variáveis de ambiente em CI.
 
 === "Finanças Pessoais sem Sair do Terminal"
     Registre despesas e receitas em menos de 2 segundos com `neo fin expense` e `neo fin income`. Seus dados são salvos localmente em banco SQLite (`~/.config/neo/finance.db`) com permissão restrita `0600`, total privacidade e resumo consolidado mensal por categoria (`neo fin summary`).
@@ -91,13 +91,14 @@ Configure seu ambiente e consulte suas demandas em menos de 1 minuto:
 === "GitHub"
     ```bash
     # 1. Autentique seu provedor Git com segurança
-    neo git auth login --provider github
+    neo git config set provider github
+    neo git config set api-key
 
     # 2. Selecione a organização ou conta ativa
     neo git workspace select
 
     # 3. Liste os repositórios disponíveis
-    neo git repo list --limit 5
+    neo git repo remote-list --limit 5
 
     # 4. Veja suas tarefas na sprint atual no quadro Kanban
     neo tasks resume
@@ -106,13 +107,14 @@ Configure seu ambiente e consulte suas demandas em menos de 1 minuto:
 === "Bitbucket Cloud"
     ```bash
     # 1. Autentique com e-mail e API Token da Atlassian
-    neo git auth login --provider bitbucket
+    neo git config set provider bitbucket
+    neo git config set api-key
 
     # 2. Selecione o workspace de trabalho
     neo git workspace select
 
     # 3. Liste os repositórios do workspace
-    neo git repo list --limit 5
+    neo git repo remote-list --limit 5
 
     # 4. Veja suas tarefas na sprint atual no quadro Kanban
     neo tasks resume
@@ -127,7 +129,7 @@ Configure seu ambiente e consulte suas demandas em menos de 1 minuto:
 | `neo tasks resume` | Abre o quadro Kanban no terminal com suas tarefas da sprint atual | `tasks` |
 | `neo tasks analyze <id>` | Analisa a story e sugere nome de branch, commits e critérios de aceite | `tasks` |
 | `neo git status` | Inspeciona branch, remote, workspace ativo e status de autenticação | `git` |
-| `neo git repo list` | Lista repositórios remotos do workspace ativo | `git` |
+| `neo git repo remote-list` | Lista repositórios remotos do workspace ativo | `git` |
 | `neo git repo search --query "<termo>"` | Busca repositórios remotos por nome ou descrição | `git` |
 | `neo git commits search --query "<termo>"` | Pesquisa histórico de commits por mensagem | `git` |
 | `neo git workspace select` | Menu interativo para alternar organização ou workspace | `git` |

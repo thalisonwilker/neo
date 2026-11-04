@@ -31,6 +31,7 @@ alwaysApply: false
 > Mantenha acionável e curto. Se não é acionável, não é uma lição — é desabafo.
 
 - 2026-10-28 · `tests/e2e/` · Testes E2E de Git que não isolam `neo.config.DEFAULT_CONFIG_DIR` e `DEFAULT_CONFIG_FILE` leem o `~/.config/neo/config.toml` real da máquina host · Sempre usar `patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path)` e `patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml")` em fixtures de testes E2E.
+- 2026-11-04 · Bitbucket Cloud · `PUT /repositories/{workspace}/{repo_slug}` também pode criar um repositório · Consultar a existência antes de editar e considerar a corrida entre consulta e atualização.
 
 ## Promovidas (histórico curto)
 > Rastro de para onde foram as lições podadas — só o link, sem reexplicar. Poda este histórico também.

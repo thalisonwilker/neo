@@ -168,7 +168,7 @@ A flag `--json` permite extrair dados pontuais diretamente no terminal combinand
 
 ```bash
 # 1. Listar nome e slug de todos os repositórios do workspace ativo
-neo git repo list --json | jq '.[] | {name, slug}'
+neo git repo remote-list --json | jq '.[] | {name, slug}'
 
 # 2. Extrair o hash e a mensagem dos 5 últimos commits
 neo git commits list --limit 5 --json | jq '.[] | {hash: .hash[0:7], message: .message | split("\n")[0]}'
