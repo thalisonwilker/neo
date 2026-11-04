@@ -34,9 +34,9 @@ def mock_github_env(tmp_path: Path):
 def test_AC_7_github_without_credentials():
     """Valida AC-7 (0006) e AC-8 (0014): Ausência de credenciais do GitHub retorna código 3."""
     with patch("neo.integrations.resolver.get_credential", return_value=None):
-        res = runner.invoke(app, ["git", "repo", "list", "--provider", "github"])
+        res = runner.invoke(app, ["git", "repo", "remote-list", "--provider", "github"])
         assert res.exit_code == int(ExitCode.AUTH_ERROR)
-        assert "neo git auth login --provider github" in res.output
+        assert "neo git config set api-key" in res.output
 
 
 def test_AC_2_config_set_and_get_provider(tmp_path: Path):
@@ -61,7 +61,7 @@ def test_AC_2_config_set_and_get_provider(tmp_path: Path):
 
 @respx.mock
 def test_AC_5_repo_list_and_show_github(mock_github_env: Path):
-    """AC-5 (0014): `neo git repo list` e `neo git repo show` no GitHub."""
+    """AC-5 (0014): `neo git repo remote-list` e `neo git repo show` no GitHub."""
     respx.get("https://api.github.com/user").mock(
         return_value=httpx.Response(200, json={"id": 1, "login": "octocat", "name": "The Octocat"})
     )
@@ -98,7 +98,7 @@ def test_AC_5_repo_list_and_show_github(mock_github_env: Path):
         )
     )
 
-    res_list = runner.invoke(app, ["git", "repo", "list", "--provider", "github"])
+    res_list = runner.invoke(app, ["git", "repo", "remote-list", "--provider", "github"])
     assert res_list.exit_code == 0
     assert "octo-repo" in res_list.output
     assert "GitHub" in res_list.output

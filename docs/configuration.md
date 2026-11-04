@@ -29,6 +29,10 @@ commit-format = "{type}: {message}"
 |---|---|---|---|
 | `provider` | `github` \| `bitbucket` | *(auto/fallback)* | Provedor Git padrão quando fora de um repositório Git local. |
 | `workspace` | `<slug>` (texto não-vazio) | *(auto via API)* | Workspace (Bitbucket) ou organização/usuário (GitHub) padrão. |
+| `api-key` | Entrada oculta | — | Credencial validada no provedor configurado. |
+| `repo` | Caminho local | — | Repositório selecionado. |
+| `branch` | Nome da branch | Branch ativa | Fazer checkout no repositório selecionado. |
+| `task` | ID da tarefa | — | Task associada ao repositório selecionado. |
 | `default-branch` | Ex.: `main`, `master`, `develop` | `main` | Nome da branch principal padrão para operações Git. |
 | `branch-pattern` | Ex.: `{type}/{id}-{slug}` | `{type}/{id}-{slug}` | Padrão de nomenclatura sugerido para branches. |
 | `commit-format` | Ex.: `{type}: {message}` | `{type}: {message}` | Formato padrão sugerido para mensagens de commit. |
@@ -45,7 +49,7 @@ neo git config unset default-branch
 ```
 
 !!! info "Segurança: `token` não é uma chave de configuração"
-    A chave `token` é rejeitada por `neo git config` com erro de uso incorreto (código `2`). Use sempre [`neo git auth login`](cli/git/auth.md) ou variáveis de ambiente.
+    A chave `token` é rejeitada por `neo git config` com erro de uso incorreto (código `2`). Use sempre [`neo git config set api-key`](cli/git/auth.md) ou variáveis de ambiente.
 
 ---
 
@@ -72,13 +76,13 @@ flowchart TD
 4. **Auto-detecção pelo `remote origin`:** analisa a URL do repositório Git atual (`github.com` ou `bitbucket.org`).
 5. **Padrão:** `github` se apenas o GitHub estiver autenticado; caso contrário, `bitbucket` (e o primeiro workspace retornado pela API).
 
-Use `neo git status` para ver de qual camada cada valor foi resolvido no diretório atual.
+Use `neo git status` para ver de qual camada cada valor foi resolvido para o repositório selecionado ou, sem seleção, para o diretório atual.
 
 ---
 
 ## Autenticação e Variáveis de Ambiente
 
-### Armazenamento Local (`neo git auth login`)
+### Armazenamento Local (`neo git config set api-key`)
 
 1. **Keyring do Sistema Operacional (prioritário):**
    - macOS: *Keychain Access*
@@ -89,7 +93,7 @@ Use `neo git status` para ver de qual camada cada valor foi resolvido no diretó
    - Permissão obrigatória: `0600` (leitura e escrita apenas pelo seu usuário).
 
 !!! warning "Bitbucket Cloud: use API Token + E-mail"
-    As antigas *App Passwords* do Bitbucket Cloud foram descontinuadas pela Atlassian. O Bitbucket Cloud exige o **e-mail da conta** e um **API Token**. O comando `neo git auth login --provider bitbucket` solicita ambos de forma segura.
+    As antigas *App Passwords* do Bitbucket Cloud foram descontinuadas pela Atlassian. O Bitbucket Cloud exige o **e-mail da conta** e um **API Token**. Após configurar o provedor, `neo git config set api-key` solicita ambos de forma segura.
 
 ### Variáveis de Ambiente para Automação e CI/CD
 
@@ -113,7 +117,7 @@ export NEO_GIT_PROVIDER="github"
 export NEO_GIT_WORKSPACE="minha-org"
 export NEO_GITHUB_TOKEN="ghp_exemplo_ci"
 
-neo git repo list --json | jq '.[].slug'
+neo git repo remote-list --json | jq '.[].slug'
 ```
 
 Nenhum comando do Neo imprime o token em logs, mensagens de erro, `--verbose` ou `--json`.

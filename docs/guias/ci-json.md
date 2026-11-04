@@ -30,7 +30,7 @@ Em ambientes não interativos (como GitHub Actions, GitLab CI ou contêineres Do
         script:
           - export NEO_BITBUCKET_EMAIL="dev@empresa.com"
           - export NEO_BITBUCKET_TOKEN="$BITBUCKET_API_TOKEN"
-          - neo git repo list --json
+          - neo git repo remote-list --json
     ```
 
 === "Shortcut (Módulo Tasks)"
@@ -62,7 +62,7 @@ fi
 
 ### Extraindo apenas nomes e URLs SSH de repositórios
 ```bash
-neo git repo list --json | jq '.[] | {name, ssh: .clone_links[0].href}'
+neo git repo remote-list --json | jq '.[] | {name, ssh: .clone_links[0].href}'
 ```
 
 ### Contando histórias por coluna no Shortcut

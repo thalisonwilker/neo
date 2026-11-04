@@ -39,7 +39,7 @@ def test_AC_6_commits_without_credentials():
     ):
         res = runner.invoke(app, ["git", "commits", "list", "--repo", "meu-repo"])
         assert res.exit_code == int(ExitCode.AUTH_ERROR)
-        assert "neo git auth login --provider bitbucket" in res.output
+        assert "neo git config set api-key" in res.output
 
 
 def test_AC_6_commits_without_repo_and_no_git():

@@ -12,7 +12,7 @@ O Neo foi projetado para devs e times que atuam em ecossistemas mistos, permitin
 
 ## 1. Como o Provedor é Resolvido
 
-Quando você executa comandos como `neo git repo list` ou `neo git commits list`, o Neo resolve o provedor ativo na seguinte ordem:
+Quando você executa comandos como `neo git repo remote-list` ou `neo git commits list`, o Neo resolve o provedor ativo na seguinte ordem:
 
 1. **Flag explícita:** `--provider github` ou `--provider bitbucket` (sobrescreve tudo para a execução atual).
 2. **Variável de ambiente:** `NEO_GIT_PROVIDER`.
@@ -28,12 +28,14 @@ Você pode manter credenciais salvas para ambos os provedores ao mesmo tempo no 
 
 === "Autenticar no GitHub"
     ```bash
-    neo git auth login --provider github
+    neo git config set provider github
+    neo git config set api-key
     ```
 
 === "Autenticar no Bitbucket Cloud"
     ```bash
-    neo git auth login --provider bitbucket
+    neo git config set provider bitbucket
+    neo git config set api-key
     # Informe o e-mail da conta Atlassian e o API Token gerado
     ```
 
@@ -64,10 +66,10 @@ Não é necessário alterar a configuração global para fazer uma consulta em o
 
 ```bash
 # Listar repositórios de uma organização no GitHub
-neo git repo list --provider github --workspace minha-org
+neo git repo remote-list --provider github --workspace minha-org
 
 # Listar repositórios de um workspace no Bitbucket
-neo git repo list --provider bitbucket --workspace meu-workspace
+neo git repo remote-list --provider bitbucket --workspace meu-workspace
 ```
 
 ---

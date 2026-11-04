@@ -157,7 +157,7 @@ def validate_git_config_key(key: str) -> GitConfigKey:
         raise ValueError(
             f"A chave '{normalized}' não existe em `neo git config`. "
             "Credenciais nunca são salvas como configuração: use "
-            "`neo git auth login --provider <github|bitbucket>`."
+            "`neo git config set api-key`."
         )
     if normalized not in SUPPORTED_GIT_CONFIG_KEYS:
         valid_keys = ", ".join(SUPPORTED_GIT_CONFIG_KEYS)

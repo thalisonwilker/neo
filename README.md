@@ -52,12 +52,17 @@ uv run neo --help
 
 ```bash
 # 1. Autentique seus provedores no Keyring do sistema operacional (entrada oculta)
-neo git auth login --provider github
 neo git config set provider github
+neo git config set api-key
 neo git config set workspace minha-organizacao
 
 # Configure também o Shortcut; o token é solicitado com entrada oculta
 neo tasks config set
+
+# Registre um repositório local e associe uma tarefa
+neo git repo select /caminho/do/repositorio
+neo git config set task 123
+neo git branch list
 
 # 2. Confira o diagnóstico do repositório local e das integrações
 neo git status
@@ -65,7 +70,7 @@ neo git auth status
 
 # 3. Navegue por workspaces, repositórios e commits (GitHub ou Bitbucket Cloud)
 neo git workspace list
-neo git repo list --limit 10
+neo git repo remote-list --limit 10
 neo git commits search --query "fix" --limit 5
 
 # 4. Acompanhe a sprint, crie tasks, checklists e comentários no Shortcut
@@ -94,7 +99,7 @@ neo fin balance
 neo fin summary
 
 # 7. Combine com --json e jq para criar scripts e automações
-neo git repo list --json | jq '.[] | {slug, main_branch}'
+neo git repo remote-list --json | jq '.[] | {slug, main_branch}'
 ```
 
 ---

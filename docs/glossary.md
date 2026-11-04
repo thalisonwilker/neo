@@ -23,6 +23,9 @@ alwaysApply: false
 | **Pull Request (PR)** | Proposta de merge entre duas branches submetida a revisão no provedor Git | Commit isolado ou merge local | `Git Integration` |
 | **SDD Provider / Provedor SDD** | Ferramenta ou esteira de desenvolvimento orientado a especificações (ex.: `spec-driven` e `spec-kit`) | Provedor de repositórios Git | `Agent & SDD Orchestration` |
 | **Repository (Repo)** | Repositório de código hospedado no provedor Git, identificado por um `slug` dentro de um `workspace` | Diretório qualquer no sistema de arquivos sem Git | `Git Integration` |
+| **Repositório local** | Diretório que contém um repositório Git conhecido pelo Neo | Workspace remoto | `Git Integration` |
+| **Repositório selecionado** | Repositório local usado como contexto persistente dos comandos Git do Neo | Diretório corrente do terminal | `Git Integration` |
+| **Task** | ID de tarefa associado a um repositório local no contexto Git | Branch ou commit | `Git Integration` |
 | **Story / Card** | Unidade de trabalho, feature, bug ou chore gerenciada no Shortcut | Issue de repositório Git | `Shortcut Integration` |
 | **Workspace** | Conceito unificado no Neo para o escopo proprietário dos repositórios: equivale a um **Workspace** no Bitbucket Cloud e a uma **Organization** ou **conta pessoal de usuário** no GitHub | Pasta local de trabalho no computador | `Git Integration` |
 | **Account / Conta** | Conta bancária ou carteira detentora de saldo (`checking`, `savings`, `investment`, `credit`, `cash`) | Provedor de Git ou usuário do sistema | `Personal Finance` |

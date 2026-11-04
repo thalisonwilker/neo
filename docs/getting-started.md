@@ -55,18 +55,20 @@ neo --version
 
 ## 2. Autentique seu Provedor Git
 
-O comando `neo git auth login` solicita o segredo com entrada oculta no terminal e o armazena no **Keyring do sistema operacional** (ou em `~/.config/neo/credentials.toml` com permissão `0600`). O Neo nunca aceita tokens como argumento de linha de comando.
+O comando `neo git config set api-key` solicita o segredo com entrada oculta no terminal e o armazena no **Keyring do sistema operacional** (ou em `~/.config/neo/credentials.toml` com permissão `0600`). O Neo nunca aceita tokens como argumento de linha de comando.
 
 === "GitHub"
     Gere um **Personal Access Token** (Classic com escopo `repo` ou Fine-grained) e execute:
     ```bash
-    neo git auth login --provider github
+    neo git config set provider github
+    neo git config set api-key
     ```
 
 === "Bitbucket Cloud"
     Gere um **API Token** na sua conta Atlassian e execute:
     ```bash
-    neo git auth login --provider bitbucket
+    neo git config set provider bitbucket
+    neo git config set api-key
     ```
     O terminal solicitará o e-mail da sua conta Atlassian e, em seguida, o API Token com digitação oculta.
 
@@ -108,10 +110,10 @@ neo git auth status
 neo git status
 
 # Listar os repositórios do workspace configurado
-neo git repo list --limit 10
+neo git repo remote-list --limit 10
 
 # Exportar em JSON para usar com jq
-neo git repo list --limit 5 --json | jq '.[] | {name, slug, main_branch}'
+neo git repo remote-list --limit 5 --json | jq '.[] | {name, slug, main_branch}'
 ```
 
 ---
