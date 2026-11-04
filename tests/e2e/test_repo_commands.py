@@ -8,6 +8,7 @@ from unittest.mock import patch
 import httpx
 import pytest
 import respx
+from rich.text import Text
 from typer.testing import CliRunner
 
 from neo.cli import app
@@ -185,12 +186,13 @@ def test_AC_5_repo_show_human_and_json():
         assert res_404.exit_code == int(ExitCode.NOT_FOUND)
 
 
-def test_AC_8_legacy_repo_clone_and_create_requires_path():
+@pytest.mark.parametrize("color", [False, True])
+def test_AC_8_legacy_repo_clone_and_create_requires_path(color: bool):
     """AC-8 (0014) e AC-4 (0023): clone legado e create sem caminho são rejeitados."""
     res_clone = runner.invoke(app, ["git", "repo", "clone", "meu-projeto"])
     assert res_clone.exit_code == int(ExitCode.USAGE_ERROR)
     assert "neo git repo show" in res_clone.output
 
-    res_create = runner.invoke(app, ["git", "repo", "create", "meu-novo-repo"])
+    res_create = runner.invoke(app, ["git", "repo", "create", "meu-novo-repo"], color=color)
     assert res_create.exit_code == int(ExitCode.USAGE_ERROR)
-    assert "--path" in res_create.output
+    assert "--path" in Text.from_ansi(res_create.output).plain
