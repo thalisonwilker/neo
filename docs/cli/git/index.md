@@ -34,13 +34,14 @@ Gerenciamento de credenciais, resolução de diretório local e configurações:
 - [**Configurar workspace**](workspace.md): defina ou consulte o workspace com `neo git config`.
 
 ### 2. Recursos Remotos
-Consulta e investigação de repositórios e commits:
+Consulta e gerenciamento de repositórios, commits e pull requests:
 
 - [**Repositórios (`neo git repo`)**](repo.md): Listagem (`list`), busca por texto (`search`) e detalhes completos (`show`).
 - [**Commits (`neo git commits`)**](commits.md): Histórico recente (`list`), busca por mensagem (`search`) e detalhes de commit (`show`).
+- [**Pull Requests (`neo git pr`)**](pr.md): lista PRs abertas e oferece abertura (`open`), aprovação (`approve`), recusa (`decline`) e pesquisa (`search`).
 
 ### 3. Backlog e Recursos Planejados
-- [**Recursos Planejados (🚧)**](planejado.md): Visão do roadmap para gerenciamento de branches, pull requests, tags e releases.
+- [**Recursos Planejados (🚧)**](planejado.md): Visão do roadmap para operações remotas de branches, tags e releases.
 
 ---
 

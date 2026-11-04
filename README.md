@@ -20,7 +20,7 @@
 
 O **Neo** (`neo-cmd`) é um assistente pessoal de linha de comando feito por dev, para devs que resolvem tudo pelo teclado. Desenvolvido em **Python 3.13** com **Typer** e **Rich**:
 
-- **Disponível hoje:** integração unificada com **GitHub**, **Bitbucket Cloud** e **Shortcut** (`neo git` e `neo tasks`), orquestração do Google Antigravity CLI e esteiras SDD (`neo agent`), micro gerenciamento financeiro pessoal local (`neo fin`), quadros Kanban no terminal, saída estruturada via `--json` e credenciais protegidas no Keyring do SO.
+- **Disponível hoje:** integração unificada com **GitHub**, **Bitbucket Cloud** e **Shortcut** (`neo git` e `neo tasks`), abertura, aprovação, recusa e pesquisa de pull requests, orquestração do Google Antigravity CLI e esteiras SDD (`neo agent`), micro gerenciamento financeiro pessoal local (`neo fin`), quadros Kanban no terminal, saída estruturada via `--json` e credenciais protegidas no Keyring do SO.
 - **No roadmap:** módulos para estudos, hobbies, lazer e acompanhamento avançado de PRs.
 
 📚 **Documentação Completa:** **[thalisonwilker.github.io/neo](https://thalisonwilker.github.io/neo/)**
@@ -72,6 +72,10 @@ neo git config get api-key
 neo git config get workspace
 neo git repo remote-list --limit 10
 neo git commits search --query "fix" --limit 5
+
+# Abra um pull request da branch atual ou pesquise pelo título
+neo git pr open --base main --title "Adicionar busca" --description "Implementa a busca."
+neo git pr search "busca"
 
 # 4. Acompanhe a sprint, crie tasks, checklists e comentários no Shortcut
 neo tasks resume

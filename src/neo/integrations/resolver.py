@@ -26,6 +26,7 @@ from neo.integrations.bitbucket_models import (
     BitbucketWorkspace,
 )
 from neo.integrations.github import GitHubClient
+from neo.integrations.pr_models import PullRequest
 from neo.output import print_error
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,44 @@ logger = logging.getLogger(__name__)
 @runtime_checkable
 class GitProviderProtocol(Protocol):
     """Protocolo comum que qualquer provedor Git (Bitbucket, GitHub) deve implementar."""
+
+    def list_open_pull_requests(
+        self, repo_slug: str, workspace: str | None = None
+    ) -> list[PullRequest]: ...
+
+    def list_pr_branches(self, repo_slug: str, workspace: str | None = None) -> list[str]: ...
+
+    def create_pull_request(
+        self,
+        repo_slug: str,
+        source: str,
+        destination: str,
+        title: str,
+        description: str,
+        workspace: str | None = None,
+    ) -> PullRequest: ...
+
+    def approve_pull_request(
+        self,
+        repo_slug: str,
+        pr_id: int,
+        message: str,
+        workspace: str | None = None,
+    ) -> None: ...
+
+    def decline_pull_request(
+        self,
+        repo_slug: str,
+        pr_id: int,
+        workspace: str | None = None,
+    ) -> None: ...
+
+    def search_pull_requests(
+        self,
+        repo_slug: str,
+        query: str,
+        workspace: str | None = None,
+    ) -> list[PullRequest]: ...
 
     def list_repositories(
         self, workspace: str | None = None, limit: int | None = None

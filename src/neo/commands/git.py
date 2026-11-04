@@ -15,6 +15,7 @@ from typer import Argument, Option
 from neo.commands._credentials import is_json_mode
 from neo.commands.branch import branch_app, current_branch, select_branch
 from neo.commands.commits import commits_app
+from neo.commands.pr import pr_app
 from neo.commands.repo import repo_app
 from neo.config import (
     SUPPORTED_GIT_CONFIG_KEYS,
@@ -64,6 +65,7 @@ git_app.add_typer(git_config_app, name="config")
 git_app.add_typer(repo_app, name="repo")
 git_app.add_typer(commits_app, name="commits")
 git_app.add_typer(branch_app, name="branch")
+git_app.add_typer(pr_app, name="pr")
 
 
 def _fail_usage(message: str, as_json: bool) -> NoReturn:

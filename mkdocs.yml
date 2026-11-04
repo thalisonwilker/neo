@@ -32,7 +32,6 @@ theme:
     - navigation.tabs.sticky
     - navigation.sections
     - navigation.indexes
-    - navigation.expand
     - navigation.top
     - navigation.tracking
     - search.highlight
@@ -92,47 +91,47 @@ nav:
   - Primeiros Passos: getting-started.md
   - Configuração: configuration.md
   - Referência da CLI:
-      - Conceitos Gerais: cli/index.md
-      - Git:
+      - Visão geral: cli/index.md
+      - Árvore de comandos: cli/comandos.md
+      - config:
+          - cli/config/index.md
+          - agent — preferências: cli/agent/config.md
+      - git:
           - cli/git/index.md
-          - Contexto e Acesso:
-              - Configurar Token / Autenticação: cli/git/auth.md
-              - Configurações Gerais: cli/git/config.md
-              - Diagnóstico de Contexto: cli/git/status.md
-              - Configurar Workspaces: cli/git/workspace.md
-          - Recursos:
-              - Repositórios: cli/git/repo.md
-              - Branches locais: cli/git/branch.md
-              - Commits: cli/git/commits.md
+          - status: cli/git/status.md
+          - config:
+              - cli/git/config.md
+              - Credenciais (api-key): cli/git/auth.md
+              - Workspace: cli/git/workspace.md
+          - repo: cli/git/repo.md
+          - branch: cli/git/branch.md
+          - commits: cli/git/commits.md
+          - pr: cli/git/pr.md
           - Recursos Planejados (🚧): cli/git/planejado.md
-      - Tasks:
+      - tasks:
           - cli/tasks/index.md
-          - Visão do Dia:
-              - Quadro Kanban: cli/tasks/resume.md
-              - Membro Autenticado: cli/tasks/whoami.md
-              - Sprints e Iterações: cli/tasks/iterations.md
-          - Gestão e Criação:
-              - Criar Story: cli/tasks/create.md
-              - Checklist da Story: cli/tasks/check.md
-              - Comentários: cli/tasks/comment.md
-          - Consulta de Demandas:
-              - Listar Stories: cli/tasks/list.md
-              - Pesquisar Stories: cli/tasks/search.md
-              - Detalhes da Story: cli/tasks/show.md
-          - Análise de Contexto: cli/tasks/analyze.md
-          - Configuração do Shortcut: cli/tasks/config.md
-      - Agente & SDD:
+          - create: cli/tasks/create.md
+          - list: cli/tasks/list.md
+          - search: cli/tasks/search.md
+          - show: cli/tasks/show.md
+          - analyze: cli/tasks/analyze.md
+          - resume: cli/tasks/resume.md
+          - iterations: cli/tasks/iterations.md
+          - whoami: cli/tasks/whoami.md
+          - check: cli/tasks/check.md
+          - comment: cli/tasks/comment.md
+          - config: cli/tasks/config.md
+      - agent:
           - cli/agent/index.md
-          - Configurações do Agente: cli/agent/config.md
-          - Diagnóstico e Status: cli/agent/status.md
-          - Preparação SDD: cli/agent/setup.md
-          - Execução Interativa: cli/agent/run.md
-      - Financeiro:
+          - status: cli/agent/status.md
+          - setup: cli/agent/setup.md
+          - run: cli/agent/run.md
+      - fin:
           - cli/fin/index.md
-          - Contas e Bancos: cli/fin/bank.md
-          - Categorias: cli/fin/category.md
-          - Transações e Atalhos: cli/fin/tx.md
-          - Balanço e Resumo: cli/fin/summary.md
+          - bank: cli/fin/bank.md
+          - category: cli/fin/category.md
+          - tx / expense / income: cli/fin/tx.md
+          - balance / summary: cli/fin/summary.md
   - Guias Práticos:
       - guias/index.md
       - Gestão Financeira Pessoal: guias/gestao-financeira.md

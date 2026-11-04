@@ -22,6 +22,7 @@ neo <módulo> [recurso] <ação> [argumentos] [--opções]
 - **Comandos em inglês, interface em português:** Nomes de módulos, recursos, ações e flags são em inglês; tabelas, painéis, confirmações e mensagens de erro são em português do Brasil.
 - **Ausência de atalhos em `neo git`:** Para evitar ambiguidades entre provedores, o módulo `neo git` **não utiliza atalhos de uma letra** (use `--provider`, `--workspace`, `--repo`, `--query`, `--limit`, `--author`, `--yes`). No módulo `neo tasks`, atalhos curtos ergonômicos são suportados (`-s`, `-i`, `-m`, `-a`, `-c`, `-l`, `-t`).
 - **Saída visual e estruturada:** Saída formatada com tabelas e caixas **Rich** por padrão para leitura humana no terminal; JSON puro emitido no `stdout` quando `--json` é utilizado.
+- **Listagem padrão de PRs:** `neo git pr` lista pull requests abertos; não é necessário um subcomando `list`.
 
 ---
 
@@ -62,7 +63,10 @@ Para garantir previsibilidade, o Neo organiza suas ações em verbos consistente
 | `create` | Criação de novos recursos locais ou remotos | `fin bank`, `fin category`, `fin tx` |
 | `update` | Atualização de metadados ou propriedades de um recurso existente | `fin bank`, `fin tx` |
 | `delete` | Remove um recurso existente ou credencial salva | `fin bank`, `fin category`, `fin tx`, `tasks config` |
-| `search` | Pesquisa registros por termo ou palavra-chave | `git repo`, `git commits`, `tasks search` |
+| `search` | Pesquisa registros por termo ou palavra-chave | `git repo`, `git commits`, `git pr`, `tasks search` |
+| `open` | Abre um pull request usando a branch atual | `git pr` |
+| `approve` | Aprova um pull request com mensagem | `git pr` |
+| `decline` | Recusa ou fecha um pull request sem merge | `git pr` |
 | `select` | Seleciona um repositório ou branch local | `git repo`, `git branch` |
 | `set` | Grava ou atualiza uma chave de configuração | `git config`, `config agent`, `tasks config` |
 | `unset` | Remove uma chave de configuração personalizada | `git config`, `config agent` |
@@ -81,7 +85,7 @@ Para garantir previsibilidade, o Neo organiza suas ações em verbos consistente
 | Verbo | Propósito planejado | Recursos pretendidos |
 |---|---|---|
 | `clone` 🚧 | Clonagem assistida de repositórios | `git repo` |
-| `open` 🚧 | Abertura do recurso na interface web do provedor | `git repo`, `git pr`, `tasks` |
+| `open` 🚧 | Abertura do recurso na interface web do provedor | `git repo`, `tasks` |
 | `diff` 🚧 | Comparação entre branches ou commits | `git repo`, `git branch` |
 | `close` / `merge` 🚧 | Finalização e merge de pull requests | `git pr` |
 
@@ -100,7 +104,7 @@ Esta matriz resume todas as operações mapeadas no Neo, indicando disponibilida
 | | Repositórios (`repo`) | ✅ | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | `clone` (🚧), `create` (✅), `edit` (✅) |
 | | Commits (`commits`) | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | — |
 | | Branches locais (`branch`) | ✅ | ➖ | ➖ | ✅ | ➖ | ➖ | ➖ | `create` (✅), `delete` (✅) |
-| | Pull Requests (`pr`) 🚧 | 🚧 | 🚧 | 🚧 | ➖ | ➖ | ➖ | ➖ | `create` (🚧), `merge` (🚧) |
+| | Pull Requests (`pr`) | ✅¹ | 🚧 | ✅ | ➖ | ➖ | ➖ | ➖ | `open` (✅), `approve` (✅), `decline` (✅), `merge` (🚧) |
 | | Tags & Releases 🚧 | 🚧 | 🚧 | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (🚧) |
 | **`neo tasks`** | Demandas (`tasks`) | ✅ | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | `create` (✅), `resume` (✅), `whoami` (✅), `iterations` (✅), `analyze` (✅) |
 | | Checklist (`check`) | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | `add` (✅), `complete` (✅), `uncomplete` (✅) |
@@ -114,6 +118,7 @@ Esta matriz resume todas as operações mapeadas no Neo, indicando disponibilida
 | | Consolidação | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | `balance` (✅), `summary` (✅) |
 
 **Legenda:**
+* ✅¹ **Listagem padrão:** `neo git pr` lista PRs abertas, sem subcomando `list`.
 * ✅ **Disponível:** Funcionalidade implementada e testada no código atual.
 * 🚧 **Planejado:** Especificado na visão de produto e presente no backlog de implementação.
 * ➖ **Não se aplica:** Ação não compatível com a natureza do recurso.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import Any
+from urllib.parse import quote, urljoin, urlsplit
 
 import httpx
 
@@ -25,6 +26,7 @@ from neo.integrations.github_models import (
     parse_github_commit,
     parse_github_repo,
 )
+from neo.integrations.pr_models import PullRequest
 
 logger = logging.getLogger(__name__)
 
@@ -231,6 +233,128 @@ class GitHubClient:
             resp = client.patch(url, headers=self._get_headers(), json={"description": description})
             self._handle_response_error(resp, f"atualizar descrição de '{ws}/{repo_slug}'")
             return parse_github_repo(resp.json())
+
+    def _pr_base(self, repo_slug: str, workspace: str | None) -> str:
+        ws = workspace or self.get_default_workspace()
+        return f"{self.base_url}/repos/{quote(ws, safe='')}/{quote(repo_slug, safe='')}"
+
+    @staticmethod
+    def _parse_pull_request(data: dict[str, Any]) -> PullRequest:
+        state = str(data.get("state", "")).lower()
+        normalized = (
+            "OPEN" if state == "open" else "MERGED" if data.get("merged_at") else "DECLINED"
+        )
+        return PullRequest(
+            id=data["number"],
+            title=data["title"],
+            state=normalized,
+            source=data["head"]["ref"],
+            destination=data["base"]["ref"],
+            url=data.get("html_url", ""),
+        )
+
+    def _get_paginated(self, url: str, params: dict[str, str | int]) -> list[dict[str, Any]]:
+        """Segue todas as páginas, sem enviar credenciais para uma origem diferente."""
+        result: list[dict[str, Any]] = []
+        visited: set[str] = set()
+        origin = urlsplit(self.base_url)
+        next_url: str | None = url
+        with httpx.Client(timeout=self.timeout) as client:
+            while next_url:
+                if next_url in visited:
+                    raise GitHubError("A paginação do GitHub contém um ciclo.")
+                visited.add(next_url)
+                resp = client.get(next_url, headers=self._get_headers(), params=params or None)
+                self._handle_response_error(resp, "consultar pull requests ou branches")
+                payload = resp.json()
+                if not isinstance(payload, list):
+                    raise GitHubError("Resposta inválida do GitHub ao consultar resultados.")
+                result.extend(item for item in payload if isinstance(item, dict))
+                raw_next = resp.links.get("next", {}).get("url")
+                if raw_next:
+                    resolved = urljoin(str(resp.url), raw_next)
+                    parsed = urlsplit(resolved)
+                    if (parsed.scheme, parsed.netloc) != (origin.scheme, origin.netloc):
+                        raise GitHubError("O GitHub retornou uma página de origem inválida.")
+                    next_url = resolved
+                else:
+                    next_url = None
+                params = {}
+        return result
+
+    def list_pr_branches(self, repo_slug: str, workspace: str | None = None) -> list[str]:
+        """Lista todas as branches remotas usadas na escolha da branch de destino."""
+        url = f"{self._pr_base(repo_slug, workspace)}/branches"
+        return [str(item["name"]) for item in self._get_paginated(url, {"per_page": 100})]
+
+    def list_open_pull_requests(
+        self, repo_slug: str, workspace: str | None = None
+    ) -> list[PullRequest]:
+        """Lista PRs abertos em todas as páginas."""
+        url = f"{self._pr_base(repo_slug, workspace)}/pulls"
+        return [
+            self._parse_pull_request(item)
+            for item in self._get_paginated(url, {"state": "open", "per_page": 100})
+        ]
+
+    def create_pull_request(
+        self,
+        repo_slug: str,
+        source: str,
+        destination: str,
+        title: str,
+        description: str,
+        workspace: str | None = None,
+    ) -> PullRequest:
+        """Abre PR a partir de uma branch existente no remoto."""
+        url = f"{self._pr_base(repo_slug, workspace)}/pulls"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(
+                url,
+                headers=self._get_headers(),
+                json={"head": source, "base": destination, "title": title, "body": description},
+            )
+            self._handle_response_error(resp, "abrir pull request")
+            return self._parse_pull_request(resp.json())
+
+    def approve_pull_request(
+        self, repo_slug: str, pr_id: int, message: str, workspace: str | None = None
+    ) -> None:
+        """Envia aprovação e mensagem em uma única revisão."""
+        url = f"{self._pr_base(repo_slug, workspace)}/pulls/{pr_id}/reviews"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(
+                url, headers=self._get_headers(), json={"event": "APPROVE", "body": message}
+            )
+            self._handle_response_error(resp, "aprovar pull request")
+
+    def decline_pull_request(
+        self, repo_slug: str, pr_id: int, workspace: str | None = None
+    ) -> None:
+        """Fecha um PR sem fazer merge."""
+        url = f"{self._pr_base(repo_slug, workspace)}/pulls/{pr_id}"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.patch(url, headers=self._get_headers(), json={"state": "closed"})
+            self._handle_response_error(resp, "recusar pull request")
+
+    def search_pull_requests(
+        self, repo_slug: str, query: str, workspace: str | None = None
+    ) -> list[PullRequest]:
+        """Busca por ID exato ou trecho de título, incluindo todas as páginas e estados."""
+        base = f"{self._pr_base(repo_slug, workspace)}/pulls"
+        if query.isdecimal():
+            with httpx.Client(timeout=self.timeout) as client:
+                resp = client.get(f"{base}/{int(query)}", headers=self._get_headers())
+                if resp.status_code == 404:
+                    return []
+                self._handle_response_error(resp, "buscar pull request")
+                return [self._parse_pull_request(resp.json())]
+        search = query.casefold()
+        return [
+            self._parse_pull_request(item)
+            for item in self._get_paginated(base, {"state": "all", "per_page": 100})
+            if search in str(item.get("title", "")).casefold()
+        ]
 
     def list_commits(
         self,

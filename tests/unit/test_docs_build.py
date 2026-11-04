@@ -107,6 +107,28 @@ def test_AC_2_docs_structure_and_pages():
     assert (PROJECT_ROOT / "CHANGELOG.md").exists()
 
 
+def test_AC_1_cli_navigation_follows_command_tree():
+    """0026 AC-1: a referência agrupa páginas pelos comandos reais da CLI."""
+    with open(PROJECT_ROOT / "mkdocs.yml", encoding="utf-8") as file:
+        config = yaml.load(file, Loader=MkDocsLoader)
+    reference = next(
+        item["Referência da CLI"] for item in config["nav"] if "Referência da CLI" in item
+    )
+    groups = {key: value for item in reference for key, value in item.items()}
+    assert {"config", "git", "tasks", "agent", "fin"} <= groups.keys()
+    git = {
+        key: value
+        for item in groups["git"]
+        if isinstance(item, dict)
+        for key, value in item.items()
+    }
+    assert {"status", "config", "repo", "branch", "commits", "pr"} <= git.keys()
+    assert not {"auth", "workspace"} & git.keys()
+    task_names = {key for item in groups["tasks"] if isinstance(item, dict) for key in item}
+    assert {"create", "list", "search", "show", "check", "comment", "config"} <= task_names
+    assert "navigation.expand" not in config["theme"]["features"]
+
+
 def test_AC_9_docs_no_legacy_git_commands():
     """Valida AC-9: Nenhum comando antigo do neo git aparece fora de migration.md."""
     docs_dir = PROJECT_ROOT / "docs"

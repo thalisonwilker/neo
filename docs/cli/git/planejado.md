@@ -1,6 +1,6 @@
 ---
 name: cli-git-planejado
-description: Backlog e especificações de recursos planejados no módulo Git do Neo (branch, pr, tag, release).
+description: Backlog de recursos planejados no módulo Git do Neo (branch, tag, release, repo e ações adicionais de PR).
 alwaysApply: false
 ---
 
@@ -18,13 +18,8 @@ alwaysApply: false
 
 Operações em branches remotas e comparação entre branches continuam planejadas. Para operações locais já disponíveis, consulte [branches](branch.md).
 
-### 2. Pull Requests (`neo git pr`)
-Fluxo completo de code review e abertura de PRs unificado para GitHub e Bitbucket:
-
-* `neo git pr list`: Lista PRs abertos no repositório com status de CI e revisores.
-* `neo git pr create`: Abre um novo Pull Request a partir da branch atual, preenchendo template baseado nos commits.
-* `neo git pr show <id>`: Detalha descrição, comentários e checks de automação.
-* `neo git pr merge <id>`: Realiza o merge do PR via linha de comando após aprovações mínimas.
+### 2. Ações adicionais de Pull Request
+Inspeção detalhada e merge pela CLI continuam planejados. Para listar PRs abertas, abrir, aprovar, recusar ou pesquisar, consulte [pull requests](pr.md).
 
 ### 3. Tags e Releases (`neo git tag` & `neo git release`)
 Versionamento e publicação de artefatos:

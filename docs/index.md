@@ -132,6 +132,7 @@ Configure seu ambiente e consulte suas demandas em menos de 1 minuto:
 | `neo git repo remote-list` | Lista repositórios remotos do workspace ativo | `git` |
 | `neo git repo search --query "<termo>"` | Busca repositórios remotos por nome ou descrição | `git` |
 | `neo git commits search --query "<termo>"` | Pesquisa histórico de commits por mensagem | `git` |
+| `neo git pr` | Lista pull requests abertos do repositório selecionado | `git` |
 | `neo git config set workspace <slug>` | Configura a organização ou workspace padrão | `git` |
 | `neo git config get api-key` | Confere o estado de autenticação do provedor configurado | `git` |
 | `neo config show` | Visão agregada de todas as preferências e credenciais do Neo | `config` |

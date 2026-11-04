@@ -1,5 +1,6 @@
 """Teste automatizado de paridade entre a CLI (Typer) e as páginas de documentação."""
 
+import re
 from pathlib import Path
 
 import typer
@@ -44,6 +45,27 @@ def test_every_typer_command_is_documented():
     assert not missing, f"Comandos da CLI sem documentação encontrada: {missing}"
 
 
+def test_AC_3_command_tree_matches_visible_cli():
+    """0026 AC-3: a árvore mantém todos os comandos visíveis na hierarquia correta."""
+    content = (PROJECT_ROOT / "docs" / "cli" / "comandos.md").read_text(encoding="utf-8")
+    stack: list[tuple[int, str]] = []
+    paths: set[str] = set()
+    for line in content.splitlines():
+        match = re.match(r"^(\s*)- .*?`([^`]+)`", line)
+        if not match:
+            continue
+        indent, name = len(match.group(1)), match.group(2)
+        if indent and name.startswith("neo "):
+            continue
+        while stack and stack[-1][0] >= indent:
+            stack.pop()
+        path = name if not indent else f"{stack[-1][1]} {name}"
+        stack.append((indent, path))
+        paths.add(path)
+    assert set(get_all_typer_commands()) <= paths
+    assert "neo git pr" in paths
+
+
 def test_every_doc_page_corresponds_to_real_command_or_topic():
     """Garante que toda página em docs/cli/ corresponde a um recurso ou comando real."""
     docs_dir = PROJECT_ROOT / "docs" / "cli"
@@ -51,6 +73,8 @@ def test_every_doc_page_corresponds_to_real_command_or_topic():
 
     expected_pages = {
         "index.md",
+        "comandos.md",
+        "config/index.md",
         "git/index.md",
         "git/auth.md",
         "git/config.md",
@@ -59,6 +83,7 @@ def test_every_doc_page_corresponds_to_real_command_or_topic():
         "git/repo.md",
         "git/branch.md",
         "git/commits.md",
+        "git/pr.md",
         "git/planejado.md",
         "tasks/index.md",
         "tasks/create.md",

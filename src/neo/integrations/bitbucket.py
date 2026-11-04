@@ -6,6 +6,7 @@ import base64
 import logging
 import re
 from typing import Any
+from urllib.parse import urlsplit
 
 import httpx
 
@@ -15,6 +16,7 @@ from neo.integrations.bitbucket_models import (
     BitbucketRepo,
     BitbucketWorkspace,
 )
+from neo.integrations.pr_models import PullRequest
 
 logger = logging.getLogger(__name__)
 
@@ -226,6 +228,136 @@ class BitbucketClient:
             resp = client.put(url, headers=self._get_headers(), json={"description": description})
             self._handle_response_error(resp, f"atualizar descrição de '{ws}/{repo_slug}'")
             return BitbucketRepo.from_api_dict(resp.json())
+
+    @staticmethod
+    def _parse_pull_request(data: dict[str, Any]) -> PullRequest:
+        """Converte o formato do Bitbucket para o modelo comum."""
+        return PullRequest(
+            id=data["id"],
+            title=data["title"],
+            state=data["state"],
+            source=data["source"]["branch"]["name"],
+            destination=data["destination"]["branch"]["name"],
+            url=data.get("links", {}).get("html", {}).get("href", ""),
+        )
+
+    def _list_pages(
+        self, url: str, params: httpx.QueryParams | None = None
+    ) -> list[dict[str, Any]]:
+        """Segue paginação sem enviar a credencial para outro servidor."""
+        expected = urlsplit(self.base_url)
+        next_url: str | None = url
+        seen: set[str] = set()
+        values: list[dict[str, Any]] = []
+        with httpx.Client(timeout=self.timeout) as client:
+            while next_url:
+                parsed = urlsplit(next_url)
+                if (parsed.scheme, parsed.netloc) != (expected.scheme, expected.netloc):
+                    raise BitbucketError("URL de paginação do Bitbucket inválida.")
+                if next_url in seen:
+                    raise BitbucketError("Paginação do Bitbucket retornou uma página repetida.")
+                seen.add(next_url)
+                response = client.get(next_url, headers=self._get_headers(), params=params)
+                self._handle_response_error(response, "listar pull requests ou branches")
+                data = response.json()
+                values.extend(item for item in data.get("values", []) if isinstance(item, dict))
+                next_raw = data.get("next")
+                next_url = next_raw if isinstance(next_raw, str) and next_raw else None
+                params = None
+        return values
+
+    def list_pr_branches(self, repo_slug: str, workspace: str | None = None) -> list[str]:
+        """Lista todas as branches remotas disponíveis como destino."""
+        ws = workspace or self.get_default_workspace()
+        url = f"{self.base_url}/repositories/{ws}/{repo_slug}/refs/branches"
+        return [item["name"] for item in self._list_pages(url) if isinstance(item.get("name"), str)]
+
+    def list_open_pull_requests(
+        self, repo_slug: str, workspace: str | None = None
+    ) -> list[PullRequest]:
+        """Lista PRs abertos em todas as páginas."""
+        ws = workspace or self.get_default_workspace()
+        url = f"{self.base_url}/repositories/{ws}/{repo_slug}/pullrequests"
+        return [
+            self._parse_pull_request(item)
+            for item in self._list_pages(url, params=httpx.QueryParams({"state": "OPEN"}))
+        ]
+
+    def create_pull_request(
+        self,
+        repo_slug: str,
+        source: str,
+        destination: str,
+        title: str,
+        description: str,
+        workspace: str | None = None,
+    ) -> PullRequest:
+        """Cria uma solicitação de integração no Bitbucket."""
+        ws = workspace or self.get_default_workspace()
+        url = f"{self.base_url}/repositories/{ws}/{repo_slug}/pullrequests"
+        payload = {
+            "title": title,
+            "description": description,
+            "source": {"branch": {"name": source}},
+            "destination": {"branch": {"name": destination}},
+        }
+        with httpx.Client(timeout=self.timeout) as client:
+            response = client.post(url, headers=self._get_headers(), json=payload)
+            self._handle_response_error(response, "criar pull request")
+            return self._parse_pull_request(response.json())
+
+    def approve_pull_request(
+        self, repo_slug: str, pr_id: int, message: str, workspace: str | None = None
+    ) -> None:
+        """Publica a mensagem e depois aprova, comunicando falha parcial."""
+        ws = workspace or self.get_default_workspace()
+        base = f"{self.base_url}/repositories/{ws}/{repo_slug}/pullrequests/{pr_id}"
+        with httpx.Client(timeout=self.timeout) as client:
+            response = client.post(
+                f"{base}/comments", headers=self._get_headers(), json={"content": {"raw": message}}
+            )
+            self._handle_response_error(response, "publicar comentário no pull request")
+            try:
+                response = client.post(f"{base}/approve", headers=self._get_headers())
+                self._handle_response_error(response, "aprovar pull request")
+            except (BitbucketError, httpx.HTTPError) as exc:
+                raise BitbucketError(
+                    "Comentário publicado, mas a aprovação falhou ou não foi confirmada. "
+                    "Confira o estado no Bitbucket antes de tentar novamente."
+                ) from exc
+
+    def decline_pull_request(
+        self, repo_slug: str, pr_id: int, workspace: str | None = None
+    ) -> None:
+        """Recusa o pull request sem fazer merge."""
+        ws = workspace or self.get_default_workspace()
+        url = f"{self.base_url}/repositories/{ws}/{repo_slug}/pullrequests/{pr_id}/decline"
+        with httpx.Client(timeout=self.timeout) as client:
+            response = client.post(url, headers=self._get_headers())
+            self._handle_response_error(response, "recusar pull request")
+
+    def search_pull_requests(
+        self, repo_slug: str, query: str, workspace: str | None = None
+    ) -> list[PullRequest]:
+        """Busca ID exato ou trecho do título em todos os estados."""
+        ws = workspace or self.get_default_workspace()
+        base = f"{self.base_url}/repositories/{ws}/{repo_slug}/pullrequests"
+        query = query.strip()
+        if query.isdecimal():
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.get(f"{base}/{int(query)}", headers=self._get_headers())
+                if response.status_code == 404:
+                    return []
+                self._handle_response_error(response, "consultar pull request")
+                return [self._parse_pull_request(response.json())]
+        params = httpx.QueryParams()
+        for state in ("OPEN", "MERGED", "DECLINED"):
+            params = params.add("state", state)
+        return [
+            self._parse_pull_request(item)
+            for item in self._list_pages(base, params=params)
+            if query.casefold() in str(item.get("title", "")).casefold()
+        ]
 
     def list_commits(
         self,
