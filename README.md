@@ -61,10 +61,10 @@ neo git branch list
 
 # 2. Confira o diagnóstico do repositório local e das integrações
 neo git status
-neo git auth status
+neo git config get api-key
 
 # 3. Navegue por workspaces, repositórios e commits (GitHub ou Bitbucket Cloud)
-neo git workspace list
+neo git config get workspace
 neo git repo remote-list --limit 10
 neo git commits search --query "fix" --limit 5
 

@@ -27,7 +27,7 @@ interfaces (CLI) → application (resolver/services) → domain (models/protocol
 
 ## Interface Comum de Provedores (`GitProviderProtocol`)
 
-Para que `neo git workspace`, `neo git repo` e `neo git commits` funcionem de forma idêntica no **GitHub** e no **Bitbucket Cloud**, ambos os clientes implementam o contrato `GitProviderProtocol`:
+Para que `neo git config`, `neo git repo` e `neo git commits` funcionem de forma idêntica no **GitHub** e no **Bitbucket Cloud**, ambos os clientes implementam o contrato `GitProviderProtocol`:
 
 ```python
 class GitProviderProtocol(Protocol):

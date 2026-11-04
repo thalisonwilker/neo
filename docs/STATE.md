@@ -11,6 +11,7 @@ alwaysApply: true
 **Última atualização:** 2026-10-30 por Antigravity
 
 ## Em andamento / próximo passo
+- **Feature 0024 implementada:** grupos `neo git auth` e `neo git workspace` removidos; credenciais e workspace permanecem em `neo git config`. Próximo passo: review e merge da branch; 193 testes aprovados, cobertura 85,07%.
 - **Feature 0023 implementada:** `0023-atualizacao-comandos-git`; contexto local, autenticação validada, branches e criação/edição de repositórios. Gates executados: 195 testes, cobertura 85,32%, Ruff, Mypy, MkDocs e auditoria da esteira. Próximo passo: review e PR; anexar cobertura e definir os gates de complexidade/SAST, ainda sem comando configurado. PRs Git permanecem para uma spec posterior.
 - **Fase atual:** Onda 1 (Trabalho / Dev). A branch `feature/0022-refactor-config-show` contém as features `0022-refactor-config-show` e `0023-atualizacao-comandos-git`, prontas para review. Features anteriores concluídas incluem `0021-tasks-create-checklist-comment`, `0020-documentacao-modulo-financeiro` e `0019-micro-gerenciamento-financeiro`. Pull requests Git permanecem no backlog `0010-branches-prs-e-detalhes-repo`.
 - **Próximo passo concreto:** Review e merge da branch `feature/0022-refactor-config-show`; anexar o relatório de cobertura ao PR.

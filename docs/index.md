@@ -95,7 +95,7 @@ Configure seu ambiente e consulte suas demandas em menos de 1 minuto:
     neo git config set api-key
 
     # 2. Selecione a organização ou conta ativa
-    neo git workspace select
+    neo git config set workspace meu-workspace
 
     # 3. Liste os repositórios disponíveis
     neo git repo remote-list --limit 5
@@ -111,7 +111,7 @@ Configure seu ambiente e consulte suas demandas em menos de 1 minuto:
     neo git config set api-key
 
     # 2. Selecione o workspace de trabalho
-    neo git workspace select
+    neo git config set workspace meu-workspace
 
     # 3. Liste os repositórios do workspace
     neo git repo remote-list --limit 5
@@ -132,8 +132,8 @@ Configure seu ambiente e consulte suas demandas em menos de 1 minuto:
 | `neo git repo remote-list` | Lista repositórios remotos do workspace ativo | `git` |
 | `neo git repo search --query "<termo>"` | Busca repositórios remotos por nome ou descrição | `git` |
 | `neo git commits search --query "<termo>"` | Pesquisa histórico de commits por mensagem | `git` |
-| `neo git workspace select` | Menu interativo para alternar organização ou workspace | `git` |
-| `neo git auth status` | Confere o estado de autenticação dos provedores Git | `git` |
+| `neo git config set workspace <slug>` | Configura a organização ou workspace padrão | `git` |
+| `neo git config get api-key` | Confere o estado de autenticação do provedor configurado | `git` |
 | `neo config show` | Visão agregada de todas as preferências e credenciais do Neo | `config` |
 | `neo agent run` | Inicia sessão interativa com o agente de IA (Antigravity CLI) | `agent` |
 | `neo fin expense <valor> <desc>` | Registra despesa rápida vinculada a conta e categoria | `fin` |

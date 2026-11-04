@@ -1,4 +1,4 @@
-"""Testes E2E para `neo config`, `neo git config`, `neo git auth` e `neo tasks config` (features 0002, 0009, 0014)."""
+"""Testes E2E para `neo config`, `neo git config`, `neo git config` e `neo tasks config` (features 0002, 0009, 0014)."""
 
 import json
 import os
@@ -29,8 +29,6 @@ def test_AC_1_help_and_version():
 def test_AC_1_no_short_flags_in_git_commands():
     """AC-1 (0014): Nenhum comando sob `neo git` aceita atalhos de uma letra (-p, -w, -r, -q, -l)."""
     for args in (
-        ["git", "auth", "status", "-p", "github"],
-        ["git", "workspace", "list", "-p", "github"],
         ["git", "repo", "list", "-w", "org"],
         ["git", "repo", "search", "-q", "termo"],
         ["git", "commits", "list", "-r", "repo"],
@@ -98,82 +96,31 @@ def test_AC_2_git_config_set_get_list_unset(tmp_path: Path):
             assert "neo git config set api-key" in res_tok.output
 
 
-def test_AC_3_git_auth_login_status_logout(tmp_path: Path):
-    """AC-6 (0023): migração de login e status/logout sem exposição de segredos."""
+def test_AC_3_git_config_api_key_status_and_unset(tmp_path: Path):
+    """AC-6 (0023): consulta e remoção de credenciais sem exposição de segredos."""
     from neo.config import set_credential
 
     stored: dict[str, str] = {}
-
-    def mock_set(service, username, password):
-        stored[username] = password
-
-    def mock_get(service, username):
-        return stored.get(username)
-
-    def mock_del(service, username):
-        stored.pop(username, None)
-
     with (
-        patch("keyring.set_password", side_effect=mock_set),
-        patch("keyring.get_password", side_effect=mock_get),
-        patch("keyring.delete_password", side_effect=mock_del),
+        patch("keyring.set_password", lambda service, key, value: stored.__setitem__(key, value)),
+        patch("keyring.get_password", lambda service, key: stored.get(key)),
+        patch("keyring.delete_password", lambda service, key: stored.pop(key, None)),
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CREDENTIALS_FILE", tmp_path / "credentials.toml"),
         patch.dict(os.environ, {}, clear=True),
     ):
-        # O comando anterior orienta para o novo ponto de entrada.
-        res_gh = runner.invoke(
-            app,
-            ["git", "auth", "login", "--provider", "github"],
-        )
-        assert res_gh.exit_code == int(ExitCode.USAGE_ERROR)
-        assert "neo git config set api-key" in " ".join(res_gh.output.split())
         set_credential("github", "ghp_super_secret_token")
         set_credential("bitbucket", "bb_api_token_secret", email="dev@acme.com")
-
-        # 3. `auth login` nunca aceita `--token`
-        res_no_token_flag = runner.invoke(
-            app, ["git", "auth", "login", "--provider", "github", "--token", "abc"]
-        )
-        assert res_no_token_flag.exit_code == int(ExitCode.USAGE_ERROR)
-
-        # 4. `auth status` (humano e --json) nunca expõe o token
-        res_status = runner.invoke(app, ["git", "auth", "status"])
-        assert res_status.exit_code == 0
-        assert "github" in res_status.output
-        assert "bitbucket" in res_status.output
-        assert "dev@acme.com" in res_status.output
-        assert "ghp_super_secret_token" not in res_status.output
-        assert "bb_api_token_secret" not in res_status.output
-
-        res_status_json = runner.invoke(
-            app, ["git", "auth", "status", "--provider", "bitbucket", "--json"]
-        )
-        assert res_status_json.exit_code == 0
-        status_data = json.loads(res_status_json.output)
-        assert status_data["provider"] == "bitbucket"
-        assert status_data["authenticated"] is True
-        assert status_data["source"] == "keyring"
-        assert status_data["email"] == "dev@acme.com"
-        assert "token" not in status_data
-        assert "masked_token" not in status_data
-
-        # 5. `auth logout` pede confirmação ou aceita `--yes`
-        res_cancel = runner.invoke(
-            app, ["git", "auth", "logout", "--provider", "github"], input="n\n"
-        )
-        assert res_cancel.exit_code == int(ExitCode.ERROR)
+        assert runner.invoke(app, ["git", "config", "set", "provider", "github"]).exit_code == 0
+        result = runner.invoke(app, ["git", "config", "get", "api-key", "--json"])
+        assert result.exit_code == 0
+        assert json.loads(result.output)["value"] == "Configurado"
+        assert "ghp_super_secret_token" not in result.output
+        assert runner.invoke(app, ["git", "config", "unset", "api-key"], input="n\n").exit_code != 0
         assert "github" in stored
-
-        res_logout = runner.invoke(app, ["git", "auth", "logout", "--provider", "github", "--yes"])
-        assert res_logout.exit_code == 0
+        assert runner.invoke(app, ["git", "config", "unset", "api-key", "--yes"]).exit_code == 0
         assert "github" not in stored
-
-        # Logout de provedor já desconectado retorna código 4 (NOT_FOUND)
-        res_logout_again = runner.invoke(
-            app, ["git", "auth", "logout", "--provider", "github", "--yes"]
-        )
-        assert res_logout_again.exit_code == int(ExitCode.NOT_FOUND)
+        assert "bitbucket" in stored
 
 
 def test_AC_4_and_AC_5_tasks_and_global_config_show():

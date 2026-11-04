@@ -1,6 +1,5 @@
-"""Testes E2E para comandos com provedor GitHub (`neo git repo`, `neo git commits`, `neo git workspace`, features 0006 e 0014)."""
+"""Testes E2E dos comandos de GitHub e da resolução de workspaces."""
 
-import json
 import os
 from pathlib import Path
 from unittest.mock import patch
@@ -183,22 +182,15 @@ def test_AC_6_commits_search_and_show_github(mock_github_env: Path):
 
 
 @respx.mock
-def test_AC_4_workspace_list_github(mock_github_env: Path):
+def test_AC_4_workspace_api_remains_available(mock_github_env: Path):
+    """A remoção do grupo CLI não elimina a resolução de workspaces no cliente."""
+    from neo.integrations.github import GitHubClient
+
     respx.get("https://api.github.com/user").mock(
         return_value=httpx.Response(200, json={"id": 1, "login": "octocat", "name": "The Octocat"})
     )
     respx.get("https://api.github.com/user/orgs").mock(
         return_value=httpx.Response(200, json=[{"id": 2, "login": "acme-corp"}])
     )
-
-    res = runner.invoke(app, ["git", "workspace", "list", "--provider", "github"])
-    assert res.exit_code == 0
-    assert "octocat" in res.output
-    assert "acme-corp" in res.output
-
-    res_json = runner.invoke(app, ["git", "workspace", "list", "--provider", "github", "--json"])
-    assert res_json.exit_code == 0
-    data = json.loads(res_json.output)
-    assert len(data) == 2
-    assert data[0]["slug"] == "octocat"
-    assert data[1]["slug"] == "acme-corp"
+    workspaces = GitHubClient(token="test-token").list_workspaces()
+    assert [item.slug for item in workspaces] == ["octocat", "acme-corp"]

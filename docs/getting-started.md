@@ -104,7 +104,7 @@ neo git config list
 
 ```bash
 # Verificar autenticação nos provedores Git
-neo git auth status
+neo git config get api-key
 
 # Inspecionar o contexto Git completo (repositório local, provedor e workspace)
 neo git status

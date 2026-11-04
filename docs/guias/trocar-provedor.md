@@ -41,7 +41,7 @@ Você pode manter credenciais salvas para ambos os provedores ao mesmo tempo no 
 
 Verifique o estado com:
 ```bash
-neo git auth status
+neo git config get api-key
 ```
 
 ---
@@ -75,7 +75,7 @@ neo git repo remote-list --provider bitbucket --workspace meu-workspace
 ---
 
 ## Veja também
-- [neo git auth](../cli/git/auth.md) — Gerenciamento de credenciais
+- [Autenticação Git](../cli/git/auth.md) — Gerenciamento de credenciais
 - [neo git config](../cli/git/config.md) — Configurações persistidas
-- [neo git workspace](../cli/git/workspace.md) — Gerenciamento de workspaces e organizações
+- [Configuração de workspace](../cli/git/workspace.md) — Gerenciamento de workspaces e organizações
 

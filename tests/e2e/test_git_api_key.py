@@ -72,9 +72,3 @@ def test_AC_6_status_and_unset_do_not_expose_environment_secret(monkeypatch):
     result = runner.invoke(app, ["git", "config", "unset", "api-key", "--yes"])
     assert result.exit_code == 0
     remove.assert_called_once_with("github")
-
-
-def test_AC_6_auth_login_points_to_new_command():
-    result = runner.invoke(app, ["git", "auth", "login", "--provider", "github"])
-    assert result.exit_code == 2
-    assert "neo git config set api-key" in " ".join(result.output.split())
