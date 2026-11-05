@@ -53,3 +53,66 @@
   transform: translateY(-4px) scale(1.02);
   box-shadow: 0 0 50px rgba(18, 135, 90, 0.45);
 }
+
+/* ==========================================================================
+   Menu Suspenso / Navegação em Árvore Colapsável com Chevron
+   ========================================================================== */
+
+/* Garante exibição do ícone de chevron e cursor interativo em seções aninhadas */
+.md-nav__item--section.md-nav__item--nested > .md-nav__link .md-nav__icon,
+.md-nav__item--section.md-nav__item--nested > .md-nav__link [for],
+.md-nav__item--section.md-nav__item--nested .md-nav__link--index label .md-nav__icon {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.md-nav__item--section.md-nav__item--nested > .md-nav__link {
+  pointer-events: auto !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Estilo do chevron suspenso */
+.md-nav__item--nested .md-nav__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-left: auto;
+  color: var(--md-accent-fg-color);
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+/* Comportamento colapsável por padrão quando não está aberto */
+.md-nav__item--section.md-nav__item--nested > .md-nav {
+  display: grid !important;
+  grid-template-rows: 0fr !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  transition: grid-template-rows 0.25s cubic-bezier(0.86, 0, 0.07, 1), opacity 0.2s, visibility 0s 0.25s;
+}
+
+.md-nav__item--section.md-nav__item--nested > .md-nav > .md-nav__list {
+  overflow: hidden;
+}
+
+/* Expansão suave quando o menu estiver ativo/aberto */
+.md-nav__item--section.md-nav__item--nested > .md-nav__toggle:checked ~ .md-nav,
+.md-nav__item--section.md-nav__item--nested > .md-nav__toggle.md-toggle--indeterminate ~ .md-nav {
+  grid-template-rows: 1fr !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transition: grid-template-rows 0.25s cubic-bezier(0.86, 0, 0.07, 1), opacity 0.2s, visibility 0s 0s;
+}
+
+/* Rotação do chevron ao expandir (apontando para baixo) */
+.md-nav__item--section.md-nav__item--nested > .md-nav__toggle:checked ~ .md-nav__link .md-nav__icon:after,
+.md-nav__item--section.md-nav__item--nested > .md-nav__toggle:checked ~ .md-nav__link--index label .md-nav__icon:after,
+.md-nav__item--section.md-nav__item--nested > .md-nav__toggle.md-toggle--indeterminate ~ .md-nav__link .md-nav__icon:after {
+  transform: rotate(90deg) !important;
+}

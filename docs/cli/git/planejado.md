@@ -16,10 +16,10 @@ alwaysApply: false
 
 ### 1. Branches remotas
 
-Operações em branches remotas e comparação entre branches continuam planejadas. Para operações locais já disponíveis, consulte [branches](branch.md).
+Operações em branches remotas e comparação entre branches continuam planejadas. Para operações locais já disponíveis, consulte [branches](branch/index.md).
 
 ### 2. Ações adicionais de Pull Request
-Inspeção detalhada e merge pela CLI continuam planejados. Para listar PRs abertas, abrir, aprovar, recusar ou pesquisar, consulte [pull requests](pr.md).
+Inspeção detalhada e merge pela CLI continuam planejados. Para listar PRs abertas, abrir, aprovar, recusar ou pesquisar, consulte [pull requests](pr/index.md).
 
 ### 3. Tags e Releases (`neo git tag` & `neo git release`)
 Versionamento e publicação de artefatos:

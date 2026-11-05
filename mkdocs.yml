@@ -18,7 +18,7 @@ theme:
       accent: custom
       toggle:
         icon: material/brightness-7
-        name: Alternar para modo escuro
+        name: Tema Escuro
     # Esquema Escuro
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
@@ -26,7 +26,7 @@ theme:
       accent: custom
       toggle:
         icon: material/brightness-4
-        name: Alternar para modo claro
+        name: Tema Claro
   features:
     - navigation.tabs
     - navigation.tabs.sticky
@@ -47,8 +47,12 @@ plugins:
         cli/auth.md: cli/git/auth.md
         cli/status.md: cli/git/status.md
         cli/workspace.md: cli/git/workspace.md
-        cli/repo.md: cli/git/repo.md
-        cli/commits.md: cli/git/commits.md
+        cli/repo.md: cli/git/repo/index.md
+        cli/git/repo.md: cli/git/repo/index.md
+        cli/git/branch.md: cli/git/branch/index.md
+        cli/git/commits.md: cli/git/commits/index.md
+        cli/git/pr.md: cli/git/pr/index.md
+        cli/commits.md: cli/git/commits/index.md
         cli/tasks.md: cli/tasks/index.md
         cli/agent.md: cli/agent/index.md
 
@@ -87,12 +91,19 @@ exclude_docs: |
   product/**
 
 nav:
-  - Início: index.md
-  - Primeiros Passos: getting-started.md
-  - Configuração: configuration.md
+  - Home: index.md
+  - Começando: getting-started.md
+  - Configuração:
+      - Visão geral: config/index.md
+      - Git:
+          - Básico: config/git/basic.md
+      - Agents:
+          - code-agent: config/agents/code-agent.md
+      - Tasks: config/tasks/index.md
+
   - Referência da CLI:
       - Visão geral: cli/index.md
-      - Árvore de comandos: cli/comandos.md
+      - cli: cli/comandos.md
       - config:
           - cli/config/index.md
           - agent — preferências: cli/agent/config.md
@@ -103,10 +114,33 @@ nav:
               - cli/git/config.md
               - Credenciais (api-key): cli/git/auth.md
               - Workspace: cli/git/workspace.md
-          - repo: cli/git/repo.md
-          - branch: cli/git/branch.md
-          - commits: cli/git/commits.md
-          - pr: cli/git/pr.md
+          - repo:
+              - cli/git/repo/index.md
+              - list: cli/git/repo/list.md
+              - select: cli/git/repo/select.md
+              - remote-list: cli/git/repo/remote-list.md
+              - search: cli/git/repo/search.md
+              - show: cli/git/repo/show.md
+              - create: cli/git/repo/create.md
+              - edit: cli/git/repo/edit.md
+          - branch:
+              - cli/git/branch/index.md
+              - list: cli/git/branch/list.md
+              - create: cli/git/branch/create.md
+              - select: cli/git/branch/select.md
+              - delete: cli/git/branch/delete.md
+          - commits:
+              - cli/git/commits/index.md
+              - list: cli/git/commits/list.md
+              - search: cli/git/commits/search.md
+              - show: cli/git/commits/show.md
+          - pr:
+              - cli/git/pr/index.md
+              - list: cli/git/pr/list.md
+              - open: cli/git/pr/open.md
+              - approve: cli/git/pr/approve.md
+              - decline: cli/git/pr/decline.md
+              - search: cli/git/pr/search.md
           - Recursos Planejados (🚧): cli/git/planejado.md
       - tasks:
           - cli/tasks/index.md

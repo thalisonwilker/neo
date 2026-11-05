@@ -78,8 +78,14 @@ def test_AC_2_docs_structure_and_pages():
     assert (docs_dir / "cli" / "git" / "config.md").exists()
     assert (docs_dir / "cli" / "git" / "auth.md").exists()
     assert (docs_dir / "cli" / "git" / "workspace.md").exists()
-    assert (docs_dir / "cli" / "git" / "repo.md").exists()
-    assert (docs_dir / "cli" / "git" / "commits.md").exists()
+    assert (docs_dir / "cli" / "git" / "repo" / "index.md").exists()
+    assert (docs_dir / "cli" / "git" / "repo" / "list.md").exists()
+    assert (docs_dir / "cli" / "git" / "branch" / "index.md").exists()
+    assert (docs_dir / "cli" / "git" / "branch" / "list.md").exists()
+    assert (docs_dir / "cli" / "git" / "commits" / "index.md").exists()
+    assert (docs_dir / "cli" / "git" / "commits" / "list.md").exists()
+    assert (docs_dir / "cli" / "git" / "pr" / "index.md").exists()
+    assert (docs_dir / "cli" / "git" / "pr" / "list.md").exists()
     assert (docs_dir / "cli" / "git" / "status.md").exists()
     assert (docs_dir / "cli" / "git" / "planejado.md").exists()
     assert (docs_dir / "cli" / "tasks" / "index.md").exists()
@@ -151,8 +157,8 @@ def test_AC_9_docs_no_legacy_git_commands():
         docs_dir / "cli" / "git" / "config.md",
         docs_dir / "cli" / "git" / "auth.md",
         docs_dir / "cli" / "git" / "workspace.md",
-        docs_dir / "cli" / "git" / "repo.md",
-        docs_dir / "cli" / "git" / "commits.md",
+        docs_dir / "cli" / "git" / "repo" / "index.md",
+        docs_dir / "cli" / "git" / "commits" / "index.md",
         docs_dir / "cli" / "git" / "status.md",
     ]
     for page in portal_pages:

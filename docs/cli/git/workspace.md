@@ -20,4 +20,4 @@ Para uma consulta pontual, use a opção `--workspace <slug>` nos comandos que a
 ## Veja também
 - [neo git config](config.md)
 - [neo git status](status.md)
-- [neo git repo](repo.md)
+- [neo git repo](repo/index.md)

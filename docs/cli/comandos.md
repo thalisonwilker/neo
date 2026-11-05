@@ -22,7 +22,7 @@ Os itens abaixo mostram os comandos disponíveis agrupados como são digitados n
         - `get` — consulta uma propriedade.
         - `list` — lista as propriedades.
         - `unset` — remove uma propriedade.
-    - **[`repo`](git/repo.md)** — repositórios:
+    - **[`repo`](git/repo/index.md)** — repositórios:
         - `list` — lista repositórios locais registrados.
         - `remote-list` — lista repositórios no provedor.
         - `search` — pesquisa repositórios remotos.
@@ -30,16 +30,16 @@ Os itens abaixo mostram os comandos disponíveis agrupados como são digitados n
         - `select` — seleciona um repositório local.
         - `create` — cria e publica um repositório.
         - `edit` — altera a descrição no provedor.
-    - **[`branch`](git/branch.md)** — branches locais:
+    - **[`branch`](git/branch/index.md)** — branches locais:
         - `list` — lista branches.
         - `select` — seleciona uma branch.
         - `create` — cria uma branch.
         - `delete` — exclui uma branch.
-    - **[`commits`](git/commits.md)** — histórico de commits:
+    - **[`commits`](git/commits/index.md)** — histórico de commits:
         - `list` — lista commits.
         - `search` — pesquisa commits.
         - `show` — exibe um commit.
-    - **[`pr`](git/pr.md)** — pull requests:
+    - **[`pr`](git/pr/index.md)** — pull requests:
         - Sem subcomando: `neo git pr` lista PRs abertas.
         - `open` — abre uma PR.
         - `approve` — aprova uma PR com mensagem.
