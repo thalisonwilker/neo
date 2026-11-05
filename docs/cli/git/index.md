@@ -36,9 +36,9 @@ Gerenciamento de credenciais, resolução de diretório local e configurações:
 ### 2. Recursos Remotos
 Consulta e gerenciamento de repositórios, commits e pull requests:
 
-- [**Repositórios (`neo git repo`)**](repo.md): Listagem (`list`), busca por texto (`search`) e detalhes completos (`show`).
-- [**Commits (`neo git commits`)**](commits.md): Histórico recente (`list`), busca por mensagem (`search`) e detalhes de commit (`show`).
-- [**Pull Requests (`neo git pr`)**](pr.md): lista PRs abertas e oferece abertura (`open`), aprovação (`approve`), recusa (`decline`) e pesquisa (`search`).
+- [**Repositórios (`neo git repo`)**](repo/index.md): Listagem (`list`), busca por texto (`search`) e detalhes completos (`show`).
+- [**Commits (`neo git commits`)**](commits/index.md): Histórico recente (`list`), busca por mensagem (`search`) e detalhes de commit (`show`).
+- [**Pull Requests (`neo git pr`)**](pr/index.md): lista PRs abertas e oferece abertura (`open`), aprovação (`approve`), recusa (`decline`) e pesquisa (`search`).
 
 ### 3. Backlog e Recursos Planejados
 - [**Recursos Planejados (🚧)**](planejado.md): Visão do roadmap para operações remotas de branches, tags e releases.
@@ -62,4 +62,4 @@ Consulta e gerenciamento de repositórios, commits e pull requests:
 - [Guia: Uso em CI com `--json`](../../guias/ci-json.md)
 
 
-- [**Branches locais (`neo git branch`)**](branch.md): lista, cria, seleciona e remove branches no repositório selecionado.
+- [**Branches locais (`neo git branch`)**](branch/index.md): lista, cria, seleciona e remove branches no repositório selecionado.

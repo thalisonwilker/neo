@@ -83,6 +83,6 @@ neo git commits list --limit 5 --json | jq -r '.[].hash[0:7]'
 
 ## Veja também
 - [Conceitos Gerais — Tabela de Códigos de Saída](../cli/index.md#tabela-de-codigos-de-saida)
-- [neo git repo](../cli/git/repo.md)
+- [neo git repo](../cli/git/repo/index.md)
 - [neo tasks resume](../cli/tasks/resume.md)
 

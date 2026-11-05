@@ -11,7 +11,8 @@ alwaysApply: true
 **Última atualização:** 2026-10-30 por Antigravity
 
 ## Em andamento / próximo passo
-- **Documentação 0026:** navegação MkDocs e árvore de comandos organizadas por hierarquia; build estrito, auditoria e 12 testes de documentação passaram. Próximo passo: review das alterações locais.
+- **Feature 0027 concluída:** `0027-granularidade-docs-e-menus-suspensos`; padrão global de menu suspenso/chevron em todos os níveis, decomposição granular de `repo`, `branch`, `commits` e `pr` em páginas `.md` dedicadas por subcomando/ação, links e testes de documentação 100% atualizados e verdes.
+- **Documentação 0026:** navegação MkDocs e árvore de comandos organizadas por hierarquia; build estrito, auditoria e 12 testes de documentação passaram.
 - **Feature 0025 implementada:** `0025-comandos-pull-request`; `neo git pr` lista PRs abertas e oferece `open`, `approve`, `decline` e `search` para GitHub e Bitbucket. Suíte: 213 testes, cobertura 85,15%; Ruff, Mypy, MkDocs e auditoria aprovados. Próximo passo: review e PR; anexar a cobertura.
 - **Feature 0024 implementada:** grupos `neo git auth` e `neo git workspace` removidos; credenciais e workspace permanecem em `neo git config`. Próximo passo: review e merge da branch; 193 testes aprovados, cobertura 85,07%.
 - **Feature 0023 implementada:** `0023-atualizacao-comandos-git`; contexto local, autenticação validada, branches e criação/edição de repositórios. Gates executados: 195 testes, cobertura 85,32%, Ruff, Mypy, MkDocs e auditoria da esteira. Próximo passo: review e PR; anexar cobertura e definir os gates de complexidade/SAST, ainda sem comando configurado. PRs Git permanecem para uma spec posterior.

@@ -74,5 +74,5 @@ neo git commits list --limit 3
 ## Veja também
 - [neo tasks resume](../cli/tasks/resume.md) — Quadro Kanban no terminal
 - [neo tasks analyze](../cli/tasks/analyze.md) — Análise contextual de histórias
-- [neo git commits](../cli/git/commits.md) — Histórico e consulta de commits
+- [neo git commits](../cli/git/commits/index.md) — Histórico e consulta de commits
 

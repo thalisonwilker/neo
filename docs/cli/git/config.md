@@ -34,4 +34,4 @@ neo git config unset api-key  # pede confirmação; --yes dispensa a pergunta
 
 A chave nunca é exibida por `get`, `list` ou `status`. Quando a validação remota falha, a credencial anterior é preservada. O Bitbucket solicita também o e-mail. Variáveis de ambiente continuam tendo precedência e não são removidas por `unset api-key`. `unset branch` não altera a branch ativa; use `neo git branch select` para trocar de branch.
 
-Consulte [autenticação](auth.md), [branches](branch.md) e [status](status.md).
+Consulte [autenticação](auth.md), [branches](branch/index.md) e [status](status.md).
