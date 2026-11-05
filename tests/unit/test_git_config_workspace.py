@@ -115,7 +115,7 @@ def test_AC_4_unconfigured_provider_fails():
 def test_AC_4_missing_credentials_fails():
     """AC-4: Sem credenciais, encerra com código 3 (AUTH_ERROR)."""
     set_git_config_value("provider", "github")
-    with patch("neo.integrations.resolver.get_credential", return_value=None):
+    with patch("neo.integrations.git.resolver.get_credential", return_value=None):
         res = runner.invoke(app, ["git", "config", "set", "workspace"])
         assert res.exit_code == int(ExitCode.AUTH_ERROR)
         assert "neo git config set api-key" in res.output
@@ -133,4 +133,3 @@ def test_AC_4_empty_workspaces_list_fails():
         res = runner.invoke(app, ["git", "config", "set", "workspace"])
         assert res.exit_code == int(ExitCode.NOT_FOUND)
         assert "Nenhum workspace encontrado" in res.output
-

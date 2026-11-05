@@ -9,12 +9,14 @@ import httpx
 import typer
 from typer.testing import CliRunner
 
-from neo.commands import local_repo
-from neo.integrations.bitbucket_models import BitbucketRepo, CloneLink
+from neo.commands.git import local_repo
+from neo.commands.git.repo.create import create_repo
+from neo.commands.git.repo.edit import edit_repo
+from neo.integrations.git.models import CloneLink, GitRepo
 
 app = typer.Typer()
-app.command("create")(local_repo.create_repo)
-app.command("edit")(local_repo.edit_repo)
+app.command("create")(create_repo)
+app.command("edit")(edit_repo)
 runner = CliRunner()
 
 
@@ -27,7 +29,7 @@ def _prepare(monkeypatch):
     }.items():
         monkeypatch.setenv(key, value)
     client = Mock()
-    client.create_repository.return_value = BitbucketRepo(
+    client.create_repository.return_value = GitRepo(
         name="demo",
         slug="demo",
         clone_links=[CloneLink(name="https", href="https://github.com/test/demo.git")],

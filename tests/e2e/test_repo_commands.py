@@ -22,12 +22,12 @@ def isolate_git_remote(tmp_path: Path):
     with (
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
-        patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
+        patch("neo.integrations.git.resolver.detect_git_remote_info", return_value=(None, None)),
         patch(
-            "neo.integrations.resolver.detect_git_remote_details",
+            "neo.integrations.git.resolver.detect_git_remote_details",
             return_value=(None, None, None),
         ),
-        patch("neo.commands.repo.detect_git_remote_info", return_value=(None, None)),
+        patch("neo.commands.git.repo.show.detect_git_remote_info", return_value=(None, None)),
     ):
         yield
 

@@ -2,12 +2,12 @@ import httpx
 import pytest
 import respx
 
-from neo.integrations.bitbucket import (
+from neo.integrations.git.api.bitbucket.client import (
     BitbucketAuthError,
     BitbucketClient,
     BitbucketNotFoundError,
 )
-from neo.integrations.bitbucket_models import BitbucketCommit, BitbucketRepo
+from neo.integrations.git.models import GitCommit, GitRepo
 
 
 @pytest.fixture
@@ -49,7 +49,7 @@ def test_list_repositories(bb_client: BitbucketClient):
 
     repos = bb_client.list_repositories(workspace="my-workspace")
     assert len(repos) == 1
-    assert isinstance(repos[0], BitbucketRepo)
+    assert isinstance(repos[0], GitRepo)
     assert repos[0].name == "Repo One"
     assert repos[0].slug == "repo-one"
     assert repos[0].ssh_clone_url == "git@bitbucket.org:my-workspace/repo-one.git"
@@ -144,7 +144,7 @@ def test_list_commits(bb_client: BitbucketClient):
 
     commits = bb_client.list_commits(repo_slug="my-repo", workspace="my-workspace")
     assert len(commits) == 1
-    assert isinstance(commits[0], BitbucketCommit)
+    assert isinstance(commits[0], GitCommit)
     assert commits[0].short_hash == "1234567"
     assert commits[0].summary == "feat: adiciona login"
     assert commits[0].author.author_name == "Thalyson"
@@ -194,7 +194,7 @@ def test_get_commit_and_pagination(bb_client: BitbucketClient):
 
 @respx.mock
 def test_list_workspaces(bb_client: BitbucketClient):
-    from neo.integrations.bitbucket_models import BitbucketWorkspace
+    from neo.integrations.git.models import GitWorkspace
 
     respx.get("https://api.bitbucket.org/2.0/user/workspaces").mock(
         return_value=httpx.Response(
@@ -217,7 +217,7 @@ def test_list_workspaces(bb_client: BitbucketClient):
 
     workspaces = bb_client.list_workspaces()
     assert len(workspaces) == 1
-    assert isinstance(workspaces[0], BitbucketWorkspace)
+    assert isinstance(workspaces[0], GitWorkspace)
     assert workspaces[0].name == "Acme Corp"
     assert workspaces[0].slug == "acme_corp"
     assert workspaces[0].is_admin is True

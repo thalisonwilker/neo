@@ -15,7 +15,7 @@ runner = CliRunner()
 
 @pytest.fixture
 def mock_sc_auth():
-    with patch("neo.commands.tasks.get_credential", return_value="mock-token"):
+    with patch("neo.commands.tasks._common.get_credential", return_value="mock-token"):
         yield
 
 

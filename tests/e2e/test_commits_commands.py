@@ -21,12 +21,12 @@ def isolate_git_remote(tmp_path: Path):
     with (
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
-        patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
+        patch("neo.integrations.git.resolver.detect_git_remote_info", return_value=(None, None)),
         patch(
-            "neo.integrations.resolver.detect_git_remote_details",
+            "neo.integrations.git.resolver.detect_git_remote_details",
             return_value=(None, None, None),
         ),
-        patch("neo.commands.commits.detect_git_remote_info", return_value=(None, None)),
+        patch("neo.commands.git.commits._common.detect_git_remote_info", return_value=(None, None)),
     ):
         yield
 
@@ -46,7 +46,7 @@ def test_AC_6_commits_without_repo_and_no_git():
     """AC-6 e AC-8 (0014): Erro código 4 quando nenhum repositório é passado fora de um repo Git."""
     with (
         patch.dict(os.environ, {"NEO_BITBUCKET_TOKEN": "mock-token"}, clear=True),
-        patch("neo.commands.commits._infer_repo_slug_from_git", return_value=None),
+        patch("neo.commands.git.commits._common._infer_repo_slug_from_git", return_value=None),
     ):
         res = runner.invoke(app, ["git", "commits", "list"])
         assert res.exit_code == int(ExitCode.NOT_FOUND)

@@ -20,6 +20,8 @@ alwaysApply: false
 | **Module / Módulo** | Domínio de primeiro nível da CLI (ex.: `neo git`, `neo tasks`) | Pacote externo instalado via `pip` | `CLI & Commands` |
 | **Model / Modelo** | Identificador do modelo de linguagem/raciocínio repassado ao agente de codificação (ex.: `Gemini 3.8 Flash`) | Provedor de Git ou serviço de tarefas | `Agent & SDD Orchestration` |
 | **Provider / Provedor** | Plataforma de hospedagem Git suportada pela interface comum do Neo (`github` para GitHub e `bitbucket` para Bitbucket Cloud) | Serviço de gestão de tarefas (`shortcut`) | `Git Integration` |
+| **Provedor de tarefas** | Serviço de gestão de trabalho acessado pelo contrato `TaskProvider`; atualmente, Shortcut | Provedor Git ou item de checklist | `Shortcut Integration` |
+| **Capacidade opcional** | Operação que um provedor pode oferecer além do contrato comum, como iterações ou workflows | Funcionalidade garantida em todos os provedores | `Shortcut Integration` |
 | **Pull Request (PR)** | Proposta de merge entre duas branches submetida a revisão no provedor Git | Commit isolado ou merge local | `Git Integration` |
 | **SDD Provider / Provedor SDD** | Ferramenta ou esteira de desenvolvimento orientado a especificações (ex.: `spec-driven` e `spec-kit`) | Provedor de repositórios Git | `Agent & SDD Orchestration` |
 | **Repository (Repo)** | Repositório de código hospedado no provedor Git, identificado por um `slug` dentro de um `workspace` | Diretório qualquer no sistema de arquivos sem Git | `Git Integration` |

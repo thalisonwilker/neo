@@ -1,7 +1,7 @@
 """Testes unitários para modelos de repositório e formatação de data (spec 0028)."""
 
-from neo.integrations.bitbucket_models import BitbucketRepo
-from neo.integrations.github_models import parse_github_repo
+from neo.integrations.git.api.github.models import parse_github_repo
+from neo.integrations.git.models import GitRepo
 from neo.output import format_american_date
 
 
@@ -23,7 +23,7 @@ def test_bitbucket_repo_from_api_dict_includes_created_on():
             "html": {"href": "https://bitbucket.org/meu-ws/meu-repo"},
         },
     }
-    repo = BitbucketRepo.from_api_dict(payload)
+    repo = GitRepo.from_api_dict(payload)
     assert repo.name == "meu-repo"
     assert repo.created_on == "2024-03-15T08:30:00.000000+00:00"
     assert repo.updated_on == "2026-11-04T12:00:00.000000+00:00"

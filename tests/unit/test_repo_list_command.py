@@ -21,13 +21,13 @@ def isolate_git_remote(tmp_path: Path):
     with (
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
-        patch("neo.integrations.resolver.selected_repo", return_value=None),
-        patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
+        patch("neo.integrations.git.resolver.selected_repo", return_value=None),
+        patch("neo.integrations.git.resolver.detect_git_remote_info", return_value=(None, None)),
         patch(
-            "neo.integrations.resolver.detect_git_remote_details",
+            "neo.integrations.git.resolver.detect_git_remote_details",
             return_value=(None, None, None),
         ),
-        patch("neo.commands.repo.detect_git_remote_info", return_value=(None, None)),
+        patch("neo.commands.git.repo.show.detect_git_remote_info", return_value=(None, None)),
     ):
         yield
 
@@ -67,7 +67,7 @@ def test_AC_1_repo_list_columns_and_american_dates():
 
     with (
         patch.dict(os.environ, {"NEO_BITBUCKET_TOKEN": "mock-token"}, clear=True),
-        patch("neo.commands.repo.get_repo_tasks_map", return_value=fake_tasks_map),
+        patch("neo.commands.git.repo._common.get_repo_tasks_map", return_value=fake_tasks_map),
     ):
         res = runner.invoke(app, ["git", "repo", "list", "--workspace", "my-workspace"])
         assert res.exit_code == 0
@@ -139,7 +139,7 @@ def test_AC_3_repo_list_json_format():
 
     with (
         patch.dict(os.environ, {"NEO_BITBUCKET_TOKEN": "mock-token"}, clear=True),
-        patch("neo.commands.repo.get_repo_tasks_map", return_value=fake_tasks_map),
+        patch("neo.commands.git.repo._common.get_repo_tasks_map", return_value=fake_tasks_map),
     ):
         res = runner.invoke(app, ["git", "repo", "list", "--workspace", "my-workspace", "--json"])
         assert res.exit_code == 0
@@ -196,7 +196,7 @@ def test_AC_5_repo_remote_list_alias_and_local_list():
 
         # Teste do local-list
         with patch(
-            "neo.commands.repo.list_repos",
+            "neo.commands.git.repo.local_list.list_repos",
             return_value=[{"path": "/Users/user/projeto", "selected": True, "task": "999"}],
         ):
             res_local = runner.invoke(app, ["git", "repo", "local-list"])

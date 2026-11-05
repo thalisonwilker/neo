@@ -18,21 +18,21 @@ runner = CliRunner()
 @pytest.fixture
 def mock_github_env(tmp_path: Path):
     with (
-        patch("neo.integrations.resolver.get_credential", return_value="ghp_mock_token"),
+        patch("neo.integrations.git.resolver.get_credential", return_value="ghp_mock_token"),
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
         patch(
-            "neo.integrations.resolver.detect_git_remote_details",
+            "neo.integrations.git.resolver.detect_git_remote_details",
             return_value=(None, None, None),
         ),
-        patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
+        patch("neo.integrations.git.resolver.detect_git_remote_info", return_value=(None, None)),
     ):
         yield tmp_path
 
 
 def test_AC_7_github_without_credentials():
     """Valida AC-7 (0006) e AC-8 (0014): Ausência de credenciais do GitHub retorna código 3."""
-    with patch("neo.integrations.resolver.get_credential", return_value=None):
+    with patch("neo.integrations.git.resolver.get_credential", return_value=None):
         res = runner.invoke(app, ["git", "repo", "remote-list", "--provider", "github"])
         assert res.exit_code == int(ExitCode.AUTH_ERROR)
         assert "neo git config set api-key" in res.output
@@ -184,7 +184,7 @@ def test_AC_6_commits_search_and_show_github(mock_github_env: Path):
 @respx.mock
 def test_AC_4_workspace_api_remains_available(mock_github_env: Path):
     """A remoção do grupo CLI não elimina a resolução de workspaces no cliente."""
-    from neo.integrations.github import GitHubClient
+    from neo.integrations.git.api.github.client import GitHubClient
 
     respx.get("https://api.github.com/user").mock(
         return_value=httpx.Response(200, json={"id": 1, "login": "octocat", "name": "The Octocat"})

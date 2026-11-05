@@ -7,9 +7,10 @@ import pytest
 from typer.testing import CliRunner
 
 from neo.cli import app
-from neo.commands import pr
-from neo.integrations.bitbucket import BitbucketError
-from neo.integrations.pr_models import PullRequest
+from neo.commands.git.pr import _common as pr
+from neo.commands.git.pr import open as pr_open
+from neo.integrations.git.api.bitbucket.client import BitbucketError
+from neo.integrations.git.pr_models import PullRequest
 
 runner = CliRunner()
 
@@ -26,7 +27,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> Mock:
         destination="main",
         url="https://example.test/pr/17",
     )
-    monkeypatch.setattr(pr, "current_branch", lambda: "feature/x")
+    monkeypatch.setattr(pr_open, "current_branch", lambda: "feature/x")
     monkeypatch.setattr(pr, "_context", lambda *args: ("demo", "team", result))
     return result
 

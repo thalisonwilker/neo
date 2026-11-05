@@ -14,9 +14,9 @@ alwaysApply: false
 |---|---|---|---|
 | **CLI & Commands** | Generic | Parsing de argumentos, despacho de comandos Typer e renderização de saída (Rich / JSON) | `commands/` |
 | **Analysis & Correlation** | Core | Regras de análise contextual entre histórias do Shortcut e sugestões de Git (branches e commits) | `services/` |
-| **GitHub Integration** | Supporting | Comunicação HTTP com API do GitHub via `GitProviderProtocol`, paginação e conversão de DTOs | `integrations/github.py` |
-| **Bitbucket Integration** | Supporting | Comunicação HTTP com API do Bitbucket via `GitProviderProtocol`, paginação e conversão de DTOs | `integrations/bitbucket.py` |
-| **Shortcut Integration** | Supporting | Comunicação HTTP com API do Shortcut, busca de stories, iterações e workflows | `integrations/shortcut.py` |
+| **GitHub Integration** | Supporting | Comunicação HTTP com API do GitHub via `GitProvider`, paginação e conversão de DTOs | `integrations/git/api/github/` |
+| **Bitbucket Integration** | Supporting | Comunicação HTTP com API do Bitbucket via `GitProvider`, paginação e conversão de DTOs | `integrations/git/api/bitbucket/` |
+| **Shortcut Integration** | Supporting | Comunicação HTTP com API do Shortcut via `TaskProvider`, busca de stories, iterações e workflows | `services/tasks/api/shortcut/` |
 | **Agent & SDD Orchestration** | Supporting | Diagnóstico, preparação e invocação do Antigravity CLI (`agy`) e esteiras SDD (`spec-driven` / `spec-kit`) | `services/agent_validator.py`, `integrations/agents/` |
 | **Personal Finance** | Supporting | Micro gerenciamento financeiro pessoal local: contas bancárias, categorias, despesas, receitas e resumos | `services/finance.py`, `integrations/finance_db.py` |
 | **Configuration & Secrets** | Generic | Leitura de preferências (`config.toml`), perfis de ambiente e persistência segura em Keyring | `config.py` |
@@ -41,8 +41,8 @@ alwaysApply: false
 
 | Upstream | Downstream | Padrão | Por quê |
 |---|---|---|---|
-| GitHub API | GitHub Integration | Anti-Corruption Layer (ACL) | Converte respostas da API do GitHub no contrato comum `GitProviderProtocol` |
-| Bitbucket API | Bitbucket Integration | Anti-Corruption Layer (ACL) | Converte respostas da API do Bitbucket no contrato comum `GitProviderProtocol` |
+| GitHub API | GitHub Integration | Anti-Corruption Layer (ACL) | Converte respostas da API do GitHub no contrato comum `GitProvider` |
+| Bitbucket API | Bitbucket Integration | Anti-Corruption Layer (ACL) | Converte respostas da API do Bitbucket no contrato comum `GitProvider` |
 | Shortcut API | Shortcut Integration | Anti-Corruption Layer (ACL) | Isola mudanças de schema do Shortcut do restante do sistema |
 | Analysis & Correlation | CLI Commands | Open Host Service | Fornece métodos claros de investigação e análise consumidos pelos comandos |
 | Configuration & Secrets | Integrations | Dependency | Injeta credenciais seguras e URLs de base nos clientes HTTP e agentes |

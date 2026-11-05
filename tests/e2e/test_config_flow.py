@@ -11,7 +11,7 @@ from typer.testing import CliRunner
 
 from neo.cli import app
 from neo.config import ExitCode
-from neo.integrations.bitbucket_models import BitbucketWorkspace
+from neo.integrations.git.models import GitWorkspace
 
 runner = CliRunner()
 
@@ -53,9 +53,12 @@ def test_AC_2_git_config_set_get_list_unset(tmp_path: Path):
 
         mock_client = Mock()
         mock_client.list_workspaces.return_value = [
-            BitbucketWorkspace(uuid="1", name="Minha Org", slug="minha-org", is_admin=True)
+            GitWorkspace(uuid="1", name="Minha Org", slug="minha-org", is_admin=True)
         ]
-        with patch("neo.commands.git.resolve_git_provider", return_value=("github", mock_client)):
+        with patch(
+            "neo.commands.git.config.set.workspace.resolve_git_provider",
+            return_value=("github", mock_client),
+        ):
             res_ws = runner.invoke(app, ["git", "config", "set", "workspace", "minha-org"])
             assert res_ws.exit_code == 0
 
@@ -208,7 +211,7 @@ def test_feature_0022_config_show_tables_and_task_detection(tmp_path: Path):
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("keyring.get_password", return_value=None),
         patch(
-            "neo.commands.config._inspect_local_git_status",
+            "neo.commands.config.show._inspect_local_git_status",
             return_value={
                 "is_git_repo": True,
                 "current_branch": "feature/2182-plano-de-ataque",
@@ -217,7 +220,7 @@ def test_feature_0022_config_show_tables_and_task_detection(tmp_path: Path):
             },
         ),
         patch(
-            "neo.commands.config.get_task_columns_config",
+            "neo.commands.config.show.get_task_columns_config",
             return_value={
                 "todo": ["A Fazer", "Backlog"],
                 "doing": ["Em Andamento"],

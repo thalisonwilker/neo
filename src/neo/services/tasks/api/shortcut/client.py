@@ -1,0 +1,302 @@
+"""Cliente HTTP para comunicação com a REST API v3 do Shortcut (https://developer.shortcut.com/api/rest/v3)."""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+import httpx
+
+from neo.services.tasks.errors import (
+    TaskProviderAuthError,
+    TaskProviderError,
+    TaskProviderNotFoundError,
+    TaskProviderRateLimitError,
+)
+from neo.services.tasks.models import (
+    ChecklistItem,
+    StoryAnalysis,
+    TaskComment,
+    TaskIteration,
+    TaskMember,
+    TaskStory,
+    TaskWorkflow,
+    TaskWorkflowState,
+)
+
+logger = logging.getLogger(__name__)
+
+
+class ShortcutClient:
+    """Cliente para a REST API v3 do Shortcut."""
+
+    def __init__(
+        self,
+        token: str,
+        base_url: str = "https://api.app.shortcut.com/api/v3",
+        timeout: float = 15.0,
+    ) -> None:
+        self.token = token.strip()
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+
+    def _get_headers(self) -> dict[str, str]:
+        return {
+            "Shortcut-Token": self.token,
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        }
+
+    def _handle_response_error(self, response: httpx.Response, context: str) -> None:
+        if response.status_code in (401, 403):
+            raise TaskProviderAuthError(
+                f"Falha de autenticação no Shortcut ({response.status_code}). "
+                "Verifique seu token executando `neo tasks config set`."
+            )
+        if response.status_code == 404:
+            raise TaskProviderNotFoundError(
+                f"A story ou recurso solicitado em {context} não foi encontrada (404)."
+            )
+        if response.status_code == 429:
+            raise TaskProviderRateLimitError(
+                "Limite de requisições à API do Shortcut atingido (429)."
+            )
+        if response.is_error:
+            try:
+                err_data = response.json()
+                msg = err_data.get("message", response.text)
+            except (ValueError, KeyError):
+                msg = response.text
+            raise TaskProviderError(f"Erro na API do Shortcut ({response.status_code}): {msg}")
+
+    # 1. Função 1: Obter membro atual autenticado
+    def get_current_member(self) -> TaskMember:
+        """Obtém informações do membro autenticado atual (GET /api/v3/member)."""
+        url = f"{self.base_url}/member"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(url, headers=self._get_headers())
+            self._handle_response_error(resp, "obter dados do membro")
+            return TaskMember.from_api_dict(resp.json())
+
+    # 2. Função 2: Listar stories
+    def list_stories(
+        self,
+        owner_id: str | None = None,
+        iteration_id: int | None = None,
+    ) -> list[TaskStory]:
+        """Lista stories ativas no workspace (GET /api/v3/search/stories)."""
+        query = "!is:archived"
+        if owner_id:
+            query += f" owner:{owner_id}"
+        if iteration_id is not None:
+            query += f" iteration:{iteration_id}"
+
+        stories = self.search_stories(query)
+        if iteration_id is not None and any(s.iteration_id is not None for s in stories):
+            stories = [s for s in stories if s.iteration_id == iteration_id]
+        return stories
+
+    # 3. Função 3: Buscar stories por query
+    def search_stories(self, query: str) -> list[TaskStory]:
+        """Pesquisa stories por termo ou query avançada (GET /api/v3/search/stories?query=...)."""
+        url = f"{self.base_url}/search/stories"
+        params = {"query": query}
+
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(url, headers=self._get_headers(), params=params)
+            self._handle_response_error(resp, f"buscar stories por query '{query}'")
+            data = resp.json()
+            stories_raw = data.get("data", [])
+            stories: list[TaskStory] = []
+            for item in stories_raw:
+                if isinstance(item, dict):
+                    stories.append(TaskStory.from_api_dict(item))
+            return stories
+
+    # 4. Função 4: Obter detalhes de uma story
+    def get_story(self, story_id: int | str) -> TaskStory:
+        """Obtém detalhes completos de uma story pelo ID (GET /api/v3/stories/{story_id})."""
+        url = f"{self.base_url}/stories/{story_id}"
+
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(url, headers=self._get_headers())
+            self._handle_response_error(resp, f"story #{story_id}")
+            return TaskStory.from_api_dict(resp.json())
+
+    # 5. Função 5: Analisar contexto de uma story
+    def analyze_story(self, story_id: int | str) -> StoryAnalysis:
+        """Obtém a story e gera um relatório heurístico de contexto para branch e commits."""
+        story = self.get_story(story_id)
+        return StoryAnalysis.from_story(story)
+
+    # 6. Função 6: Listar workflows e estados (colunas do board)
+    def list_workflows(self) -> list[TaskWorkflow]:
+        """Lista todos os workflows e seus estados configurados no Shortcut (GET /api/v3/workflows)."""
+        url = f"{self.base_url}/workflows"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(url, headers=self._get_headers())
+            self._handle_response_error(resp, "listar workflows")
+            data = resp.json()
+            workflows: list[TaskWorkflow] = []
+            if isinstance(data, list):
+                for item in data:
+                    if isinstance(item, dict):
+                        workflows.append(TaskWorkflow.from_api_dict(item))
+            return workflows
+
+    def list_workflow_states(self) -> list[TaskWorkflowState]:
+        """Retorna a lista achatada de todas as colunas/estados disponíveis nos workflows."""
+        states: list[TaskWorkflowState] = []
+        for wf in self.list_workflows():
+            states.extend(wf.states)
+        return states
+
+    def get_default_workflow_state_id(self) -> int | None:
+        """Retorna o ID do estado inicial padrão (primeiro estado 'unstarted' dos workflows)."""
+        workflows = self.list_workflows()
+        for wf in workflows:
+            for s in wf.states:
+                if s.type == "unstarted":
+                    return s.id
+        for wf in workflows:
+            if wf.states:
+                return wf.states[0].id
+        return None
+
+    # 7. Função 7: Listar e resolver Iterações (Sprints)
+    def list_iterations(self) -> list[TaskIteration]:
+        """Lista todas as iterações do Shortcut ordenadas da mais recente para a mais antiga."""
+        url = f"{self.base_url}/iterations"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(url, headers=self._get_headers())
+            self._handle_response_error(resp, "listar iterações")
+            data = resp.json()
+            iterations: list[TaskIteration] = []
+            if isinstance(data, list):
+                for item in data:
+                    if isinstance(item, dict):
+                        iterations.append(TaskIteration.from_api_dict(item))
+            iterations.sort(key=lambda it: (it.start_date, it.id), reverse=True)
+            return iterations
+
+    def get_latest_iteration(self) -> TaskIteration | None:
+        """Retorna a última iteração (atual) cadastrada no Shortcut, ou None se não houver."""
+        iterations = self.list_iterations()
+        return iterations[0] if iterations else None
+
+    def resolve_iteration(self, term: str | None = None) -> TaskIteration | None:
+        """Resolve a iteração alvo: última iteração se None, None se 'all', ou busca por ID/nome."""
+        if term is not None and term.strip().lower() == "all":
+            return None
+
+        iterations = self.list_iterations()
+        if term is None:
+            return iterations[0] if iterations else None
+
+        clean = term.strip()
+        clean_lower = clean.lower()
+
+        # 1. Match por ID exato
+        for it in iterations:
+            if str(it.id) == clean:
+                return it
+
+        # 2. Match por nome exato (case-insensitive)
+        for it in iterations:
+            if it.name.lower() == clean_lower:
+                return it
+
+        # 3. Match por substring no nome (ex: '71' -> 'Sprint 71')
+        for it in iterations:
+            if clean_lower in it.name.lower():
+                return it
+
+        raise TaskProviderNotFoundError(
+            f"Iteração '{clean}' não encontrada. "
+            "Execute `neo tasks iterations` para ver as iterações disponíveis."
+        )
+
+    # 8. Função 8: Criar Story
+    def create_story(
+        self,
+        name: str,
+        description: str | None = None,
+        story_type: str = "feature",
+        iteration_id: int | None = None,
+        owner_ids: list[str] | None = None,
+        workflow_state_id: int | None = None,
+    ) -> TaskStory:
+        """Cria uma nova story no Shortcut (POST /api/v3/stories)."""
+        url = f"{self.base_url}/stories"
+        payload: dict[str, Any] = {
+            "name": name,
+            "story_type": story_type,
+        }
+        if description is not None:
+            payload["description"] = description
+        if iteration_id is not None:
+            payload["iteration_id"] = iteration_id
+        if owner_ids:
+            payload["owner_ids"] = owner_ids
+
+        actual_state_id = workflow_state_id
+        if actual_state_id is None:
+            try:
+                actual_state_id = self.get_default_workflow_state_id()
+            except (TaskProviderError, httpx.RequestError, AssertionError):
+                actual_state_id = None
+
+        if actual_state_id is not None:
+            payload["workflow_state_id"] = actual_state_id
+
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(url, headers=self._get_headers(), json=payload)
+            self._handle_response_error(resp, f"criar story '{name}'")
+            return TaskStory.from_api_dict(resp.json())
+
+    # 9. Função 9: Checklist Items (Tasks)
+    def create_task(
+        self,
+        story_id: int | str,
+        description: str,
+        complete: bool = False,
+    ) -> ChecklistItem:
+        """Adiciona um item de checklist a uma story (POST /api/v3/stories/{story_id}/tasks)."""
+        url = f"{self.base_url}/stories/{story_id}/tasks"
+        payload = {"description": description, "complete": complete}
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(url, headers=self._get_headers(), json=payload)
+            self._handle_response_error(resp, f"adicionar checklist item na story #{story_id}")
+            return ChecklistItem.from_api_dict(resp.json(), story_id=int(story_id))
+
+    def update_task(
+        self,
+        story_id: int | str,
+        task_id: int | str,
+        complete: bool | None = None,
+        description: str | None = None,
+    ) -> ChecklistItem:
+        """Atualiza um item de checklist de uma story (PUT /api/v3/stories/{story_id}/tasks/{task_id})."""
+        url = f"{self.base_url}/stories/{story_id}/tasks/{task_id}"
+        payload: dict[str, Any] = {}
+        if complete is not None:
+            payload["complete"] = complete
+        if description is not None:
+            payload["description"] = description
+
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.put(url, headers=self._get_headers(), json=payload)
+            self._handle_response_error(
+                resp, f"atualizar checklist item #{task_id} na story #{story_id}"
+            )
+            return ChecklistItem.from_api_dict(resp.json(), story_id=int(story_id))
+
+    # 10. Função 10: Comentários
+    def create_comment(self, story_id: int | str, text: str) -> TaskComment:
+        """Adiciona um comentário a uma story (POST /api/v3/stories/{story_id}/comments)."""
+        url = f"{self.base_url}/stories/{story_id}/comments"
+        payload = {"text": text}
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(url, headers=self._get_headers(), json=payload)
+            self._handle_response_error(resp, f"adicionar comentário na story #{story_id}")
+            return TaskComment.from_api_dict(resp.json(), story_id=int(story_id))

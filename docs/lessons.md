@@ -30,6 +30,8 @@ alwaysApply: false
 > Formato: `- <YYYY-MM-DD> · <área/arquivo> · o gotcha em 1 linha · como evitar/mitigar`.
 > Mantenha acionável e curto. Se não é acionável, não é uma lição — é desabafo.
 
+- 2026-11-04 · `tests/unit/test_github_client.py` · Clientes Git também consultam o workspace configurado na máquina durante testes unitários · Isolar configuração e variável `NEO_GIT_WORKSPACE` nas fixtures.
+
 - 2026-11-04 · `tests/e2e/` · O Rich pode intercalar escapes ANSI dentro de opções como `--path` no CI · Remover ANSI antes de comparar texto e testar com e sem cores.
 
 - 2026-10-28 · `tests/e2e/` · Testes E2E de Git que não isolam `neo.config.DEFAULT_CONFIG_DIR` e `DEFAULT_CONFIG_FILE` leem o `~/.config/neo/config.toml` real da máquina host · Sempre usar `patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path)` e `patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml")` em fixtures de testes E2E.

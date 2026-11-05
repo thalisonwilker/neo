@@ -9,7 +9,7 @@ import pytest
 from typer.testing import CliRunner
 
 from neo.cli import app
-from neo.integrations.bitbucket_models import BitbucketWorkspace
+from neo.integrations.git.models import GitWorkspace
 
 runner = CliRunner()
 
@@ -18,12 +18,17 @@ runner = CliRunner()
 def mock_git_provider():
     mock_client = Mock()
     mock_client.list_workspaces.return_value = [
-        BitbucketWorkspace(uuid="1", name="Acme", slug="acme", is_admin=True),
-        BitbucketWorkspace(uuid="2", name="Saved", slug="saved", is_admin=True),
+        GitWorkspace(uuid="1", name="Acme", slug="acme", is_admin=True),
+        GitWorkspace(uuid="2", name="Saved", slug="saved", is_admin=True),
     ]
     with (
-        patch("neo.commands.git._configured_provider", return_value="bitbucket"),
-        patch("neo.commands.git.resolve_git_provider", return_value=("bitbucket", mock_client)),
+        patch(
+            "neo.commands.git.config.set.workspace._configured_provider", return_value="bitbucket"
+        ),
+        patch(
+            "neo.commands.git.config.set.workspace.resolve_git_provider",
+            return_value=("bitbucket", mock_client),
+        ),
     ):
         yield
 

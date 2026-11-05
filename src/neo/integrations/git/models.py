@@ -1,0 +1,169 @@
+"""Modelos tipados (DTOs) da API do Bitbucket Cloud."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+
+class CloneLink(BaseModel):
+    """Representa um link de clonagem (SSH ou HTTPS)."""
+
+    name: str
+    href: str
+
+
+class GitRepo(BaseModel):
+    """Representa um repositório Git (Bitbucket Cloud ou GitHub)."""
+
+    name: str
+    slug: str
+    is_private: bool = Field(default=True)
+    description: str | None = None
+    created_on: str = ""
+    updated_on: str = ""
+    main_branch: str = "main"
+    workspace: str = ""
+    web_url: str = ""
+    clone_links: list[CloneLink] = Field(default_factory=list)
+
+    @property
+    def ssh_clone_url(self) -> str | None:
+        """Retorna a URL de clonagem SSH, se disponível."""
+        for link in self.clone_links:
+            if link.name.lower() == "ssh":
+                return link.href
+        return None
+
+    @property
+    def https_clone_url(self) -> str | None:
+        """Retorna a URL de clonagem HTTPS, se disponível."""
+        for link in self.clone_links:
+            if link.name.lower() == "https":
+                return link.href
+        return None
+
+    @classmethod
+    def from_api_dict(cls, data: dict[str, Any]) -> GitRepo:
+        """Constrói uma instância a partir do payload JSON da API 2.0 do Bitbucket."""
+        clone_links: list[CloneLink] = []
+        links_data = data.get("links", {})
+        if isinstance(links_data, dict):
+            for link_obj in links_data.get("clone", []):
+                if isinstance(link_obj, dict) and "name" in link_obj and "href" in link_obj:
+                    clone_links.append(CloneLink(name=link_obj["name"], href=link_obj["href"]))
+            html_obj = links_data.get("html", {})
+            web_url = html_obj.get("href", "") if isinstance(html_obj, dict) else ""
+        else:
+            web_url = ""
+
+        main_branch = "main"
+        mainbranch_obj = data.get("mainbranch")
+        if isinstance(mainbranch_obj, dict) and "name" in mainbranch_obj:
+            main_branch = mainbranch_obj["name"]
+
+        workspace_slug = ""
+        workspace_obj = data.get("workspace")
+        if isinstance(workspace_obj, dict):
+            workspace_slug = workspace_obj.get("slug", "")
+
+        return cls(
+            name=data.get("name", ""),
+            slug=data.get("slug", ""),
+            is_private=data.get("is_private", True),
+            description=data.get("description"),
+            created_on=data.get("created_on", ""),
+            updated_on=data.get("updated_on", ""),
+            main_branch=main_branch,
+            workspace=workspace_slug,
+            web_url=web_url,
+            clone_links=clone_links,
+        )
+
+
+class GitCommitAuthor(BaseModel):
+    """Representa o autor de um commit."""
+
+    raw: str = ""
+    display_name: str | None = None
+
+    @property
+    def author_name(self) -> str:
+        """Extrai o nome do autor do campo raw ou display_name."""
+        if self.display_name:
+            return self.display_name
+        if "<" in self.raw:
+            return self.raw.split("<")[0].strip()
+        return self.raw.strip() or "Desconhecido"
+
+
+class GitCommit(BaseModel):
+    """Representa um commit em um repositório Git."""
+
+    hash: str
+    message: str = ""
+    date: str = ""
+    web_url: str = ""
+    author: GitCommitAuthor = Field(default_factory=GitCommitAuthor)
+
+    @property
+    def short_hash(self) -> str:
+        """Retorna os 7 primeiros caracteres do hash do commit."""
+        return self.hash[:7] if self.hash else ""
+
+    @property
+    def summary(self) -> str:
+        """Retorna a primeira linha da mensagem de commit."""
+        if not self.message:
+            return ""
+        return self.message.strip().split("\n")[0].strip()
+
+    @classmethod
+    def from_api_dict(cls, data: dict[str, Any]) -> GitCommit:
+        """Constrói o commit a partir da resposta JSON da API do Bitbucket."""
+        author_data = data.get("author", {})
+        raw_author = (
+            author_data.get("raw", "") if isinstance(author_data, dict) else str(author_data)
+        )
+        display_name = None
+        if isinstance(author_data, dict):
+            user_obj = author_data.get("user")
+            if isinstance(user_obj, dict):
+                display_name = user_obj.get("display_name")
+
+        links_data = data.get("links", {})
+        html_obj = links_data.get("html", {}) if isinstance(links_data, dict) else {}
+        web_url = html_obj.get("href", "") if isinstance(html_obj, dict) else ""
+
+        return cls(
+            hash=data.get("hash", ""),
+            message=data.get("message", ""),
+            date=data.get("date", ""),
+            web_url=web_url,
+            author=GitCommitAuthor(raw=raw_author, display_name=display_name),
+        )
+
+
+class GitWorkspace(BaseModel):
+    """Representa um workspace (Bitbucket) ou organização/usuário (GitHub)."""
+
+    uuid: str = ""
+    name: str = ""
+    slug: str = ""
+    is_admin: bool = False
+
+    @classmethod
+    def from_api_dict(cls, data: dict[str, Any]) -> GitWorkspace:
+        """Constrói o workspace a partir do payload de /user/workspaces ou /workspaces/{slug}."""
+        is_admin = data.get("administrator", False)
+        ws_data = data.get("workspace", data)
+        if not isinstance(ws_data, dict):
+            ws_data = data
+
+        return cls(
+            uuid=ws_data.get("uuid", ""),
+            name=ws_data.get("name") or ws_data.get("slug", ""),
+            slug=ws_data.get("slug", ""),
+            is_admin=bool(is_admin),
+        )

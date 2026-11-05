@@ -5,8 +5,8 @@ import json
 import httpx
 import respx
 
-from neo.integrations.bitbucket import BitbucketClient
-from neo.integrations.github import GitHubClient
+from neo.integrations.git.api.bitbucket.client import BitbucketClient
+from neo.integrations.git.api.github.client import GitHubClient
 
 
 @respx.mock

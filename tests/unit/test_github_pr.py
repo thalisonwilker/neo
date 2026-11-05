@@ -6,7 +6,7 @@ import httpx
 import pytest
 import respx
 
-from neo.integrations.github import GitHubClient, GitHubError
+from neo.integrations.git.api.github.client import GitHubClient, GitHubError
 
 BASE = "https://api.github.com/repos/acme/project"
 

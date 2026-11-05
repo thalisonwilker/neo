@@ -4,7 +4,7 @@ import httpx
 import pytest
 import respx
 
-from neo.integrations.github import (
+from neo.integrations.git.api.github.client import (
     GitHubAuthError,
     GitHubClient,
     GitHubNotFoundError,
@@ -12,7 +12,10 @@ from neo.integrations.github import (
 
 
 @pytest.fixture
-def gh_client():
+def gh_client(monkeypatch, tmp_path):
+    monkeypatch.setattr("neo.config.DEFAULT_CONFIG_DIR", tmp_path)
+    monkeypatch.setattr("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml")
+    monkeypatch.delenv("NEO_GIT_WORKSPACE", raising=False)
     return GitHubClient(token="ghp_mock_token", base_url="https://api.github.com")
 
 

@@ -52,7 +52,7 @@ MOCK_WORKFLOWS = [
 
 @pytest.fixture
 def mock_sc_auth():
-    with patch("neo.commands.tasks.get_credential", return_value="mock-token"):
+    with patch("neo.commands.tasks._common.get_credential", return_value="mock-token"):
         respx.get("https://api.app.shortcut.com/api/v3/workflows").mock(
             return_value=httpx.Response(200, json=MOCK_WORKFLOWS)
         )
@@ -212,7 +212,7 @@ def test_tasks_create_json_mode(mock_sc_auth):
 
 def test_tasks_create_missing_token():
     """Valida erro código 1 quando não há token configurado."""
-    with patch("neo.commands.tasks.get_credential", return_value=None):
+    with patch("neo.commands.tasks._common.get_credential", return_value=None):
         result = runner.invoke(app, ["tasks", "create", "Story Sem Token"])
         assert result.exit_code == 1
         assert "Credenciais do Shortcut não configuradas" in result.output

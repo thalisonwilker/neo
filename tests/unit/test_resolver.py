@@ -8,9 +8,9 @@ import pytest
 import typer
 
 from neo.config import ExitCode
-from neo.integrations.bitbucket import BitbucketClient
-from neo.integrations.github import GitHubClient
-from neo.integrations.resolver import (
+from neo.integrations.git.api.bitbucket.client import BitbucketClient
+from neo.integrations.git.api.github.client import GitHubClient
+from neo.integrations.git.resolver import (
     detect_git_remote_details,
     detect_git_remote_info,
     resolve_git_provider,
@@ -21,7 +21,7 @@ from neo.integrations.resolver import (
 
 def test_detect_git_remote_info_github():
     with (
-        patch("neo.integrations.resolver.selected_repo", return_value=None),
+        patch("neo.integrations.git.resolver.selected_repo", return_value=None),
         patch("subprocess.run") as mock_run,
     ):
         mock_run.return_value.returncode = 0
@@ -36,7 +36,7 @@ def test_detect_git_remote_info_github():
 
 def test_detect_git_remote_info_bitbucket():
     with (
-        patch("neo.integrations.resolver.selected_repo", return_value=None),
+        patch("neo.integrations.git.resolver.selected_repo", return_value=None),
         patch("subprocess.run") as mock_run,
     ):
         mock_run.return_value.returncode = 0
@@ -61,8 +61,10 @@ def test_AC_2_resolve_git_provider_precedence():
     """AC-2 (0014): Precedência CLI > NEO_GIT_PROVIDER > [git] config.toml > remote > default."""
     with (
         patch.dict(os.environ, {"NEO_GIT_PROVIDER": "bitbucket"}, clear=True),
-        patch("neo.integrations.resolver.get_default_provider_config", return_value="github"),
-        patch("neo.integrations.resolver.detect_git_remote_info", return_value=("github", "repo")),
+        patch("neo.integrations.git.resolver.get_default_provider_config", return_value="github"),
+        patch(
+            "neo.integrations.git.resolver.detect_git_remote_info", return_value=("github", "repo")
+        ),
     ):
         # 1. CLI ganha de todos
         assert resolve_git_provider_and_source("github") == ("github", "cli")
@@ -71,16 +73,18 @@ def test_AC_2_resolve_git_provider_precedence():
 
     with (
         patch.dict(os.environ, {}, clear=True),
-        patch("neo.integrations.resolver.get_default_provider_config", return_value="github"),
-        patch("neo.integrations.resolver.detect_git_remote_info", return_value=("bitbucket", "r")),
+        patch("neo.integrations.git.resolver.get_default_provider_config", return_value="github"),
+        patch(
+            "neo.integrations.git.resolver.detect_git_remote_info", return_value=("bitbucket", "r")
+        ),
     ):
         # 3. Config ganha de remote
         assert resolve_git_provider_and_source(None) == ("github", "config")
 
     with (
         patch.dict(os.environ, {}, clear=True),
-        patch("neo.integrations.resolver.get_default_provider_config", return_value=None),
-        patch("neo.integrations.resolver.detect_git_remote_info", return_value=("github", "r")),
+        patch("neo.integrations.git.resolver.get_default_provider_config", return_value=None),
+        patch("neo.integrations.git.resolver.detect_git_remote_info", return_value=("github", "r")),
     ):
         # 4. Remote ganha de default
         assert resolve_git_provider_and_source(None) == ("github", "remote")
@@ -90,9 +94,9 @@ def test_AC_2_resolve_git_workspace_precedence():
     """AC-2 (0014): Precedência de workspace CLI > NEO_GIT_WORKSPACE > config > remote > default."""
     with (
         patch.dict(os.environ, {"NEO_GIT_WORKSPACE": "env-ws"}, clear=True),
-        patch("neo.integrations.resolver.get_default_workspace_config", return_value="cfg-ws"),
+        patch("neo.integrations.git.resolver.get_default_workspace_config", return_value="cfg-ws"),
         patch(
-            "neo.integrations.resolver.detect_git_remote_details",
+            "neo.integrations.git.resolver.detect_git_remote_details",
             return_value=("github", "rem-ws", "repo"),
         ),
     ):
@@ -101,9 +105,9 @@ def test_AC_2_resolve_git_workspace_precedence():
 
     with (
         patch.dict(os.environ, {}, clear=True),
-        patch("neo.integrations.resolver.get_default_workspace_config", return_value="cfg-ws"),
+        patch("neo.integrations.git.resolver.get_default_workspace_config", return_value="cfg-ws"),
         patch(
-            "neo.integrations.resolver.detect_git_remote_details",
+            "neo.integrations.git.resolver.detect_git_remote_details",
             return_value=("github", "rem-ws", "repo"),
         ),
     ):
@@ -111,9 +115,9 @@ def test_AC_2_resolve_git_workspace_precedence():
 
     with (
         patch.dict(os.environ, {}, clear=True),
-        patch("neo.integrations.resolver.get_default_workspace_config", return_value=None),
+        patch("neo.integrations.git.resolver.get_default_workspace_config", return_value=None),
         patch(
-            "neo.integrations.resolver.detect_git_remote_details",
+            "neo.integrations.git.resolver.detect_git_remote_details",
             return_value=("github", "rem-ws", "repo"),
         ),
     ):
@@ -121,7 +125,7 @@ def test_AC_2_resolve_git_workspace_precedence():
 
 
 def test_resolve_git_provider_explicit_flag():
-    with patch("neo.integrations.resolver.get_credential", return_value="mock-token"):
+    with patch("neo.integrations.git.resolver.get_credential", return_value="mock-token"):
         prov, client = resolve_git_provider("github")
         assert prov == "github"
         assert isinstance(client, GitHubClient)
@@ -140,9 +144,11 @@ def test_resolve_git_provider_invalid_flag():
 def test_resolve_git_provider_auto_detect():
     with (
         patch.dict(os.environ, {}, clear=True),
-        patch("neo.integrations.resolver.get_default_provider_config", return_value=None),
-        patch("neo.integrations.resolver.detect_git_remote_info", return_value=("github", "repo")),
-        patch("neo.integrations.resolver.get_credential", return_value="mock-token"),
+        patch("neo.integrations.git.resolver.get_default_provider_config", return_value=None),
+        patch(
+            "neo.integrations.git.resolver.detect_git_remote_info", return_value=("github", "repo")
+        ),
+        patch("neo.integrations.git.resolver.get_credential", return_value="mock-token"),
     ):
         prov, client = resolve_git_provider()
         assert prov == "github"
@@ -152,9 +158,9 @@ def test_resolve_git_provider_auto_detect():
 def test_resolve_git_provider_config_fallback(tmp_path: Path):
     with (
         patch.dict(os.environ, {}, clear=True),
-        patch("neo.integrations.resolver.detect_git_remote_info", return_value=(None, None)),
-        patch("neo.integrations.resolver.get_default_provider_config", return_value="github"),
-        patch("neo.integrations.resolver.get_credential", return_value="mock-token"),
+        patch("neo.integrations.git.resolver.detect_git_remote_info", return_value=(None, None)),
+        patch("neo.integrations.git.resolver.get_default_provider_config", return_value="github"),
+        patch("neo.integrations.git.resolver.get_credential", return_value="mock-token"),
     ):
         prov, client = resolve_git_provider()
         assert prov == "github"
@@ -165,9 +171,11 @@ def test_resolve_git_provider_without_credentials():
     """AC-3 e AC-8 (0014): Falha sem credenciais encerra com código 3 (AUTH_ERROR)."""
     with (
         patch.dict(os.environ, {}, clear=True),
-        patch("neo.integrations.resolver.get_default_provider_config", return_value=None),
-        patch("neo.integrations.resolver.detect_git_remote_info", return_value=("github", "repo")),
-        patch("neo.integrations.resolver.get_credential", return_value=None),
+        patch("neo.integrations.git.resolver.get_default_provider_config", return_value=None),
+        patch(
+            "neo.integrations.git.resolver.detect_git_remote_info", return_value=("github", "repo")
+        ),
+        patch("neo.integrations.git.resolver.get_credential", return_value=None),
         pytest.raises(typer.Exit) as exc_info,
     ):
         resolve_git_provider()

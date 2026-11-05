@@ -9,8 +9,8 @@ from typer.testing import CliRunner
 
 from neo.cli import app
 from neo.config import ExitCode
-from neo.integrations.bitbucket import UnsupportedProviderOperationError
-from neo.integrations.resolver import handle_git_provider_error
+from neo.integrations.git.errors import UnsupportedProviderOperationError
+from neo.integrations.git.resolver import handle_git_provider_error
 
 runner = CliRunner()
 
@@ -30,7 +30,7 @@ def test_AC_7_git_status_inside_and_outside_repo(tmp_path: Path):
             clear=True,
         ),
         patch(
-            "neo.commands.git._inspect_local_git_status",
+            "neo.commands.git._common._inspect_local_git_status",
             return_value={
                 "is_git_repo": True,
                 "current_branch": "main",
@@ -40,7 +40,7 @@ def test_AC_7_git_status_inside_and_outside_repo(tmp_path: Path):
             },
         ),
         patch(
-            "neo.commands.git.detect_git_remote_details",
+            "neo.commands.git.status.detect_git_remote_details",
             return_value=("github", "thalisonwilker", "neo"),
         ),
     ):

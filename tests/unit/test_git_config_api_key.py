@@ -34,7 +34,7 @@ def test_AC_2_bitbucket_api_key_success():
     )
 
     with (
-        patch("neo.commands.git.set_credential") as mock_set_cred,
+        patch("neo.commands.git.config.set.api_key.set_credential") as mock_set_cred,
     ):
         # Apenas uma entrada no prompt: a chave de API
         res = runner.invoke(app, ["git", "config", "set", "api-key"], input="my-bb-token\n")
@@ -51,7 +51,7 @@ def test_AC_2_bitbucket_api_key_failure_401():
         return_value=httpx.Response(401, json={"error": {"message": "Unauthorized"}})
     )
 
-    with patch("neo.commands.git.set_credential") as mock_set_cred:
+    with patch("neo.commands.git.config.set.api_key.set_credential") as mock_set_cred:
         res = runner.invoke(app, ["git", "config", "set", "api-key"], input="invalid-token\n")
         assert res.exit_code == int(ExitCode.AUTH_ERROR)
         assert "Conexão recusada" in res.output
@@ -66,7 +66,7 @@ def test_AC_3_github_api_key_success():
         return_value=httpx.Response(200, json={"id": 1, "login": "octocat"})
     )
 
-    with patch("neo.commands.git.set_credential") as mock_set_cred:
+    with patch("neo.commands.git.config.set.api_key.set_credential") as mock_set_cred:
         res = runner.invoke(app, ["git", "config", "set", "api-key"], input="ghp_validtoken\n")
         assert res.exit_code == 0
         assert "Conexão efetuada" in res.output
@@ -81,7 +81,7 @@ def test_AC_3_github_api_key_failure_401():
         return_value=httpx.Response(401, json={"message": "Bad credentials"})
     )
 
-    with patch("neo.commands.git.set_credential") as mock_set_cred:
+    with patch("neo.commands.git.config.set.api_key.set_credential") as mock_set_cred:
         res = runner.invoke(app, ["git", "config", "set", "api-key"], input="ghp_invalid\n")
         assert res.exit_code == int(ExitCode.AUTH_ERROR)
         assert "Conexão recusada" in res.output

@@ -6,7 +6,7 @@ import httpx
 import pytest
 import respx
 
-from neo.integrations.bitbucket import BitbucketClient, BitbucketError
+from neo.integrations.git.api.bitbucket.client import BitbucketClient, BitbucketError
 
 BASE = "https://api.bitbucket.org/2.0/repositories/acme/demo"
 

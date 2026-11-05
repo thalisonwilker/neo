@@ -2,15 +2,14 @@ import httpx
 import pytest
 import respx
 
-from neo.integrations.shortcut import (
-    ShortcutAuthError,
+from neo.services.tasks.api.shortcut.client import (
     ShortcutClient,
-    ShortcutNotFoundError,
 )
-from neo.integrations.shortcut_models import (
-    ShortcutMember,
-    ShortcutStory,
+from neo.services.tasks.errors import TaskProviderAuthError, TaskProviderNotFoundError
+from neo.services.tasks.models import (
     StoryAnalysis,
+    TaskMember,
+    TaskStory,
 )
 
 
@@ -36,7 +35,7 @@ def test_get_current_member(sc_client: ShortcutClient):
     )
 
     member = sc_client.get_current_member()
-    assert isinstance(member, ShortcutMember)
+    assert isinstance(member, TaskMember)
     assert member.id == "member-uuid-123"
     assert member.name == "Thalyson Dev"
     assert member.mention_name == "thalyson"
@@ -63,7 +62,7 @@ def test_list_stories(sc_client: ShortcutClient):
 
     stories = sc_client.list_stories()
     assert len(stories) == 1
-    assert isinstance(stories[0], ShortcutStory)
+    assert isinstance(stories[0], TaskStory)
     assert stories[0].id == 101
     assert stories[0].name == "Implementar tela de login"
     assert stories[0].labels == ["frontend"]
@@ -91,7 +90,7 @@ def test_get_story_and_not_found(sc_client: ShortcutClient):
     assert story.id == 101
     assert story.story_type == "bug"
 
-    with pytest.raises(ShortcutNotFoundError, match="não foi encontrada"):
+    with pytest.raises(TaskProviderNotFoundError, match="não foi encontrada"):
         sc_client.get_story(999)
 
 
@@ -140,7 +139,7 @@ def test_shortcut_auth_error_401(sc_client: ShortcutClient):
         return_value=httpx.Response(401, json={"message": "Unauthorized token"})
     )
 
-    with pytest.raises(ShortcutAuthError, match="Falha de autenticação no Shortcut"):
+    with pytest.raises(TaskProviderAuthError, match="Falha de autenticação no Shortcut"):
         sc_client.get_current_member()
 
 
@@ -222,7 +221,7 @@ def test_list_and_resolve_iterations(sc_client: ShortcutClient):
     assert sc_client.resolve_iteration("sprint 70").id == 21001
     assert sc_client.resolve_iteration("71").id == 21002
 
-    with pytest.raises(ShortcutNotFoundError, match="não encontrada"):
+    with pytest.raises(TaskProviderNotFoundError, match="não encontrada"):
         sc_client.resolve_iteration("Sprint 999")
 
 
@@ -252,7 +251,7 @@ def test_create_story(sc_client: ShortcutClient):
         iteration_id=21002,
         owner_ids=["member-uuid-123"],
     )
-    assert isinstance(story, ShortcutStory)
+    assert isinstance(story, TaskStory)
     assert story.id == 501
     assert story.name == "Nova Story de Teste"
     assert story.iteration_id == 21002

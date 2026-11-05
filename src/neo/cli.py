@@ -9,7 +9,7 @@ from rich import print as rprint
 
 from neo.commands.agent import agent_app
 from neo.commands.config import config_app
-from neo.commands.finance import fin_app
+from neo.commands.fin import fin_app
 from neo.commands.git import git_app
 from neo.commands.tasks import tasks_app
 
