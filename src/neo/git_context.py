@@ -130,3 +130,38 @@ def unset_task() -> bool:
         entry.pop("task", None)
         _write(data)
     return existed
+
+
+def get_repo_tasks_map() -> dict[str, str]:
+    """Retorna um mapeamento de nome/slug de repositório (minúsculo) para a task formatada (#<TASK-ID>)."""
+    try:
+        data = _read()
+    except ValueError:
+        return {}
+    mapping: dict[str, str] = {}
+    repos = data.get("repositories", {})
+    if not isinstance(repos, dict):
+        return mapping
+    for path_str, entry in repos.items():
+        if isinstance(entry, dict):
+            task = entry.get("task")
+            if isinstance(task, str) and task.strip():
+                clean_task = f"#{task.strip().lstrip('#')}"
+                base_name = Path(path_str).name.lower()
+                mapping[base_name] = clean_task
+    return mapping
+
+
+def resolve_task_for_repo(
+    repo_name: str,
+    repo_slug: str | None = None,
+    tasks_map: dict[str, str] | None = None,
+) -> str | None:
+    """Busca a task vinculada localmente ao repositório pelo nome ou slug."""
+    if tasks_map is None:
+        tasks_map = get_repo_tasks_map()
+    if repo_name.lower() in tasks_map:
+        return tasks_map[repo_name.lower()]
+    if repo_slug and repo_slug.lower() in tasks_map:
+        return tasks_map[repo_slug.lower()]
+    return None

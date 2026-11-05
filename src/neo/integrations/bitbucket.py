@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import base64
 import logging
 import re
 from typing import Any
@@ -75,16 +74,8 @@ class BitbucketClient:
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.token}",
         }
-        if ":" in self.token:
-            encoded = base64.b64encode(self.token.encode("utf-8")).decode("ascii")
-            headers["Authorization"] = f"Basic {encoded}"
-        elif self.username:
-            auth_str = f"{self.username}:{self.token}"
-            encoded = base64.b64encode(auth_str.encode("utf-8")).decode("ascii")
-            headers["Authorization"] = f"Basic {encoded}"
-        else:
-            headers["Authorization"] = f"Bearer {self.token}"
         return headers
 
     def _handle_response_error(self, response: httpx.Response, context: str) -> None:
@@ -116,6 +107,8 @@ class BitbucketClient:
         url = f"{self.base_url}/user/workspaces"
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.get(url, headers=self._get_headers())
+            # TODO Tratar chave sem permissão
+
             self._handle_response_error(resp, "listar workspaces do usuário")
             data = resp.json()
             workspaces: list[BitbucketWorkspace] = []

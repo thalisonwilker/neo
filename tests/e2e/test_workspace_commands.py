@@ -3,14 +3,29 @@
 import json
 import os
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from typer.testing import CliRunner
 
 from neo.cli import app
+from neo.integrations.bitbucket_models import BitbucketWorkspace
 
 runner = CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def mock_git_provider():
+    mock_client = Mock()
+    mock_client.list_workspaces.return_value = [
+        BitbucketWorkspace(uuid="1", name="Acme", slug="acme", is_admin=True),
+        BitbucketWorkspace(uuid="2", name="Saved", slug="saved", is_admin=True),
+    ]
+    with (
+        patch("neo.commands.git._configured_provider", return_value="bitbucket"),
+        patch("neo.commands.git.resolve_git_provider", return_value=("bitbucket", mock_client)),
+    ):
+        yield
 
 
 def test_AC_2_workspace_config_set_get_list_unset(tmp_path: Path):

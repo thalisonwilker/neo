@@ -44,6 +44,7 @@ def parse_github_repo(data: dict[str, Any]) -> BitbucketRepo:
         slug=data.get("name", ""),
         is_private=data.get("private", True),
         description=data.get("description"),
+        created_on=data.get("created_at", ""),
         updated_on=data.get("updated_at", ""),
         main_branch=data.get("default_branch", "main"),
         workspace=owner_slug,

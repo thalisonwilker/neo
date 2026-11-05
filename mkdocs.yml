@@ -119,6 +119,7 @@ nav:
               - list: cli/git/repo/list.md
               - select: cli/git/repo/select.md
               - remote-list: cli/git/repo/remote-list.md
+              - local-list: cli/git/repo/local-list.md
               - search: cli/git/repo/search.md
               - show: cli/git/repo/show.md
               - create: cli/git/repo/create.md

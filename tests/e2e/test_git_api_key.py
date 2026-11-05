@@ -21,18 +21,16 @@ def test_AC_6_valid_key_is_validated_before_save(monkeypatch, provider):
     monkeypatch.setattr(git, "GitHubClient" if provider == "github" else "BitbucketClient", factory)
     save = Mock()
     monkeypatch.setattr(git, "set_credential", save)
-    inputs = "dev@example.com\nnew-secret\n" if provider == "bitbucket" else "new-secret\n"
+    inputs = "new-secret\n"
     result = runner.invoke(app, ["git", "config", "set", "api-key"], input=inputs)
     assert result.exit_code == 0, result.output
     assert "new-secret" not in result.output
-    save.assert_called_once_with(
-        provider, "new-secret", email="dev@example.com" if provider == "bitbucket" else None
-    )
+    assert "Conexão efetuada" in result.output
+    save.assert_called_once_with(provider, "new-secret")
+    factory.assert_called_once_with(token="new-secret")
     if provider == "github":
-        factory.assert_called_once_with(token="new-secret")
         client.get_current_user.assert_called_once()
     else:
-        factory.assert_called_once_with(token="new-secret", username="dev@example.com")
         client.list_workspaces.assert_called_once()
 
 
@@ -46,6 +44,7 @@ def test_AC_6_invalid_or_unreachable_key_preserves_previous(monkeypatch):
     result = runner.invoke(app, ["git", "config", "set", "api-key"], input="new-secret\n")
     assert result.exit_code != 0
     assert "new-secret" not in result.output
+    assert "Conexão recusada" in result.output
     save.assert_not_called()
 
 

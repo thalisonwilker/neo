@@ -20,7 +20,10 @@ from neo.integrations.resolver import (
 
 
 def test_detect_git_remote_info_github():
-    with patch("subprocess.run") as mock_run:
+    with (
+        patch("neo.integrations.resolver.selected_repo", return_value=None),
+        patch("subprocess.run") as mock_run,
+    ):
         mock_run.return_value.returncode = 0
         mock_run.return_value.stdout = "git@github.com:my-org/my-project.git\n"
 
@@ -32,7 +35,10 @@ def test_detect_git_remote_info_github():
 
 
 def test_detect_git_remote_info_bitbucket():
-    with patch("subprocess.run") as mock_run:
+    with (
+        patch("neo.integrations.resolver.selected_repo", return_value=None),
+        patch("subprocess.run") as mock_run,
+    ):
         mock_run.return_value.returncode = 0
         mock_run.return_value.stdout = "https://bitbucket.org/my-ws/api-service.git\n"
 

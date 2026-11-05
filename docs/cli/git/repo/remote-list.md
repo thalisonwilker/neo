@@ -1,11 +1,11 @@
 ---
 name: cli-git-repo-remote-list
-description: Lista os repositórios remotos disponíveis no workspace ou organização do provedor configurado.
+description: Lista os repositórios remotos disponíveis no workspace ou organização do provedor configurado (alias para repo list).
 alwaysApply: false
 ---
 
 # neo git repo remote-list
-> Lista os repositórios remotos disponíveis no workspace do provedor Git ativo.
+> Alias de compatibilidade para [`neo git repo list`](list.md).
 
 ## Sintaxe
 
@@ -15,7 +15,7 @@ neo git repo remote-list [--workspace <slug>] [--provider <github|bitbucket>] [-
 
 ## Descrição
 
-O comando `neo git repo remote-list` consulta a API do provedor Git (GitHub ou Bitbucket Cloud) e lista os repositórios remotos associados ao workspace ou organização resolvido pela cadeia de precedência ou especificado via opções.
+O comando `neo git repo remote-list` é um alias para [`neo git repo list`](list.md). Ele consulta a API do provedor Git (GitHub ou Bitbucket Cloud) e lista os repositórios remotos associados ao workspace ou organização ativo.
 
 ## Opções
 
@@ -52,6 +52,7 @@ neo git repo remote-list --provider github --json | jq '.[].name'
 
 ## Veja também
 
+- [`neo git repo list`](list.md) — Comando principal de listagem remota.
+- [`neo git repo local-list`](local-list.md) — Listar repositórios locais registrados no Neo.
 - [`neo git repo search`](search.md) — Pesquisar repositórios remotos por nome ou termo.
 - [`neo git repo show`](show.md) — Ver detalhes de um repositório remoto específico.
-

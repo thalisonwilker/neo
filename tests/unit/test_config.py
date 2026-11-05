@@ -264,6 +264,27 @@ def test_default_provider_config(tmp_path: Path):
     assert get_default_provider_config(config_dir=tmp_path) == "bitbucket"
 
 
+def test_AC_1_setting_provider_resets_git_config(tmp_path: Path):
+    """AC-1 (0029): Ao configurar um novo provedor, as configurações do git são resetadas."""
+    with patch.dict(os.environ, {}, clear=True):
+        set_git_config_value("provider", "github", config_dir=tmp_path)
+        set_git_config_value("workspace", "minha-org", config_dir=tmp_path)
+        set_git_config_value("default-branch", "develop", config_dir=tmp_path)
+
+        assert get_git_config_value("workspace", config_dir=tmp_path)[1] == "minha-org"
+
+        # Mudança de provedor deve resetar as configurações de git
+        set_git_config_value("provider", "bitbucket", config_dir=tmp_path)
+
+        assert get_git_config_value("provider", config_dir=tmp_path) == (
+            "provider",
+            "bitbucket",
+            "config",
+        )
+        assert get_git_config_value("workspace", config_dir=tmp_path)[1] is None
+        assert get_git_config_value("default-branch", config_dir=tmp_path)[2] == "default"
+
+
 def test_task_columns_config(tmp_path: Path):
     assert get_task_columns_config("shortcut", config_dir=tmp_path) is None
 

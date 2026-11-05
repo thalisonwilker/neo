@@ -6,10 +6,16 @@ alwaysApply: false
 
 # Configuração de workspace Git
 
-O workspace identifica uma organização ou conta no GitHub e um workspace no Bitbucket Cloud. Configure o slug, consulte seu valor e remova a preferência usando:
+O workspace identifica uma organização ou conta no GitHub e um workspace no Bitbucket Cloud. O Neo permite selecionar o workspace de forma interativa a partir da lista retornada pela API do provedor ou informar diretamente um slug (que é validado na API):
 
 ```bash
+# Seleção interativa: consulta a API e exibe lista numerada para escolha
+neo git config set workspace
+
+# Definição direta com validação de existência no provedor
 neo git config set workspace minha-organizacao
+
+# Consulta e remoção
 neo git config get workspace
 neo git config unset workspace
 neo git status

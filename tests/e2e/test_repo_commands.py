@@ -69,7 +69,8 @@ def test_AC_5_repo_list_human_and_json():
         )
         assert res_human.exit_code == 0
         assert "Serviço Auth" in res_human.output
-        assert "servico-auth" in res_human.output
+        assert "Data Criação" in res_human.output
+        assert "10/27/2026" in res_human.output
 
         res_json = runner.invoke(
             app, ["git", "repo", "remote-list", "--workspace", "my-workspace", "--json"]

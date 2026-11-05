@@ -23,8 +23,9 @@ Os itens abaixo mostram os comandos disponíveis agrupados como são digitados n
         - `list` — lista as propriedades.
         - `unset` — remove uma propriedade.
     - **[`repo`](git/repo/index.md)** — repositórios:
-        - `list` — lista repositórios locais registrados.
-        - `remote-list` — lista repositórios no provedor.
+        - `list` — lista repositórios remotos no workspace do provedor.
+        - `remote-list` — alias para listagem de repositórios remotos.
+        - `local-list` — lista repositórios locais registrados.
         - `search` — pesquisa repositórios remotos.
         - `show` — exibe detalhes de um repositório.
         - `select` — seleciona um repositório local.

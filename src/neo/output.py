@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime
 from typing import Any
 
 from rich.console import Console
@@ -58,3 +59,21 @@ def print_table(title: str, columns: list[str], rows: list[list[str]]) -> None:
 def print_panel(title: str, text: str) -> None:
     """Renderiza um painel estilizado com Rich."""
     console.print(Panel(text, title=f"[bold cyan]{title}[/bold cyan]", border_style="cyan"))
+
+
+def format_american_date(date_str: str | None) -> str:
+    """Converte string de data ISO 8601 para formato americano MM/DD/YYYY.
+
+    Retorna '-' se a data for vazia, nula ou inválida.
+    """
+    if not date_str or not date_str.strip():
+        return "-"
+    raw = date_str.strip()
+    try:
+        dt = datetime.fromisoformat(raw)
+        return dt.strftime("%m/%d/%Y")
+    except (ValueError, TypeError):
+        parts = raw.split("T")[0].split("-")
+        if len(parts) == 3 and len(parts[0]) == 4 and len(parts[1]) == 2 and len(parts[2]) == 2:
+            return f"{parts[1]}/{parts[2]}/{parts[0]}"
+        return "-"

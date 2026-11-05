@@ -3,7 +3,7 @@
 import json
 import os
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import httpx
 import respx
@@ -11,6 +11,7 @@ from typer.testing import CliRunner
 
 from neo.cli import app
 from neo.config import ExitCode
+from neo.integrations.bitbucket_models import BitbucketWorkspace
 
 runner = CliRunner()
 
@@ -50,8 +51,13 @@ def test_AC_2_git_config_set_get_list_unset(tmp_path: Path):
         assert res_set.exit_code == 0
         assert "provider" in res_set.output and "github" in res_set.output
 
-        res_ws = runner.invoke(app, ["git", "config", "set", "workspace", "minha-org"])
-        assert res_ws.exit_code == 0
+        mock_client = Mock()
+        mock_client.list_workspaces.return_value = [
+            BitbucketWorkspace(uuid="1", name="Minha Org", slug="minha-org", is_admin=True)
+        ]
+        with patch("neo.commands.git.resolve_git_provider", return_value=("github", mock_client)):
+            res_ws = runner.invoke(app, ["git", "config", "set", "workspace", "minha-org"])
+            assert res_ws.exit_code == 0
 
         res_branch = runner.invoke(app, ["git", "config", "set", "default-branch", "develop"])
         assert res_branch.exit_code == 0

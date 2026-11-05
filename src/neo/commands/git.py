@@ -44,10 +44,19 @@ from neo.integrations.bitbucket import BitbucketClient, BitbucketError
 from neo.integrations.github import GitHubClient
 from neo.integrations.resolver import (
     detect_git_remote_details,
+    handle_git_provider_error,
+    resolve_git_provider,
     resolve_git_provider_and_source,
     resolve_git_workspace_and_source,
 )
-from neo.output import print_error, print_json, print_panel, print_success, print_table
+from neo.output import (
+    console,
+    print_error,
+    print_json,
+    print_panel,
+    print_success,
+    print_table,
+)
 
 git_app = typer.Typer(
     name="git",
@@ -108,11 +117,6 @@ def _set_api_key(as_json: bool) -> None:
     provider = _configured_provider(as_json)
     if as_json:
         _fail_usage("`config set api-key` requer entrada interativa oculta.", as_json=True)
-    email: str | None = None
-    if provider == "bitbucket":
-        email = typer.prompt("E-mail da conta Bitbucket").strip()
-        if not email:
-            _fail_usage("O e-mail da conta Bitbucket não pode ser vazio.", as_json=False)
     token = typer.prompt("Chave de API", hide_input=True).strip()
     if not token:
         _fail_usage("A chave de API não pode ser vazia.", as_json=False)
@@ -120,22 +124,97 @@ def _set_api_key(as_json: bool) -> None:
         if provider == "github":
             GitHubClient(token=token).get_current_user()
         else:
-            BitbucketClient(token=token, username=email).list_workspaces()
+            BitbucketClient(token=token).list_workspaces()
     except (BitbucketError, httpx.HTTPError, OSError, ValueError):
         print_error(
-            "Não foi possível validar a chave de API no provedor. A credencial anterior foi preservada.",
+            "Conexão recusada",
             as_json=False,
             code=int(ExitCode.AUTH_ERROR),
         )
         raise typer.Exit(code=int(ExitCode.AUTH_ERROR)) from None
     try:
-        set_credential(provider, token, email=email)
+        set_credential(provider, token)
     except (KeyringError, OSError, RuntimeError, ValueError):
         print_error(
             "Não foi possível salvar a credencial.", as_json=False, code=int(ExitCode.ERROR)
         )
         raise typer.Exit(code=int(ExitCode.ERROR)) from None
-    print_success(f"Credencial de {provider} validada e salva.", as_json=False)
+    print_success("Conexão efetuada", as_json=False)
+
+
+def _set_workspace(value: str | None, as_json: bool) -> None:
+    """Configura o workspace validando na API do provedor ou selecionando interativamente."""
+    provider = _configured_provider(as_json)
+    _prov_name, client = resolve_git_provider(provider, as_json=as_json)
+
+    try:
+        workspaces = client.list_workspaces()
+    except BitbucketError as exc:
+        handle_git_provider_error(exc, as_json=as_json)
+    except (httpx.HTTPError, OSError) as exc:
+        print_error(
+            f"Erro ao consultar workspaces no provedor: {exc}",
+            as_json=as_json,
+            code=int(ExitCode.ERROR),
+        )
+        raise typer.Exit(code=int(ExitCode.ERROR)) from exc
+
+    if not workspaces:
+        print_error(
+            "Nenhum workspace encontrado para a conta autenticada.",
+            as_json=as_json,
+            code=int(ExitCode.NOT_FOUND),
+        )
+        raise typer.Exit(code=int(ExitCode.NOT_FOUND))
+
+    if value is not None and value.strip():
+        target_val = value.strip().lower()
+        matched = next(
+            (w for w in workspaces if w.slug.lower() == target_val or w.name.lower() == target_val),
+            None,
+        )
+        if not matched:
+            print_error(
+                f"Workspace '{value}' não encontrado na conta autenticada.",
+                as_json=as_json,
+                code=int(ExitCode.NOT_FOUND),
+            )
+            raise typer.Exit(code=int(ExitCode.NOT_FOUND))
+        selected_slug = matched.slug
+    else:
+        if as_json:
+            _fail_usage(
+                "`config set workspace` sem argumento requer entrada interativa.",
+                as_json=True,
+            )
+
+        console.print("\n[bold cyan]Workspaces disponíveis:[/bold cyan]")
+        for i, w in enumerate(workspaces, 1):
+            display_name = f" ({w.name})" if w.name and w.name != w.slug else ""
+            console.print(f"  [bold cyan]{i}.[/bold cyan] [bold]{w.slug}[/bold]{display_name}")
+
+        try:
+            chosen_idx = typer.prompt("\nNúmero do workspace", type=int)
+        except typer.Abort:
+            raise typer.Exit(code=int(ExitCode.ERROR))
+
+        if chosen_idx < 1 or chosen_idx > len(workspaces):
+            _fail_usage(
+                f"Seleção inválida. Escolha um número entre 1 e {len(workspaces)}.",
+                as_json=False,
+            )
+        selected_slug = workspaces[chosen_idx - 1].slug
+
+    try:
+        valid_key, clean_val = set_git_config_value("workspace", selected_slug)
+    except ValueError as e:
+        _fail_usage(str(e), as_json=as_json)
+
+    print_success(
+        f"Configuração Git atualizada: [bold]{valid_key}[/bold] = [cyan]{clean_val}[/cyan]",
+        as_json=as_json,
+        json_payload={"status": "success", "key": valid_key, "value": clean_val},
+    )
 
 
 # ============================================================================
@@ -154,7 +233,8 @@ def git_config_set(
 ) -> None:
     """Define o valor de uma chave na seção [git] do config.toml."""
     as_json = is_json_mode(ctx)
-    if key.strip().lower() == "api-key":
+    normalized = key.strip().lower()
+    if normalized == "api-key":
         if value is not None:
             _fail_usage(
                 "Não informe a chave como argumento; ela será solicitada com entrada oculta.",
@@ -162,9 +242,11 @@ def git_config_set(
             )
         _set_api_key(as_json)
         return
+    if normalized == "workspace":
+        _set_workspace(value, as_json)
+        return
     if value is None:
         _fail_usage("Informe o valor da configuração.", as_json)
-    normalized = key.strip().lower()
     if normalized in ("repo", "task", "branch"):
         try:
             if normalized == "repo":

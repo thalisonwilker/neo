@@ -21,6 +21,7 @@ class BitbucketRepo(BaseModel):
     slug: str
     is_private: bool = Field(default=True)
     description: str | None = None
+    created_on: str = ""
     updated_on: str = ""
     main_branch: str = "main"
     workspace: str = ""
@@ -72,6 +73,7 @@ class BitbucketRepo(BaseModel):
             slug=data.get("slug", ""),
             is_private=data.get("is_private", True),
             description=data.get("description"),
+            created_on=data.get("created_on", ""),
             updated_on=data.get("updated_on", ""),
             main_branch=main_branch,
             workspace=workspace_slug,

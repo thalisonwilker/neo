@@ -84,6 +84,7 @@ def test_every_doc_page_corresponds_to_real_command_or_topic():
         "git/repo/list.md",
         "git/repo/select.md",
         "git/repo/remote-list.md",
+        "git/repo/local-list.md",
         "git/repo/search.md",
         "git/repo/show.md",
         "git/repo/create.md",

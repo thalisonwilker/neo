@@ -36,7 +36,7 @@ Você pode manter credenciais salvas para ambos os provedores ao mesmo tempo no 
     ```bash
     neo git config set provider bitbucket
     neo git config set api-key
-    # Informe o e-mail da conta Atlassian e o API Token gerado
+    # Informe o API Token gerado (autenticação Bearer REST API)
     ```
 
 Verifique o estado com:
@@ -48,7 +48,7 @@ neo git config get api-key
 
 ## 3. Alternando o Provedor Padrão
 
-Para definir qual provedor utilizar quando estiver fora de um repositório Git local:
+Para definir qual provedor utilizar quando estiver fora de um repositório Git local (note que alterar o provedor reseta as configurações do módulo Git em `config.toml`, preservando o novo provedor):
 
 ```bash
 # Definir GitHub como padrão

@@ -33,7 +33,7 @@ def test_AC_1_select_and_list_local_repos(isolated: Path) -> None:
     repo = isolated / "project"
     init_repo(repo)
     assert runner.invoke(app, ["git", "repo", "select", str(repo)]).exit_code == 0
-    result = runner.invoke(app, ["--json", "git", "repo", "list"])
+    result = runner.invoke(app, ["--json", "git", "repo", "local-list"])
     assert json.loads(result.output) == [{"path": str(repo), "selected": True, "task": None}]
     assert runner.invoke(app, ["git", "repo", "select", str(isolated / "missing")]).exit_code != 0
     assert json.loads(runner.invoke(app, ["--json", "git", "config", "get", "repo"]).output)[

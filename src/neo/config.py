@@ -307,10 +307,13 @@ def set_git_config_value(
     if "git" not in data or not isinstance(data["git"], dict):
         data["git"] = {}
 
-    data["git"][valid_key] = clean_val
-    # Remove chave legada se existir para evitar ambiguidade
-    if valid_key == "provider" and "default_provider" in data["git"]:
-        del data["git"]["default_provider"]
+    if valid_key == "provider":
+        data["git"] = {"provider": clean_val}
+    else:
+        data["git"][valid_key] = clean_val
+        # Remove chave legada se existir para evitar ambiguidade
+        if "default_provider" in data["git"]:
+            del data["git"]["default_provider"]
 
     _write_file_config(config_file, data)
     return valid_key, clean_val

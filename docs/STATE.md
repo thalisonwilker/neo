@@ -8,9 +8,12 @@ alwaysApply: true
 
 > Memória de trabalho entre sessões. É volátil: atualizada o tempo todo. Decisão estrutural → ADR; estado do trabalho → aqui. Atualize ao pausar/encerrar; leia ao retomar. Use a skill `/handoff`.
 
-**Última atualização:** 2026-10-30 por Antigravity
+**Última atualização:** 2026-11-04 por Antigravity
 
 ## Em andamento / próximo passo
+- **Feature 0030 concluída:** `0030-refactor-git-config-set-workspace`; `neo git config set workspace` recupera a lista de workspaces da API do provedor ativo (GitHub/Bitbucket) e apresenta seleção interativa numerada `[1..N]` quando o valor não for informado, ou valida a existência do workspace na API quando passado diretamente como argumento. 240 testes verdes e 86% de cobertura.
+- **Feature 0029 concluída:** `0029-refactor-git-config-provider-api-key`; `neo git config set provider` reseta a seção `[git]` em `config.toml` mantendo apenas o novo provedor selecionado (`github` ou `bitbucket`). `neo git config set api-key` recebe a chave via prompt oculto sem solicitar e-mail para o Bitbucket (autenticação Bearer Rest API), testa a conexão e emite "Conexão efetuada" no sucesso ou "Conexão recusada" (código 3) na falha. 233 testes verdes e 86% de cobertura.
+- **Feature 0028 concluída:** `0028-refactor-git-repo-list`; `neo git repo list` refatorado para consultar API do provedor (GitHub/Bitbucket), validar conexão/credenciais, exibir tabela com `Nome`, `Data Criação` (MM/DD/YYYY), `Última atualização` (MM/DD/YYYY) e `Task` (`#<TASK-ID>`). Suporte a `--workspace`, `--provider`, `--limit`, `--json`. `remote-list` mantido como alias e `local-list` para repositórios locais. Suíte completa com 226 testes verdes e cobertura 86%.
 - **Feature 0027 concluída:** `0027-granularidade-docs-e-menus-suspensos`; padrão global de menu suspenso/chevron em todos os níveis, decomposição granular de `repo`, `branch`, `commits` e `pr` em páginas `.md` dedicadas por subcomando/ação, links e testes de documentação 100% atualizados e verdes.
 - **Documentação 0026:** navegação MkDocs e árvore de comandos organizadas por hierarquia; build estrito, auditoria e 12 testes de documentação passaram.
 - **Feature 0025 implementada:** `0025-comandos-pull-request`; `neo git pr` lista PRs abertas e oferece `open`, `approve`, `decline` e `search` para GitHub e Bitbucket. Suíte: 213 testes, cobertura 85,15%; Ruff, Mypy, MkDocs e auditoria aprovados. Próximo passo: review e PR; anexar a cobertura.
