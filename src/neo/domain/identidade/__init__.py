@@ -8,6 +8,7 @@ from neo.domain.identidade.errors import (
     EmailAutorizadoNaoEncontradoError,
     ErroDeDominio,
     PrimeiroAcessoJaConcluidoError,
+    PrimeiroAcessoPendenteError,
     TokenInvalidoError,
 )
 from neo.domain.identidade.ports import (
@@ -20,6 +21,7 @@ from neo.domain.identidade.ports import (
 from neo.domain.identidade.value_objects import (
     Email,
     IdentidadeExterna,
+    MetaSemanal,
     NomeDeExibicao,
     NomeDoEspaco,
     TipoEspaco,
@@ -36,9 +38,11 @@ __all__ = [
     "Espaco",
     "IdentidadeExterna",
     "LeitorDeEmailExterno",
+    "MetaSemanal",
     "NomeDeExibicao",
     "NomeDoEspaco",
     "PrimeiroAcessoJaConcluidoError",
+    "PrimeiroAcessoPendenteError",
     "RepositorioDeListaDePermissao",
     "RepositorioDeUsuarios",
     "TipoEspaco",

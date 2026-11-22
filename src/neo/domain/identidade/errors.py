@@ -41,6 +41,15 @@ class PrimeiroAcessoJaConcluidoError(ErroDeDominio):
         super().__init__("primeiro_acesso_ja_concluido", mensagem)
 
 
+class PrimeiroAcessoPendenteError(ErroDeDominio):
+    """Acao que exige o Primeiro acesso concluido (ex.: criar Espaco) pedida antes dele."""
+
+    def __init__(
+        self, mensagem: str = "Conclua o primeiro acesso antes de criar um espaço."
+    ) -> None:
+        super().__init__("primeiro_acesso_pendente", mensagem)
+
+
 class ClerkIndisponivelError(ErroDeDominio):
     """Falha ao consultar o provedor externo de identidade."""
 

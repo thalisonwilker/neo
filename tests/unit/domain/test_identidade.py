@@ -11,9 +11,11 @@ from neo.domain.identidade import (
     DadosInvalidosError,
     Email,
     IdentidadeExterna,
+    MetaSemanal,
     NomeDeExibicao,
     NomeDoEspaco,
     PrimeiroAcessoJaConcluidoError,
+    PrimeiroAcessoPendenteError,
     TipoEspaco,
     TokenInvalidoError,
     Usuario,
@@ -81,7 +83,7 @@ def test_AC_4_identidade_externa_rejeita_vazia() -> None:
 
 
 def test_AC_7_limites_nome_exibicao_nome_espaco_e_tipos() -> None:
-    """AC-7: remove espacos nas pontas, valida limites (1-60 / 1-40) e tipos fixos."""
+    """AC-7: remove espacos nas pontas, valida limites (1-60 / 1-100, ver 0040 AC-6) e tipos fixos."""
     assert NomeDeExibicao("  A  ").valor == "A"
     assert len(NomeDeExibicao("x" * 60).valor) == 60
     for invalido in ("", "   ", "x" * 61):
@@ -90,8 +92,8 @@ def test_AC_7_limites_nome_exibicao_nome_espaco_e_tipos() -> None:
         assert exc_info.value.campo == "nome_exibicao"
 
     assert NomeDoEspaco("  N  ").valor == "N"
-    assert len(NomeDoEspaco("y" * 40).valor) == 40
-    for invalido in ("", "   ", "y" * 41):
+    assert len(NomeDoEspaco("y" * 100).valor) == 100
+    for invalido in ("", "   ", "y" * 101):
         with pytest.raises(DadosInvalidosError) as exc_info:
             NomeDoEspaco(invalido)
         assert exc_info.value.campo == "espaco.nome"
@@ -135,3 +137,99 @@ def test_AC_6_e_AC_8_ciclo_primeiro_acesso_usuario() -> None:
             tipo_espaco=TipoEspaco.PESSOAL,
         )
     assert exc_info.value.codigo == "primeiro_acesso_ja_concluido"
+
+
+# --- 0040: criar Espaco ---------------------------------------------------------------
+
+
+def _usuario_com_primeiro_acesso() -> Usuario:
+    usuario = Usuario.registrar(IdentidadeExterna("user_0040"), Email("dev@neo.app"))
+    usuario.concluir_primeiro_acesso(
+        nome_exibicao=NomeDeExibicao("Thalyson"),
+        nome_espaco=NomeDoEspaco("Neo"),
+        tipo_espaco=TipoEspaco.TRABALHO,
+    )
+    return usuario
+
+
+def test_0040_AC_3_nome_do_espaco_aceita_ate_100_caracteres_apos_trim() -> None:
+    assert NomeDoEspaco("  " + "z" * 100 + "  ").valor == "z" * 100
+    with pytest.raises(DadosInvalidosError) as exc_info:
+        NomeDoEspaco("z" * 101)
+    assert exc_info.value.campo == "espaco.nome"
+
+
+@pytest.mark.parametrize("valor", [1, 30, 168])
+def test_0040_AC_3_meta_semanal_valida(valor: int) -> None:
+    assert MetaSemanal(valor).valor == valor
+
+
+@pytest.mark.parametrize("valor", [0, -1, 169, 12.5, "12", True, None])
+def test_0040_AC_3_meta_semanal_invalida(valor: object) -> None:
+    with pytest.raises(DadosInvalidosError) as exc_info:
+        MetaSemanal(valor)  # type: ignore[arg-type]
+    assert exc_info.value.campo == "meta_semanal"
+
+
+@pytest.mark.parametrize(
+    ("tipo", "meta"),
+    [
+        (TipoEspaco.TRABALHO, 30),
+        (TipoEspaco.ESTUDOS, 10),
+        (TipoEspaco.HOBBIES, 8),
+        (TipoEspaco.PESSOAL, 8),
+    ],
+)
+def test_0040_AC_2_meta_sugerida_por_tipo(tipo: TipoEspaco, meta: int) -> None:
+    assert tipo.meta_sugerida == meta
+    assert MetaSemanal.sugerida(tipo) == MetaSemanal(meta)
+
+
+def test_0040_AC_1_criar_espaco_com_meta_e_agentes() -> None:
+    usuario = _usuario_com_primeiro_acesso()
+    espaco = usuario.criar_espaco(
+        nome=NomeDoEspaco("  Faculdade  "),
+        tipo=TipoEspaco.ESTUDOS,
+        meta_semanal=MetaSemanal(12),
+        agentes_sugeridos=True,
+    )
+    assert espaco.nome == NomeDoEspaco("Faculdade")
+    assert espaco.tipo is TipoEspaco.ESTUDOS
+    assert espaco.meta_semanal == MetaSemanal(12)
+    assert espaco.agentes_sugeridos is True
+    assert espaco.usuario_id == usuario.id
+    assert usuario.espacos[-1] == espaco
+    assert len(usuario.espacos) == 2
+
+
+def test_0040_AC_2_criar_espaco_sem_meta_usa_sugerida_e_sem_agentes() -> None:
+    usuario = _usuario_com_primeiro_acesso()
+    espaco = usuario.criar_espaco(nome=NomeDoEspaco("Oficina"), tipo=TipoEspaco.HOBBIES)
+    assert espaco.meta_semanal == MetaSemanal(8)
+    assert espaco.agentes_sugeridos is False
+
+
+def test_0040_nomes_repetidos_sao_permitidos() -> None:
+    usuario = _usuario_com_primeiro_acesso()
+    a = usuario.criar_espaco(nome=NomeDoEspaco("Neo"), tipo=TipoEspaco.TRABALHO)
+    assert a.nome == usuario.espacos[0].nome
+    assert a.id != usuario.espacos[0].id
+
+
+def test_0040_AC_4_criar_espaco_exige_primeiro_acesso() -> None:
+    usuario = Usuario.registrar(IdentidadeExterna("user_pendente"), Email("p@neo.app"))
+    with pytest.raises(PrimeiroAcessoPendenteError) as exc_info:
+        usuario.criar_espaco(nome=NomeDoEspaco("X"), tipo=TipoEspaco.PESSOAL)
+    assert exc_info.value.codigo == "primeiro_acesso_pendente"
+    assert usuario.espacos == []
+
+
+def test_0040_AC_6_espaco_do_primeiro_acesso_nasce_com_meta_sugerida() -> None:
+    usuario = Usuario.registrar(IdentidadeExterna("user_pa"), Email("pa@neo.app"))
+    espaco = usuario.concluir_primeiro_acesso(
+        nome_exibicao=NomeDeExibicao("Ana"),
+        nome_espaco=NomeDoEspaco("e" * 100),
+        tipo_espaco=TipoEspaco.ESTUDOS,
+    )
+    assert espaco.meta_semanal == MetaSemanal(10)
+    assert espaco.agentes_sugeridos is False

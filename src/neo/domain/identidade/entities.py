@@ -6,10 +6,14 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from neo.domain.identidade.errors import PrimeiroAcessoJaConcluidoError
+from neo.domain.identidade.errors import (
+    PrimeiroAcessoJaConcluidoError,
+    PrimeiroAcessoPendenteError,
+)
 from neo.domain.identidade.value_objects import (
     Email,
     IdentidadeExterna,
+    MetaSemanal,
     NomeDeExibicao,
     NomeDoEspaco,
     TipoEspaco,
@@ -25,6 +29,8 @@ class Espaco:
     nome: NomeDoEspaco
     tipo: TipoEspaco
     criado_em: datetime
+    meta_semanal: MetaSemanal
+    agentes_sugeridos: bool = False
 
 
 @dataclass(frozen=True)
@@ -88,8 +94,38 @@ class Usuario:
             nome=nome_espaco,
             tipo=tipo_espaco,
             criado_em=ts,
+            # Invariante 8 (0040): Espaco do Primeiro acesso nasce com a Meta sugerida e sem agentes.
+            meta_semanal=MetaSemanal.sugerida(tipo_espaco),
+            agentes_sugeridos=False,
         )
         self.nome_exibicao = nome_exibicao
         self.primeiro_acesso_em = ts
+        self.espacos.append(espaco)
+        return espaco
+
+    def criar_espaco(
+        self,
+        nome: NomeDoEspaco,
+        tipo: TipoEspaco,
+        meta_semanal: MetaSemanal | None = None,
+        agentes_sugeridos: bool = False,
+        agora: datetime | None = None,
+    ) -> Espaco:
+        """Cria um novo Espaco do Usuario (0040).
+
+        Invariante 6: so cria Espaco quem ja concluiu o Primeiro acesso.
+        Invariante 7: sem meta informada, vale a Meta sugerida do tipo.
+        """
+        if not self.primeiro_acesso_concluido:
+            raise PrimeiroAcessoPendenteError()
+        espaco = Espaco(
+            id=uuid4(),
+            usuario_id=self.id,
+            nome=nome,
+            tipo=tipo,
+            criado_em=agora or datetime.now(UTC),
+            meta_semanal=meta_semanal or MetaSemanal.sugerida(tipo),
+            agentes_sugeridos=agentes_sugeridos,
+        )
         self.espacos.append(espaco)
         return espaco
