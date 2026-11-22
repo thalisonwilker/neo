@@ -74,7 +74,7 @@ Visitante ──► /dashboard/overview
 
 ### Cadastro e saída
 - `/auth/sign-up` renderiza `<SignUp/>` com os mesmos métodos e visual.
-- **Saída:** menu do usuário no cabeçalho do painel com "Sair". Encerra a sessão no Clerk e volta para `/auth/sign-in`. (Confirmar no código qual componente do template faz isso; ver tarefa 6.)
+- **Saída:** item "Sair" no menu do usuário da sidebar (`NavUser`, em `components/layout/app-sidebar.tsx`), via `useSignOut` de `features/auth`. Encerra a sessão no Clerk e volta para `/auth/sign-in`.
 
 ### Componentes e arquivos tocados
 | Arquivo | Mudança |
@@ -134,7 +134,7 @@ Sem impacto novo. O template traz Sentry (desligável por variável), fora do es
 | 3 | Provedor único | Remover `ClerkProvider` duplicado e aplicar `ptBR` | definido |
 | 4 | Proteção no proxy | `createRouteMatcher` + `auth.protect()`; layout como segunda camada | definido |
 | 5 | Telas de entrada e cadastro | Sem placeholders, marca NEO, pt-BR | definido |
-| 6 | Saída de sessão | Item "Sair" no menu do usuário | definido (confirmar componente no código) |
+| 6 | Saída de sessão | Item "Sair" no menu do usuário da sidebar | definido |
 | 7 | Métodos no Clerk | Habilitar Google, e-mail e senha, link mágico e GitHub | definido (manual) |
 | 8 | Cadastro aberto | Decisão do mantenedor: qualquer pessoa pode se cadastrar; restringir antes de conectar dados reais | definido |
 | 9 | Testes e gates | Vitest, funções puras, `TESTING.md` | definido |
@@ -172,6 +172,6 @@ Ganhamos entrega rápida e um login completo. Aceitamos depender de um serviço 
 ## Questões em aberto
 - [x] **1. Quem pode se cadastrar?** Decidido em 22/11/2026: **aberto a qualquer pessoa**. Consequência registrada no ADR-0010: rever antes de o painel exibir dados reais.
 - [ ] 2. O link mágico do Clerk em desenvolvimento chega como link ou como código? Verificar no painel do Clerk (spike na implementação, tarefa 7).
-- [ ] 3. Qual componente do template faz a saída de sessão e onde ele aparece? Confirmar no código (tarefa 6).
+- [x] 3. Qual componente do template faz a saída de sessão? Resolvido na tarefa 9: o item de saída de `NavUser` em `components/layout/app-sidebar.tsx`. O `UserNav` (`components/layout/user-nav.tsx`) não é usado em lugar nenhum.
 
 > **ADR registrado:** [ADR-0010 — Painel web em Next.js com autenticação via Clerk](../../docs/architecture/adr/0010-painel-web-nextjs-com-clerk.md).

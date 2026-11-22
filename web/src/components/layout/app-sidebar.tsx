@@ -27,7 +27,8 @@ import {
 } from '@/components/ui/sidebar';
 import { UserAvatarProfile } from '@/components/user-avatar-profile';
 import { navGroups } from '@/config/nav-config';
-import { useClerk, useOrganization, useUser } from '@clerk/nextjs';
+import { SIGN_OUT_LABEL, useSignOut } from '@/features/auth/use-sign-out';
+import { useOrganization, useUser } from '@clerk/nextjs';
 import { useFilteredNavGroups } from '@/hooks/use-nav';
 import { cn } from '@/lib/utils';
 import type { NavItem } from '@/types';
@@ -236,7 +237,7 @@ function NavMainItem({ item, pathname }: { item: NavItem; pathname: string }) {
 function NavUser() {
   const { user } = useUser();
   const { organization } = useOrganization();
-  const { signOut } = useClerk();
+  const signOut = useSignOut();
   const router = useRouter();
   const { isMobile, state } = useSidebar();
   const railMenu = state === 'collapsed' && !isMobile;
@@ -290,9 +291,9 @@ function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => signOut({ redirectUrl: '/auth/sign-in' })}>
+              <DropdownMenuItem onClick={signOut}>
                 <Icons.logout aria-hidden />
-                Sign out
+                {SIGN_OUT_LABEL}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
