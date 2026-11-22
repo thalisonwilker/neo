@@ -40,6 +40,7 @@ alwaysApply: false
 - [ ] Task 8: aplicar `resolvePostLoginRedirect(redirect_url, origem)` nas páginas de entrada e cadastro (`forceRedirectUrl` do `<SignIn/>` e do `<SignUp/>`), porque o Clerk gera `redirect_url` absoluto. Não cabe no proxy, que só monta a URL de entrada.
 - [x] Task 9: qual componente do template faz a saída da sessão. **Resultado:** o item de saída de `NavUser` em `components/layout/app-sidebar.tsx` (menu do usuário na base da sidebar). O `UserNav` em `components/layout/user-nav.tsx` é código morto do template. O rótulo passou de "Sign out" para "Sair" e o retorno usa `/auth/sign-in` via `useSignOut`.
 - [x] Task 10: o link mágico do Clerk em desenvolvimento chega como link ou como código. **Resultado:** hoje é por código (`email_code`); GitHub também não está habilitado. Ambos são passos de configuração manual (C3 e C5 do `uat.md`).
+- [ ] Task 10: habilitar GitHub e o link mágico no Clerk (C3 e C5 do `uat.md`) e refazer U4 e U6. UAT parcial em 22/11/2026: 12 de 14 passos passaram; o AC-10 segue sem verificação completa.
 
 ## Divergências (SPEC_DEVIATION)
 - Nenhuma divergência identificada.
