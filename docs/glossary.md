@@ -35,3 +35,8 @@ alwaysApply: false
 | **Transaction / Transação** | Movimentação financeira pontual registrada (despesa ou receita) com data, valor e conta | Transação de banco de dados ACID ou commit Git | `Personal Finance` |
 | **Balance / Balanço** | Saldo líquido apurado por conta e patrimônio consolidado | Limite de crédito ou orçamento futuro | `Personal Finance` |
 | **Monthly Summary / Resumo Mensal** | Apuração consolidada de entradas, saídas e resultado líquido de um mês com detalhamento por categoria | Extrato bancário de conta individual | `Personal Finance` |
+| **Painel** | Aplicação web do Neo em `web/` | A CLI `neo` | `Painel Web (Acesso)` |
+| **Sessão do painel** | Estado autenticado do usuário no painel, mantido pelo Clerk | Sessão de terminal ou credencial da CLI no Keyring | `Painel Web (Acesso)` |
+| **Rota protegida** | Rota do painel que só responde com sessão válida | Rota pública de entrada ou cadastro | `Painel Web (Acesso)` |
+| **Método de entrada** | Forma de provar identidade no painel: Google, e-mail e senha, link mágico ou GitHub | Provedor Git do Neo (`github` e `bitbucket`) | `Painel Web (Acesso)` |
+| **Destino pós-login** | Caminho interno para onde o usuário vai depois de entrar no painel | URL externa informada em parâmetro | `Painel Web (Acesso)` |

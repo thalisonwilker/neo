@@ -35,6 +35,7 @@ alwaysApply: false
   - [ADR-0005: Padrões de Qualidade de Código, Tipagem e Testes](architecture/adr/0005-padroes-de-qualidade-e-testes.md)
   - [ADR-0006: Observabilidade e UX Visual no Terminal](architecture/adr/0006-observabilidade-e-ux-cli.md)
   - [ADR-0007: Integração de Agentes de Codificação e Provedores SDD](architecture/adr/0007-integracao-agente-antigravity-e-sdd.md)
+  - [ADR-0010: Painel web em Next.js com autenticação via Clerk](architecture/adr/0010-painel-web-nextjs-com-clerk.md)
 
 ## 🛠️ Engenharia — como construímos
 - **Testes e quality gates** (comandos e Definition of Done) → [engineering/TESTING.md](engineering/TESTING.md)

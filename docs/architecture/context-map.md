@@ -20,6 +20,7 @@ alwaysApply: false
 | **Agent & SDD Orchestration** | Supporting | Diagnóstico, preparação e invocação do Antigravity CLI (`agy`) e esteiras SDD (`spec-driven` / `spec-kit`) | `services/agent_validator.py`, `integrations/agents/` |
 | **Personal Finance** | Supporting | Micro gerenciamento financeiro pessoal local: contas bancárias, categorias, despesas, receitas e resumos | `services/finance.py`, `integrations/finance_db.py` |
 | **Configuration & Secrets** | Generic | Leitura de preferências (`config.toml`), perfis de ambiente e persistência segura em Keyring | `config.py` |
+| **Painel Web (Acesso)** | Generic | Entrada, cadastro, saída e proteção de rotas do painel web; identidade delegada ao Clerk | `web/` |
 
 ## Relações entre contextos
 
@@ -46,6 +47,7 @@ alwaysApply: false
 | Shortcut API | Shortcut Integration | Anti-Corruption Layer (ACL) | Isola mudanças de schema do Shortcut do restante do sistema |
 | Analysis & Correlation | CLI Commands | Open Host Service | Fornece métodos claros de investigação e análise consumidos pelos comandos |
 | Configuration & Secrets | Integrations | Dependency | Injeta credenciais seguras e URLs de base nos clientes HTTP e agentes |
+| Clerk (SaaS) | Painel Web (Acesso) | Conformist | O painel adota o modelo de identidade do Clerk; o uso fica restrito a poucos arquivos (ADR-0010) |
 
 ## Diagramas
 Diagramas visuais detalhados em Mermaid disponíveis em [`diagrams.md`](./diagrams.md).
