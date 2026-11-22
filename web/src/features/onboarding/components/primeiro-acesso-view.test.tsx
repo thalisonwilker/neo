@@ -43,7 +43,16 @@ describe('AC-12: tela de Primeiro acesso', () => {
         email: 'dev@neo.app',
         nome_exibicao: 'Thalyson',
         primeiro_acesso_concluido: true,
-        espacos: [{ id: 'e1', nome: 'Neo', tipo: 'trabalho', criado_em: '2026-11-22T12:00:00Z' }]
+        espacos: [
+          {
+            id: 'e1',
+            nome: 'Neo',
+            tipo: 'trabalho',
+            criado_em: '2026-11-22T12:00:00Z',
+            meta_semanal: 30,
+            agentes_sugeridos: false
+          }
+        ]
       }
     });
 
@@ -97,7 +106,16 @@ describe('AC-12: tela de Primeiro acesso', () => {
         email: 'dev@neo.app',
         nome_exibicao: 'Thalyson',
         primeiro_acesso_concluido: true,
-        espacos: [{ id: 'e1', nome: 'Neo', tipo: 'trabalho', criado_em: '2026-11-22T12:00:00Z' }]
+        espacos: [
+          {
+            id: 'e1',
+            nome: 'Neo',
+            tipo: 'trabalho',
+            criado_em: '2026-11-22T12:00:00Z',
+            meta_semanal: 30,
+            agentes_sugeridos: false
+          }
+        ]
       }
     });
 
@@ -125,5 +143,10 @@ describe('AC-12: tela de Primeiro acesso', () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText('Nome de exibição')).toHaveAttribute('aria-invalid', 'true');
     expect(mocks.replace).not.toHaveBeenCalled();
+  });
+
+  it('AC-12 (0040 AC-6): o nome do espaço aceita até 100 caracteres', () => {
+    render(<PrimeiroAcessoView />);
+    expect(screen.getByLabelText('Nome do espaço')).toHaveAttribute('maxLength', '100');
   });
 });

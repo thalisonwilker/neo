@@ -28,7 +28,7 @@ alwaysApply: false
 ## Agregados, entidades e value objects
 - **Agregado `Usuario`** (raiz: `Usuario`)
   - Entidades: `Espaco`
-  - Value objects: `Email` (normalizado em minúsculas, formato válido), `NomeDeExibicao` (1 a 60 caracteres, sem espaços nas pontas), `NomeDoEspaco` (1 a 40 caracteres), `TipoEspaco` (enum dos 4 valores), `IdentidadeExterna`
+  - Value objects: `Email` (normalizado em minúsculas, formato válido), `NomeDeExibicao` (1 a 60 caracteres, sem espaços nas pontas), `NomeDoEspaco` (1 a 100 caracteres desde a [0040](../0040-criar-espaco/domain.md); era 1 a 40), `TipoEspaco` (enum dos 4 valores), `IdentidadeExterna`
   - **Invariantes:**
     1. Um Usuário só nasce se o `Email` estiver na Lista de permissão.
     2. Uma `IdentidadeExterna` corresponde a no máximo um Usuário.

@@ -48,7 +48,7 @@ O Neo passa a ter uma API que reconhece quem entrou pelo Clerk, só registra Usu
 
 ### AC-7: Dados inválidos no Primeiro acesso
 - **Dado** um Usuário com Primeiro acesso pendente
-- **Quando** envia nome de exibição vazio, só com espaços ou com mais de 60 caracteres; nome do Espaço vazio ou com mais de 40; ou tipo fora de `trabalho`, `estudos`, `hobbies`, `pessoal`
+- **Quando** envia nome de exibição vazio, só com espaços ou com mais de 60 caracteres; nome do Espaço vazio ou com mais de 100 (era 40; alterado na [0040](../0040-criar-espaco/spec.md) AC-6); ou tipo fora de `trabalho`, `estudos`, `hobbies`, `pessoal`
 - **Então** recebe 422 com `erro: "dados_invalidos"` indicando o campo, e nada é gravado. Espaços nas pontas são removidos antes de validar.
 
 ### AC-8: Primeiro acesso não se repete

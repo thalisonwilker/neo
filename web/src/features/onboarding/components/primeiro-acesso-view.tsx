@@ -1,5 +1,6 @@
 'use client';
 
+import { MAX_NOME_ESPACO } from '@/features/espacos/perfis';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -123,6 +124,7 @@ export function PrimeiroAcessoView() {
               <Input
                 id='nome-espaco'
                 name='espaco_nome'
+                maxLength={MAX_NOME_ESPACO}
                 placeholder='Ex.: Neo'
                 value={nomeEspaco}
                 onChange={(e) => setNomeEspaco(e.target.value)}
