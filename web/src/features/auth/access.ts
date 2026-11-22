@@ -84,6 +84,24 @@ export function buildSignInUrl(pathname: string, search = ''): string {
   return safe ? `${SIGN_IN_PATH}?redirect_url=${encodeURIComponent(safe)}` : SIGN_IN_PATH;
 }
 
+/**
+ * AC-3: origem do pedido (protocolo + host), usada para reconhecer uma URL absoluta da mesma
+ * origem em `redirect_url`. Considera os cabeçalhos de um proxy reverso (`x-forwarded-*`).
+ * Sem host, a origem é desconhecida e qualquer URL absoluta é rejeitada.
+ */
+export function originFromHeaders(headers: {
+  get(name: string): string | null;
+}): string | undefined {
+  const host = headers.get('x-forwarded-host')?.split(',')[0].trim() || headers.get('host');
+  if (!host) return undefined;
+
+  const forwarded = headers.get('x-forwarded-proto')?.split(',')[0].trim();
+  const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host);
+  const protocol =
+    forwarded === 'http' || forwarded === 'https' ? forwarded : isLocal ? 'http' : 'https';
+  return `${protocol}://${host}`;
+}
+
 /** AC-5: para onde a raiz `/` (e o índice `/dashboard`) leva o visitante, conforme a sessão. */
 export function resolveRootDestination(isSignedIn: boolean): string {
   return isSignedIn ? DEFAULT_POST_LOGIN_PATH : SIGN_IN_PATH;

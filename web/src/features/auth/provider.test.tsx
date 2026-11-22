@@ -16,6 +16,7 @@ vi.mock('@clerk/nextjs', () => ({
 }));
 
 import Providers from '@/components/layout/providers';
+import { localization } from './localization';
 
 // Os testes rodam a partir de web/ (`npm run test`).
 const srcRoot = resolve(process.cwd(), 'src');
@@ -49,7 +50,9 @@ describe('AC-8: provedor único e português do Brasil', () => {
       </Providers>
     );
     expect(screen.getByText('conteúdo')).toBeInTheDocument();
-    expect(captured.props?.localization).toBe(ptBR);
+    // pt-BR oficial + as traduções que o pacote não traz (features/auth/localization.ts).
+    expect(captured.props?.localization).toBe(localization);
+    expect(captured.props?.localization).toMatchObject({ locale: ptBR.locale });
   });
 
   it('AC-8: o documento declara o idioma pt-BR', () => {

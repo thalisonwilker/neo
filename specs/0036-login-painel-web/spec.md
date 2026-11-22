@@ -58,7 +58,7 @@ O painel web passa a ter um fluxo único de entrada, cadastro e saída com Clerk
 ### AC-8: Provedor único e português do Brasil — Vitest
 - **Dado** a árvore de componentes do painel,
 - **Então** existe **um único** `ClerkProvider` (o de `providers.tsx`) e `app/layout.tsx` não importa o Clerk,
-- **E** o provedor aplica a localização `ptBR`.
+- **E** o provedor aplica a localização pt-BR: o pacote oficial `ptBR` mais as traduções que ele não traz para o fluxo de entrada e cadastro (o pacote deixa 41 textos desse fluxo em inglês, como o campo de senha do cadastro).
 
 ### AC-9: Telas de entrada e cadastro sem placeholders — Vitest
 - **Dado** as telas `/auth/sign-in` e `/auth/sign-up`,
@@ -86,10 +86,11 @@ O painel web passa a ter um fluxo único de entrada, cadastro e saída com Clerk
 - **E** voltar a `/dashboard/overview` exige entrar de novo.
 - (Vitest cobre o destino configurado da saída; o encerramento real é UAT.)
 
-### AC-13: Erros claros em português — UAT
+### AC-13: Erros claros em português — Vitest e UAT
 - **Dado** credencial inválida, link mágico expirado ou método indisponível,
 - **Quando** o Clerk recusa a tentativa,
 - **Então** a tela mostra mensagem clara em português do Brasil, sem detalhes técnicos internos.
+- (O Vitest garante que nenhum texto do fluxo de entrada e cadastro fica em inglês; a exibição real da mensagem é UAT. Ficam fora SSO empresarial, passkeys, chaves de API e organizações, que o painel não habilita.)
 
 ### AC-14: Gates do painel passam — comandos
 - **Dado** o código da feature,

@@ -6,9 +6,42 @@ import {
   SIGN_UP_PATH,
   buildSignInUrl,
   isProtectedPath,
+  originFromHeaders,
   resolvePostLoginRedirect,
   resolveRootDestination
 } from './access';
+
+const headers = (values: Record<string, string>) => ({
+  get: (name: string) => values[name.toLowerCase()] ?? null
+});
+
+describe('AC-3: origem do pedido para validar o destino pós-login', () => {
+  it('AC-3: usa http em localhost quando não há protocolo encaminhado', () => {
+    expect(originFromHeaders(headers({ host: 'localhost:3100' }))).toBe('http://localhost:3100');
+  });
+
+  it('AC-3: usa o host e o protocolo encaminhados por um proxy reverso', () => {
+    expect(
+      originFromHeaders(
+        headers({
+          host: 'interno:3000',
+          'x-forwarded-host': 'painel.example.com',
+          'x-forwarded-proto': 'https,http'
+        })
+      )
+    ).toBe('https://painel.example.com');
+  });
+
+  it('AC-3: assume https fora de localhost sem protocolo encaminhado', () => {
+    expect(originFromHeaders(headers({ host: 'painel.example.com' }))).toBe(
+      'https://painel.example.com'
+    );
+  });
+
+  it('AC-3: sem host, a origem é desconhecida', () => {
+    expect(originFromHeaders(headers({}))).toBeUndefined();
+  });
+});
 
 describe('AC-5: a raiz decide pela sessão', () => {
   it('AC-5: com sessão, vai direto ao painel', () => {

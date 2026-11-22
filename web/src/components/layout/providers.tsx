@@ -1,5 +1,5 @@
 'use client';
-import { ptBR } from '@clerk/localizations';
+import { localization } from '@/features/auth/localization';
 import { ClerkProvider } from '@clerk/nextjs';
 import React from 'react';
 import { ActiveThemeProvider } from '../themes/active-theme';
@@ -16,7 +16,7 @@ export default function Providers({
     <>
       <ActiveThemeProvider initialTheme={activeThemeValue}>
         <ClerkProvider
-          localization={ptBR}
+          localization={localization}
           appearance={{
             variables: {
               colorPrimary: 'var(--primary)',
