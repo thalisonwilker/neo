@@ -5,6 +5,10 @@ export interface EspacoDTO {
   nome: string;
   tipo: TipoEspaco;
   criado_em: string;
+  /** 0040: horas por semana dedicadas ao Espaço (1 a 168). */
+  meta_semanal: number;
+  /** 0040: quer que o Neo crie os agentes e skills sugeridos para o tipo. */
+  agentes_sugeridos: boolean;
 }
 
 export interface UsuarioDTO {
@@ -38,6 +42,18 @@ export interface PrimeiroAcessoPayload {
     tipo: TipoEspaco;
   };
 }
+
+/** 0040: corpo de `POST /v1/espacos`. */
+export interface CriarEspacoPayload {
+  nome: string;
+  tipo: TipoEspaco;
+  meta_semanal: number;
+  agentes_sugeridos: boolean;
+}
+
+export type ResultadoCriarEspaco =
+  | { ok: true; status: 201; espaco: EspacoDTO }
+  | { ok: false; status: 401 | 403 | 409 | 422 | 500 | 503; erro: ErroApiDTO };
 
 const DEFAULT_API_URL = 'http://localhost:8000';
 const ERRO_INDISPONIVEL: ErroApiDTO = {
@@ -143,6 +159,52 @@ export async function submitPrimeiroAcesso(
     res.status === 422 ||
     res.status === 500 ||
     res.status === 503
+  ) {
+    return { ok: false, status: res.status, erro };
+  }
+  return { ok: false, status: 503, erro };
+}
+
+/** 0040 AC-10 e AC-11: cria um Espaço do Usuário autenticado. */
+export async function criarEspaco(
+  token: string | null,
+  payload: CriarEspacoPayload,
+  fetchImpl: typeof fetch = fetch
+): Promise<ResultadoCriarEspaco> {
+  if (!token) {
+    return {
+      ok: false,
+      status: 401,
+      erro: { erro: 'token_invalido', mensagem: 'Sessão inválida ou expirada.' }
+    };
+  }
+
+  let res: Response;
+  try {
+    res = await fetchImpl(`${getNeoApiBaseUrl()}/v1/espacos`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch {
+    return { ok: false, status: 503, erro: ERRO_INDISPONIVEL };
+  }
+
+  if (res.status === 201) {
+    const espaco = (await res.json()) as EspacoDTO;
+    return { ok: true, status: 201, espaco };
+  }
+
+  const erro = await parseErroJson(res);
+  if (
+    res.status === 401 ||
+    res.status === 403 ||
+    res.status === 409 ||
+    res.status === 422 ||
+    res.status === 500
   ) {
     return { ok: false, status: res.status, erro };
   }

@@ -30,7 +30,16 @@ const usuarioConcluido = {
   email: 'dev@neo.app',
   nome_exibicao: 'Thalyson',
   primeiro_acesso_concluido: true,
-  espacos: [{ id: 'e1', nome: 'Neo', tipo: 'trabalho' as const, criado_em: '2026-11-22T12:00:00Z' }]
+  espacos: [
+    {
+      id: 'e1',
+      nome: 'Neo',
+      tipo: 'trabalho' as const,
+      criado_em: '2026-11-22T12:00:00Z',
+      meta_semanal: 30,
+      agentes_sugeridos: false
+    }
+  ]
 };
 
 const usuarioPendente = {

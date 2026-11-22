@@ -21,8 +21,22 @@ const usuarioBase: UsuarioDTO = {
   nome_exibicao: 'Thalyson',
   primeiro_acesso_concluido: true,
   espacos: [
-    { id: 'e2', nome: 'Faculdade', tipo: 'estudos', criado_em: '2026-11-22T13:00:00Z' },
-    { id: 'e1', nome: 'Neo', tipo: 'trabalho', criado_em: '2026-11-22T12:00:00Z' }
+    {
+      id: 'e2',
+      nome: 'Faculdade',
+      tipo: 'estudos',
+      criado_em: '2026-11-22T13:00:00Z',
+      meta_semanal: 10,
+      agentes_sugeridos: false
+    },
+    {
+      id: 'e1',
+      nome: 'Neo',
+      tipo: 'trabalho',
+      criado_em: '2026-11-22T12:00:00Z',
+      meta_semanal: 30,
+      agentes_sugeridos: false
+    }
   ]
 };
 
@@ -120,7 +134,16 @@ describe('0038 AC-5: lista de Espaços reais', () => {
     const nome = 'Faculdade · Ciência da Computação e Engenharia';
     mocks.usuario = {
       ...usuarioBase,
-      espacos: [{ id: 'e1', nome, tipo: 'estudos', criado_em: '2026-11-22T12:00:00Z' }]
+      espacos: [
+        {
+          id: 'e1',
+          nome,
+          tipo: 'estudos',
+          criado_em: '2026-11-22T12:00:00Z',
+          meta_semanal: 10,
+          agentes_sugeridos: false
+        }
+      ]
     };
     render(<HomeView hoje={HOJE} />);
     expect(screen.getByTitle(nome)).toHaveClass('truncate');
