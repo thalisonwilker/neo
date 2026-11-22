@@ -21,6 +21,7 @@ alwaysApply: false
 | **Personal Finance** | Supporting | Micro gerenciamento financeiro pessoal local: contas bancárias, categorias, despesas, receitas e resumos | `services/finance.py`, `integrations/finance_db.py` |
 | **Configuration & Secrets** | Generic | Leitura de preferências (`config.toml`), perfis de ambiente e persistência segura em Keyring | `config.py` |
 | **Painel Web (Acesso)** | Generic | Entrada, cadastro, saída e proteção de rotas do painel web; identidade delegada ao Clerk | `web/` |
+| **Identidade** | Supporting | Usuário do Neo, Lista de permissão, Primeiro acesso e Espaços; servido pela API FastAPI (ADR-0011) | `domain/identidade/`, `application/identidade/`, `interfaces/api/` |
 
 ## Relações entre contextos
 
@@ -48,6 +49,8 @@ alwaysApply: false
 | Analysis & Correlation | CLI Commands | Open Host Service | Fornece métodos claros de investigação e análise consumidos pelos comandos |
 | Configuration & Secrets | Integrations | Dependency | Injeta credenciais seguras e URLs de base nos clientes HTTP e agentes |
 | Clerk (SaaS) | Painel Web (Acesso) | Conformist | O painel adota o modelo de identidade do Clerk; o uso fica restrito a poucos arquivos (ADR-0010) |
+| Clerk (SaaS) | Identidade | Anti-Corruption Layer (ACL) | A porta `VerificadorDeToken` traduz token e dados do Clerk; o domínio não conhece o Clerk (ADR-0011) |
+| Identidade | Painel Web (Acesso) | Open Host Service | API v1 (`/v1/me`, `/v1/primeiro-acesso`) consumida pelo painel |
 
 ## Diagramas
 Diagramas visuais detalhados em Mermaid disponíveis em [`diagrams.md`](./diagrams.md).

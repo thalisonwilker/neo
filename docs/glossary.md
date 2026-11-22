@@ -39,4 +39,9 @@ alwaysApply: false
 | **Sessão do painel** | Estado autenticado do usuário no painel, mantido pelo Clerk | Sessão de terminal ou credencial da CLI no Keyring | `Painel Web (Acesso)` |
 | **Rota protegida** | Rota do painel que só responde com sessão válida | Rota pública de entrada ou cadastro | `Painel Web (Acesso)` |
 | **Método de entrada** | Forma de provar identidade no painel: Google, e-mail e senha ou link mágico | Provedor Git do Neo (`github` e `bitbucket`) | `Painel Web (Acesso)` |
+| **Usuário** | Pessoa registrada no Neo, ligada a uma única identidade do Clerk | Conta do Clerk sem registro no Neo · Account financeira | `Identidade` |
+| **Lista de permissão** | E-mails autorizados a virar Usuário, editada por `neo api permitir` | Lista de permissão do Clerk (complementar, configurada à mão) | `Identidade` |
+| **Primeiro acesso** | Etapa única em que o Usuário informa o nome de exibição e cria o primeiro Espaço | Primeiro login no Clerk | `Identidade` |
+| **Espaço** | Agrupador da vida do Usuário no painel, de tipo `trabalho`, `estudos`, `hobbies` ou `pessoal` | **Workspace** do provedor Git | `Identidade` |
+| **Boas-vindas** | Tela mostrada uma vez, ao concluir o Primeiro acesso | Tela inicial do painel | `Identidade` |
 | **Destino pós-login** | Caminho interno para onde o usuário vai depois de entrar no painel | URL externa informada em parâmetro | `Painel Web (Acesso)` |
