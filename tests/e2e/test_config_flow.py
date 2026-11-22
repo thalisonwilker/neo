@@ -39,8 +39,8 @@ def test_AC_1_no_short_flags_in_git_commands():
         assert res.exit_code == int(ExitCode.USAGE_ERROR), f"Esperado código 2 para {args}"
 
 
-def test_AC_2_git_config_set_get_list_unset(tmp_path: Path):
-    """AC-2 (0014): Gerenciamento de configuração `neo git config set|get|list|unset` e bloqueio de `token`."""
+def test_AC_2_git_config_set_get_show_unset(tmp_path: Path):
+    """AC-2 (0014): Gerenciamento de configuração Git e bloqueio de `token`."""
     with (
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
@@ -75,18 +75,20 @@ def test_AC_2_git_config_set_get_list_unset(tmp_path: Path):
         data_get = json.loads(res_get_json.output)
         assert data_get == {"key": "workspace", "value": "minha-org", "source": "config"}
 
-        # 3. Listar todas as chaves (`list`)
-        res_list = runner.invoke(app, ["git", "config", "list"])
-        assert res_list.exit_code == 0
-        assert "default-branch" in res_list.output
-        assert "branch-pattern" in res_list.output
-        assert "commit-format" in res_list.output
-
-        res_list_json = runner.invoke(app, ["git", "config", "list", "--json"])
-        assert res_list_json.exit_code == 0
-        data_list = json.loads(res_list_json.output)
-        assert data_list["provider"]["value"] == "github"
-        assert data_list["default-branch"]["value"] == "develop"
+        # 3. Exibir todas as chaves (`show`)
+        for args in (["git", "config", "show", "--json"], ["--json", "git", "config", "show"]):
+            res_show = runner.invoke(app, args)
+            assert res_show.exit_code == 0
+            data = json.loads(res_show.output)
+            assert data["provider"]["value"] == "github"
+            assert data["default-branch"]["value"] == "develop"
+        res_show = runner.invoke(app, ["git", "config", "show"])
+        assert res_show.exit_code == 0
+        assert "branch:" in res_show.output
+        assert "develop" in res_show.output
+        assert "branch-pattern" in res_show.output
+        assert "commit-format" in res_show.output
+        assert runner.invoke(app, ["git", "config", "list"]).exit_code == int(ExitCode.USAGE_ERROR)
 
         # 4. Remover chave (`unset`)
         res_unset = runner.invoke(app, ["git", "config", "unset", "default-branch"])
@@ -125,6 +127,11 @@ def test_AC_3_git_config_api_key_status_and_unset(tmp_path: Path):
         assert result.exit_code == 0
         assert json.loads(result.output)["value"] == "Configurado"
         assert "ghp_super_secret_token" not in result.output
+        for args in (["git", "config", "show"], ["git", "config", "show", "--json"]):
+            shown = runner.invoke(app, args)
+            assert shown.exit_code == 0
+            assert "Configurado" in shown.output
+            assert "ghp_super_secret_token" not in shown.output
         assert runner.invoke(app, ["git", "config", "unset", "api-key"], input="n\n").exit_code != 0
         assert "github" in stored
         assert runner.invoke(app, ["git", "config", "unset", "api-key", "--yes"]).exit_code == 0

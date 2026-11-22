@@ -1,3 +1,5 @@
+import json
+
 """Testes unitários para o GitHubClient usando respx."""
 
 import httpx
@@ -201,3 +203,13 @@ def test_github_error_handling(gh_client: GitHubClient):
     )
     with pytest.raises(GitHubNotFoundError):
         gh_client.get_repository("inexistente", workspace="octocat")
+
+
+@respx.mock
+def test_set_default_branch(gh_client: GitHubClient):
+    route = respx.patch("https://api.github.com/repos/octocat/demo").mock(
+        return_value=httpx.Response(200, json={})
+    )
+    gh_client.set_default_branch("demo", "develop", workspace="octocat")
+    assert route.called
+    assert json.loads(route.calls.last.request.content) == {"default_branch": "develop"}

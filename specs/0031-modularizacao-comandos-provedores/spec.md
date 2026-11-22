@@ -22,6 +22,8 @@ Organizar os comandos segundo a hierarquia da CLI e acessar GitHub, Bitbucket e 
 - **E** a inicialização da aplicação e `neo --help` executam sem importação circular.
 
 ### AC-2: Compatibilidade da CLI
+
+> Atualização posterior: `neo git config list` foi removido a pedido do mantenedor; use `neo git config show`. Esta exceção substitui a compatibilidade desse comando.
 - **Dado** uma invocação atualmente suportada, incluindo aliases, opções, argumentos e prompts.
 - **Quando** executada após a refatoração com as mesmas configurações e respostas externas.
 - **Então** preserva a gramática, os efeitos, a saída de sucesso ou erro, o JSON e o código de saída existentes, inclusive os aliases ocultos.

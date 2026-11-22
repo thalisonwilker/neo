@@ -227,6 +227,14 @@ class GitHubClient:
             self._handle_response_error(resp, f"criar repositório '{name}' em '{target_ws}'")
             return parse_github_repo(resp.json())
 
+    def set_default_branch(self, repo_slug: str, branch: str, workspace: str | None = None) -> None:
+        """Define a branch principal do repositório."""
+        ws = workspace or self.get_default_workspace()
+        url = f"{self.base_url}/repos/{ws}/{repo_slug}"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.patch(url, headers=self._get_headers(), json={"default_branch": branch})
+            self._handle_response_error(resp, "definir branch principal")
+
     def update_repository_description(
         self, repo_slug: str, description: str, workspace: str | None = None
     ) -> GitRepo:

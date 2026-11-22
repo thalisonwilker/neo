@@ -57,7 +57,7 @@ Para garantir previsibilidade, o Neo organiza suas ações em verbos consistente
 
 | Verbo | Propósito | Recursos que utilizam |
 |---|---|---|
-| `list` | Lista registros tabulares de um recurso | `git config`, `git repo`, `git commits`, `config agent`, `tasks list`, `tasks iterations`, `fin bank`, `fin category`, `fin tx` |
+| `list` | Lista registros tabulares de um recurso | `git repo`, `git commits`, `config agent`, `tasks list`, `tasks iterations`, `fin bank`, `fin category`, `fin tx` |
 | `show` | Exibe todos os detalhes e metadados de um registro específico | `git repo`, `git commits`, `tasks show`, `config show` |
 | `get` | Consulta o registro detalhado ou chave de configuração de um recurso | `git config`, `config agent`, `tasks config`, `fin bank`, `fin category`, `fin tx` |
 | `create` | Criação de novos recursos locais ou remotos | `fin bank`, `fin category`, `fin tx` |

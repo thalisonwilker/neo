@@ -6,7 +6,9 @@ alwaysApply: false
 
 # neo git config
 
-Use `neo git config set`, `neo git config get`, `neo git config list` e `neo git config unset` para gerenciar preferências e contexto.
+Use `neo git config set`, `neo git config get`, `neo git config show` e `neo git config unset` para gerenciar preferências e contexto.
+
+`show` apresenta o estado do provedor, workspace, branch padrão, padrões de branch e commit, credencial, repositório selecionado e task. Valores configurados são destacados em verde; a credencial nunca é exibida. Para Bitbucket, também apresenta o projeto selecionado. Use `--json` para consultar os valores e suas origens em formato estruturado.
 
 | Chave | Comportamento |
 |---|---|
@@ -26,12 +28,14 @@ neo git config set repo /caminho/do/repo
 neo git config set branch feature/minha-branch
 neo git config set task 123
 neo git config get task --json
-neo git config list
+neo git config show
 neo git config unset task
 neo git config unset repo
 neo git config unset api-key  # pede confirmação; --yes dispensa a pergunta
 ```
 
-A chave nunca é exibida por `get`, `list` ou `status`. Quando a validação remota falha, a credencial anterior é preservada e é exibido `Conexão recusada` (código de saída 3). O Bitbucket autentica diretamente via API REST com token Bearer, sem solicitar e-mail. Variáveis de ambiente continuam tendo precedência e não são removidas por `unset api-key`. `unset branch` não altera a branch ativa; use `neo git branch select` para trocar de branch.
+A chave nunca é exibida por `get`, `show` ou `status`. Quando a validação remota falha, a credencial anterior é preservada e é exibido `Conexão recusada` (código de saída 3). O Bitbucket autentica diretamente via API REST com token Bearer, sem solicitar e-mail. Variáveis de ambiente continuam tendo precedência e não são removidas por `unset api-key`. `unset branch` não altera a branch ativa; use `neo git branch select` para trocar de branch.
 
 Consulte [autenticação](auth.md), [branches](branch/index.md) e [status](status.md).
+
+Ao configurar um workspace Bitbucket, o Neo lista os projetos acessíveis e solicita a seleção de um projeto. Workspace e projeto são salvos juntos; se a seleção falhar ou for cancelada, a configuração anterior é preservada. A seleção requer modo interativo, sem `--json`.

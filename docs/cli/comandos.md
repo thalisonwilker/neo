@@ -20,7 +20,7 @@ Os itens abaixo mostram os comandos disponíveis agrupados como são digitados n
     - **[`config`](git/config.md)** — configuração Git:
         - `set` — define uma propriedade.
         - `get` — consulta uma propriedade.
-        - `list` — lista as propriedades.
+        - `show` — exibe as propriedades.
         - `unset` — remove uma propriedade.
     - **[`repo`](git/repo/index.md)** — repositórios:
         - `list` — lista repositórios remotos no workspace do provedor.

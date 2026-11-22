@@ -1,3 +1,5 @@
+import json
+
 import httpx
 import pytest
 import respx
@@ -251,3 +253,58 @@ def test_get_default_workspace_precedence(bb_client: BitbucketClient):
     with patch("neo.config.get_default_workspace_config", return_value=None):
         ws = bb_client.get_default_workspace()
         assert ws == "auto-ws"
+
+
+@respx.mock
+def test_set_default_branch(bb_client: BitbucketClient):
+    url = "https://api.bitbucket.org/2.0/repositories/my-workspace/demo"
+    respx.get(url).mock(return_value=httpx.Response(200, json={"name": "demo", "slug": "demo"}))
+    route = respx.put(url).mock(return_value=httpx.Response(200, json={}))
+    bb_client.set_default_branch("demo", "develop", workspace="my-workspace")
+    assert route.called
+    assert json.loads(route.calls.last.request.content) == {"mainbranch": {"name": "develop"}}
+
+
+@respx.mock
+def test_AC_1_projects_are_paginated_and_key_is_sent(bb_client: BitbucketClient):
+    url = "https://api.bitbucket.org/2.0/workspaces/my-workspace/projects"
+    respx.get(f"{url}?page=2").mock(
+        return_value=httpx.Response(
+            200,
+            json={"values": [{"name": "Outro", "key": "OUTRO", "uuid": "{second}"}]},
+        )
+    )
+    respx.get(url).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "values": [{"name": "Easygestor", "key": "EASY", "uuid": "{first}"}],
+                "next": f"{url}?page=2",
+            },
+        )
+    )
+    projects = bb_client.list_projects("my-workspace")
+    assert [(p.name, p.key, p.uuid) for p in projects] == [
+        ("Easygestor", "EASY", "{first}"),
+        ("Outro", "OUTRO", "{second}"),
+    ]
+    route = respx.post("https://api.bitbucket.org/2.0/repositories/my-workspace/demo").mock(
+        return_value=httpx.Response(200, json={"name": "demo", "slug": "demo"})
+    )
+    bb_client.create_repository("demo", workspace="my-workspace", project_id=projects[0].key)
+    assert json.loads(route.calls.last.request.content)["project"] == {"key": "EASY"}
+
+
+@respx.mock
+def test_AC_4_project_without_key_raises_error(bb_client: BitbucketClient):
+    url = "https://api.bitbucket.org/2.0/workspaces/my-workspace/projects"
+    respx.get(url).mock(
+        return_value=httpx.Response(
+            200,
+            json={"values": [{"name": "Sem Chave", "uuid": "{uuid-only}"}]},
+        )
+    )
+    from neo.integrations.git.errors import GitProviderError
+
+    with pytest.raises(GitProviderError, match="sem chave ou nome válido"):
+        bb_client.list_projects("my-workspace")

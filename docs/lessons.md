@@ -6,6 +6,10 @@ alwaysApply: false
 
 # LESSONS — Aprendizados & gotchas
 
+- Rich respeita `NO_COLOR` mesmo com `force_terminal=True`; testes de cores precisam definir `no_color=False` explicitamente.
+- O `.gitignore` da raiz ignora qualquer `lib/` (empacotamento Python) e engolia `web/src/lib/` do painel: ao criar pastas novas em `web/`, confira com `git check-ignore -v <caminho>` antes de commitar.
+- O Clerk gera `redirect_url` **absoluto** (ex.: `http://localhost:3100/dashboard/overview`); a validação do destino pós-login precisa aceitar URL absoluta da mesma origem e reduzi-la a caminho + consulta.
+
 > **Área de staging, não cemitério.** Registra o que se aprende na marra: quirks de biblioteca,
 > armadilhas de ambiente, suposições que quebraram. É **volátil** — diferente do **ADR** (decisão
 > durável) e do **STATE** (o que estamos fazendo agora). A lição que **estabiliza** é **promovida**
@@ -40,3 +44,7 @@ alwaysApply: false
 ## Promovidas (histórico curto)
 > Rastro de para onde foram as lições podadas — só o link, sem reexplicar. Poda este histórico também.
 - <YYYY-MM-DD: "<lição>" → [ADR-NNNN](architecture/adr/NNNN-*.md) / glossary / CLAUDE.md>
+
+- Em sandbox sem escrita em `~/.cache/uv`, execute os gates com `UV_CACHE_DIR=/tmp/neo-uv-cache`.
+
+- 2026-11-05 · Bitbucket Cloud · A criação de repositórios no Bitbucket requer a propriedade `key` do projeto no payload (`{"project": {"key": "<KEY>"}}`); enviar o UUID `{...}` causa erro 400 da API · Usar e persistir sempre a `key` do projeto retornada pela API.

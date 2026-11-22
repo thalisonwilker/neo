@@ -95,7 +95,7 @@ neo git config set provider github
 neo git config set workspace minha-organizacao
 
 # Conferir as configurações ativas
-neo git config list
+neo git config show
 ```
 
 ---

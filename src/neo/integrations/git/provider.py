@@ -70,6 +70,10 @@ class GitProvider(Protocol):
         description: str | None = None,
     ) -> GitRepo: ...
 
+    def set_default_branch(
+        self, repo_slug: str, branch: str, workspace: str | None = None
+    ) -> None: ...
+
     def update_repository_description(
         self, repo_slug: str, description: str, workspace: str | None = None
     ) -> GitRepo: ...

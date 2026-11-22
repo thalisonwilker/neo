@@ -41,9 +41,14 @@ def test_AC_1_interactive_workspace_selection():
         )
     )
 
+    respx.get("https://api.bitbucket.org/2.0/workspaces/workspace-beta/projects").mock(
+        return_value=httpx.Response(
+            200, json={"values": [{"key": "PROJ", "uuid": "{uuid}", "name": "Projeto"}]}
+        )
+    )
     with patch.dict(os.environ, {"NEO_BITBUCKET_TOKEN": "mock-token"}, clear=True):
         # Usuário seleciona o item 2 (workspace-beta)
-        res = runner.invoke(app, ["git", "config", "set", "workspace"], input="2\n")
+        res = runner.invoke(app, ["git", "config", "set", "workspace"], input="2\n1\n")
         assert res.exit_code == 0
         assert "Workspaces disponíveis:" in res.output
         assert "workspace-alpha" in res.output

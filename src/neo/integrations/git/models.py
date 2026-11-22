@@ -14,6 +14,14 @@ class CloneLink(BaseModel):
     href: str
 
 
+class GitProject(BaseModel):
+    """Projeto Bitbucket identificado por key."""
+
+    key: str
+    name: str
+    uuid: str | None = None
+
+
 class GitRepo(BaseModel):
     """Representa um repositório Git (Bitbucket Cloud ou GitHub)."""
 

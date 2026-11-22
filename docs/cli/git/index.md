@@ -29,7 +29,7 @@ Os comandos do módulo `neo git` estão distribuídos em submenus funcionais:
 Gerenciamento de credenciais, resolução de diretório local e configurações:
 
 - [**Autenticação Git**](auth.md): configure e gerencie credenciais via `neo git config`.
-- [**Configurações Gerais (`neo git config`)**](config.md): Definição de provedor padrão, branch principal e formatos sugeridos (`set`, `get`, `list`, `unset`).
+- [**Configurações Gerais (`neo git config`)**](config.md): Definição de provedor padrão, branch principal e formatos sugeridos (`set`, `get`, `show`, `unset`).
 - [**Diagnóstico de Contexto (`neo git status`)**](status.md): Inspeciona o repositório local, branch atual, remote, provedor e workspace resolvidos.
 - [**Configurar workspace**](workspace.md): defina ou consulte o workspace com `neo git config`.
 

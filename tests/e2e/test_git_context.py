@@ -67,7 +67,7 @@ def test_AC_7_selected_repo_and_branch_config(isolated: Path) -> None:
     assert runner.invoke(app, ["git", "config", "set", "repo", str(repo)]).exit_code == 0
     assert runner.invoke(app, ["git", "branch", "create", "example"]).exit_code == 0
     assert runner.invoke(app, ["git", "config", "set", "branch", "example"]).exit_code == 0
-    result = runner.invoke(app, ["--json", "git", "config", "list"])
+    result = runner.invoke(app, ["--json", "git", "config", "show"])
     assert json.loads(result.output)["branch"]["value"] == "example"
     assert runner.invoke(app, ["git", "config", "unset", "branch"]).exit_code != 0
     assert runner.invoke(app, ["git", "config", "unset", "repo"]).exit_code == 0

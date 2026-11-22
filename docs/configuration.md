@@ -42,7 +42,7 @@ commit-format = "{type}: {message}"
 neo git config set provider github
 neo git config set workspace minha-organizacao
 neo git config get provider
-neo git config list
+neo git config show
 
 # Restaurar uma chave para o valor padrão
 neo git config unset default-branch

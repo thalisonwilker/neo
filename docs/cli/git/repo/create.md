@@ -1,71 +1,37 @@
 ---
 name: cli-git-repo-create
-description: Cria um repositório local e no provedor Git com commit inicial e push da branch padrão.
+description: Cria e clona um repositório remoto, prepara os arquivos e publica o commit inicial.
 alwaysApply: false
 ---
 
 # neo git repo create
-> Cria um repositório Git localmente e no provedor remoto, gerando commit inicial e enviando a branch padrão.
+
+Cria um repositório remoto, clona-o e publica os arquivos iniciais.
 
 ## Sintaxe
 
 ```bash
-neo git repo create <nome> --path <caminho> [--public] [--workspace <slug>] [--provider <github|bitbucket>] [--json]
+neo git repo create <nome> [--path <diretório-pai>] [--default-branch <nome>] [--description <texto>] [--public]
 ```
 
-## Descrição
+O Neo valida a conexão, cria o remoto privado por padrão e clona em um subdiretório com o nome do repositório. Em seguida cria `README.md` com o nome e a descrição, se informada, e `AGENTS.md` vazio; faz o commit `first commit` e envia a branch principal. Após o push, registra e seleciona o repositório e exibe um comando `cd` para acessá-lo.
 
-O comando `neo git repo create` automatiza o fluxo de bootstrap de novos projetos:
-1. Valida se o diretório de destino não existe (recusa sobrescrever diretórios preexistentes).
-2. Cria o repositório no provedor remoto (**privado por padrão**, a menos que `--public` seja informado).
-3. Inicializa o repositório Git local com os arquivos `README.md` e `AGENTS.md`.
-4. Cria o commit inicial, vincula o remote `origin` e faz o push da branch principal padrão.
-5. Registra e seleciona o novo repositório no contexto local do Neo.
-
-Se qualquer etapa remota falhar (ex.: rede ou permissão), o Neo preserva o diretório local e reporta com precisão o estado de cada etapa para recuperação manual sem perda de dados.
-
-## Parâmetros e Opções
-
-| Argumento / Opção | Tipo | Padrão | Obrigatório | Descrição |
-|---|---|---|---|---|
-| `<nome>` | Argumento posicional | — | Sim | Nome / slug do repositório a ser criado. |
-| `--path` | Caminho no sistema | — | Sim | Caminho local onde o diretório do projeto será criado. |
-| `--public` | Flag booleana | `false` | Não | Cria o repositório como público (padrão é privado). |
-| `--workspace` | Texto | Contexto | Não | Workspace ou organização de destino. |
-| `--provider` | `github` \| `bitbucket` | Contexto | Não | Provedor Git onde o repositório remoto será criado. |
-| `--json` | Flag booleana | `false` | Não | Retorna o status e metadados de criação em JSON. |
-
-## Exemplos
-
-### Criando um repositório privado (padrão)
-
-```bash
-neo git repo create minha-api --path /Users/dev/Projects/minha-api
-```
-
-### Criando um repositório público
-
-```bash
-neo git repo create biblioteca-open --path /Users/dev/Projects/biblioteca-open --public
-```
-
-### Saída estruturada em JSON
-
-```bash
-neo git repo create auth-service --path /Users/dev/Projects/auth-service --json
-```
-
-## Erros comuns e códigos de saída
-
-| Código | Significado | Causa e Resolução |
+| Opção | Padrão | Descrição |
 |---|---|---|
-| `0` | Sucesso | Repositório criado, versionado e enviado com sucesso. |
-| `2` | Erro de uso | Opção `--path` não informada ou nome inválido. |
-| `3` | Autenticação | Falha de credenciais para criar no provedor remoto. |
-| `4` | Conflito / Erro | Caminho local já existe ou repositório com mesmo nome já existe no provedor. |
+| `--path` | Diretório atual | Diretório pai do clone; deve existir. |
+| `--default-branch` | `main` | Nome da branch principal. |
+| `--description` | Sem descrição | Descrição no provedor e no README. |
+| `--public` | Privado | Cria o repositório público. |
+
+```bash
+neo git repo create minha-api --path /Users/dev/Projects --description "Minha API" --default-branch main
+```
+
+O clone ficará em `/Users/dev/Projects/minha-api`. O Neo não sobrescreve um destino existente. Em caso de falha, informa a etapa e preserva os recursos já criados para recuperação manual. O modo global `neo --json` fornece saída estruturada.
 
 ## Veja também
 
-- [`neo git repo list`](list.md) — Listar repositórios registrados.
-- [`neo git repo edit`](edit.md) — Editar descrição de repositório existente.
+- [`neo git repo list`](list.md)
+- [`neo git repo edit`](edit.md)
 
+No Bitbucket, configure o workspace com `neo git config set workspace` e selecione um projeto antes de criar o repositório. O Neo usa o projeto selecionado para esse workspace; se ele não estiver configurado, o comando orienta refazer a seleção.

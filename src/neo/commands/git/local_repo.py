@@ -42,7 +42,7 @@ def _validate_remote_url(provider: str, remote_url: str) -> None:
         raise ValueError("O provedor não retornou uma URL HTTPS válida para o repositório.")
 
 
-def _push_with_credential(path: Path, provider: str, remote_url: str) -> None:
+def _git_with_credential(path: Path, provider: str, remote_url: str, *args: str) -> None:
     """Entrega a credencial ao Git via askpass temporário, sem expô-la nos argumentos."""
     _validate_remote_url(provider, remote_url)
     credential = get_credential(provider)
@@ -51,7 +51,8 @@ def _push_with_credential(path: Path, provider: str, remote_url: str) -> None:
     if provider == "bitbucket" and ":" in credential:
         username, password = credential.split(":", 1)
     else:
-        username, password = "x-access-token", credential
+        username = "x-bitbucket-api-token-auth" if provider == "bitbucket" else "x-access-token"
+        password = credential
     with tempfile.TemporaryDirectory(prefix="neo-git-askpass-") as temp_dir:
         script = Path(temp_dir) / "askpass"
         script.write_text(
@@ -78,12 +79,17 @@ def _push_with_credential(path: Path, provider: str, remote_url: str) -> None:
             "credential.helper=",
             "-c",
             "http.followRedirects=false",
-            "push",
-            "--set-upstream",
-            "origin",
-            "HEAD",
+            *args,
             env=env,
         )
+
+
+def _push_with_credential(path: Path, provider: str, remote_url: str) -> None:
+    _git_with_credential(path, provider, remote_url, "push", "--set-upstream", "origin", "HEAD")
+
+
+def _clone_with_credential(parent: Path, target: Path, provider: str, remote_url: str) -> None:
+    _git_with_credential(parent, provider, remote_url, "clone", "--", remote_url, str(target))
 
 
 __all__ = [

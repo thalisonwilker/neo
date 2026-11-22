@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import re
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
 import httpx
 
@@ -23,6 +23,7 @@ from neo.integrations.git.errors import (
 )
 from neo.integrations.git.models import (
     GitCommit,
+    GitProject,
     GitRepo,
     GitWorkspace,
 )
@@ -96,6 +97,29 @@ class BitbucketClient:
                 if isinstance(item, dict):
                     workspaces.append(GitWorkspace.from_api_dict(item))
             return workspaces
+
+    def list_projects(self, workspace: str) -> list[GitProject]:
+        """Lista projetos acessíveis do workspace em todas as páginas."""
+        url = f"{self.base_url}/workspaces/{quote(workspace, safe='')}/projects"
+        projects = []
+        for item in self._list_pages(url):
+            key, name = item.get("key"), item.get("name")
+            uuid = item.get("uuid")
+            if (
+                not isinstance(key, str)
+                or not key.strip()
+                or not isinstance(name, str)
+                or not name.strip()
+            ):
+                raise BitbucketError("O Bitbucket retornou um projeto sem chave ou nome válido.")
+            projects.append(
+                GitProject(
+                    key=key.strip(),
+                    name=name.strip(),
+                    uuid=uuid.strip() if isinstance(uuid, str) else None,
+                )
+            )
+        return projects
 
     def get_default_workspace(self, ignore_config: bool = False) -> str:
         """Retorna o workspace padrão (respeitando config local ou fallback para API)."""
@@ -171,6 +195,7 @@ class BitbucketClient:
         workspace: str | None = None,
         is_private: bool = True,
         description: str | None = None,
+        project_id: str | None = None,
     ) -> GitRepo:
         """Cria um novo repositório no Bitbucket."""
         ws = workspace or self.get_default_workspace()
@@ -184,10 +209,24 @@ class BitbucketClient:
         if description:
             payload["description"] = description
 
+        if project_id:
+            payload["project"] = {"key": project_id}
+
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(url, headers=self._get_headers(), json=payload)
             self._handle_response_error(resp, f"criar repositório '{slug}' em '{ws}'")
             return GitRepo.from_api_dict(resp.json())
+
+    def set_default_branch(self, repo_slug: str, branch: str, workspace: str | None = None) -> None:
+        """Define a branch principal do repositório existente."""
+        ws = workspace or self.get_default_workspace()
+        self.get_repository(repo_slug, workspace=ws)
+        url = f"{self.base_url}/repositories/{ws}/{repo_slug}"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.put(
+                url, headers=self._get_headers(), json={"mainbranch": {"name": branch}}
+            )
+            self._handle_response_error(resp, "definir branch principal")
 
     def update_repository_description(
         self, repo_slug: str, description: str, workspace: str | None = None

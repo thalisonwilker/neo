@@ -42,7 +42,7 @@ commit-format = "{type}: {message}"
 neo git config set provider github
 neo git config set workspace minha-organizacao
 neo git config get provider
-neo git config list
+neo git config show
 
 # Restaurar uma chave para o valor padrão
 neo git config unset default-branch
@@ -106,3 +106,5 @@ Em pipelines de CI/CD ou scripts automatizados, defina as variáveis de ambiente
 | **Bitbucket Cloud** | `NEO_BITBUCKET_TOKEN` | `BITBUCKET_TOKEN` | API Token do Bitbucket Cloud. |
 | **Contexto Git** | `NEO_GIT_PROVIDER` | — | Força o provedor padrão (`github` ou `bitbucket`). |
 | **Contexto Git** | `NEO_GIT_WORKSPACE` | — | Força o workspace ou organização padrão. |
+
+Ao configurar um workspace Bitbucket, selecione também o projeto na lista exibida. O Neo salva seu identificador vinculado ao workspace e o usa ao criar repositórios. `neo git config show` exibe o projeto selecionado.

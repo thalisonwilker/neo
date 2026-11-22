@@ -19,6 +19,7 @@ from __future__ import annotations
 import logging
 import os
 import stat
+import tempfile
 import tomllib
 from enum import IntEnum
 from pathlib import Path
@@ -488,6 +489,48 @@ def get_default_provider_config(config_dir: Path | None = None) -> GitProviderTy
 def set_default_provider_config(provider: str, config_dir: Path | None = None) -> None:
     """Salva o provedor Git padrão na seção `[git]` de `config.toml`."""
     set_git_config_value("provider", provider, config_dir=config_dir)
+
+
+def set_bitbucket_workspace_project(
+    workspace: str, project_id: str, config_dir: Path | None = None
+) -> None:
+    """Persiste workspace e projeto selecionado em uma única gravação."""
+    if not workspace.strip() or not project_id.strip():
+        raise ValueError("Workspace e projeto não podem ser vazios.")
+    config_file = _get_config_path(config_dir)
+    data = _read_file_config(config_file)
+    if not isinstance(data.get("git"), dict):
+        data["git"] = {}
+    data["git"].update(
+        {"workspace": workspace, "project": project_id, "project-workspace": workspace}
+    )
+    config_file.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(prefix=".neo-config-", dir=config_file.parent)
+    os.close(fd)
+    temp_file = Path(temp_name)
+    try:
+        _write_file_config(temp_file, data)
+        os.replace(temp_file, config_file)
+    finally:
+        temp_file.unlink(missing_ok=True)
+
+
+def get_bitbucket_project(workspace: str | None, config_dir: Path | None = None) -> str | None:
+    """Retorna projeto somente se pertence ao workspace efetivo."""
+    data = _read_file_config(_get_config_path(config_dir))
+    git_cfg = data.get("git", {})
+    if not isinstance(git_cfg, dict):
+        return None
+    saved_workspace, project = git_cfg.get("project-workspace"), git_cfg.get("project")
+    if (
+        workspace
+        and isinstance(saved_workspace, str)
+        and saved_workspace.casefold() == workspace.casefold()
+        and isinstance(project, str)
+        and project.strip()
+    ):
+        return project.strip()
+    return None
 
 
 def get_default_workspace_config(

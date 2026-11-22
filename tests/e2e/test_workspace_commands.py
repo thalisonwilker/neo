@@ -9,7 +9,7 @@ import pytest
 from typer.testing import CliRunner
 
 from neo.cli import app
-from neo.integrations.git.models import GitWorkspace
+from neo.integrations.git.models import GitProject, GitWorkspace
 
 runner = CliRunner()
 
@@ -17,6 +17,9 @@ runner = CliRunner()
 @pytest.fixture(autouse=True)
 def mock_git_provider():
     mock_client = Mock()
+    mock_client.list_projects.return_value = [
+        GitProject(key="PROJ", uuid="{project-uuid}", name="Projeto")
+    ]
     mock_client.list_workspaces.return_value = [
         GitWorkspace(uuid="1", name="Acme", slug="acme", is_admin=True),
         GitWorkspace(uuid="2", name="Saved", slug="saved", is_admin=True),
@@ -40,14 +43,17 @@ def test_AC_2_workspace_config_set_get_list_unset(tmp_path: Path):
         patch("neo.config.DEFAULT_CONFIG_FILE", tmp_path / "config.toml"),
         patch.dict(os.environ, {}, clear=True),
     ):
-        assert runner.invoke(app, ["git", "config", "set", "workspace", "acme"]).exit_code == 0
+        assert (
+            runner.invoke(app, ["git", "config", "set", "workspace", "acme"], input="1\n").exit_code
+            == 0
+        )
         result = runner.invoke(app, ["git", "config", "get", "workspace", "--json"])
         assert json.loads(result.output) == {
             "key": "workspace",
             "value": "acme",
             "source": "config",
         }
-        result = runner.invoke(app, ["git", "config", "list", "--json"])
+        result = runner.invoke(app, ["git", "config", "show", "--json"])
         assert json.loads(result.output)["workspace"]["value"] == "acme"
         assert runner.invoke(app, ["git", "config", "unset", "workspace"]).exit_code == 0
         result = runner.invoke(app, ["git", "config", "get", "workspace", "--json"])
@@ -60,7 +66,12 @@ def test_workspace_environment_precedence(tmp_path: Path):
         patch("neo.config.DEFAULT_CONFIG_DIR", tmp_path),
         patch.dict(os.environ, {"NEO_GIT_WORKSPACE": "environment"}, clear=True),
     ):
-        assert runner.invoke(app, ["git", "config", "set", "workspace", "saved"]).exit_code == 0
+        assert (
+            runner.invoke(
+                app, ["git", "config", "set", "workspace", "saved"], input="1\n"
+            ).exit_code
+            == 0
+        )
         result = runner.invoke(app, ["git", "config", "get", "workspace", "--json"])
         assert json.loads(result.output) == {
             "key": "workspace",

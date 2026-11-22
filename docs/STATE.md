@@ -8,9 +8,15 @@ alwaysApply: true
 
 > Memória de trabalho entre sessões. É volátil: atualizada o tempo todo. Decisão estrutural → ADR; estado do trabalho → aqui. Atualize ao pausar/encerrar; leia ao retomar. Use a skill `/handoff`.
 
-**Última atualização:** 2026-11-04 por Antigravity
+**Última atualização:** 2026-11-22 por Claude
 
 ## Em andamento / próximo passo
+- **Feature 0036 implementada e validada (UAT aprovado):** `0036-login-painel-web`; painel web em `web/` (template Kiranism, MIT, com o tema NEO) com fluxo de login do Clerk: entrada e cadastro em `/auth/sign-in` e `/auth/sign-up` (pt-BR, marca NEO), métodos Google, e-mail e senha e link mágico, proxy que protege `/dashboard` e a API (redirect com `redirect_url` ou 401), destino pós-login validado (sem redirecionamento aberto), raiz e layout seguindo a sessão, e saída pelo menu do usuário. 107 testes Vitest, typecheck, oxlint, oxfmt, `next build`, `npm audit` (0 vulnerabilidades), `mkdocs build --strict` e auditoria da esteira aprovados; UAT em `specs/0036-login-painel-web/uat.md` (13 de 14 passos, GitHub fora do escopo). Trabalho na branch `feat/web-dashboard-template`. Próximo passo: review/PR. Antes de o painel exibir dados reais, **restringir o cadastro** (hoje aberto, aceito no ADR-0010).
+- **Feature 0035 implementada e validada:** `0035-bitbucket-project-key`; substituição do UUID do projeto Bitbucket pela `key` na listagem de projetos (`Nome (KEY)`), na persistência de configuração (`config.toml`), na exibição (`neo git config show`) e no payload de criação de repositórios (`neo git repo create`), eliminando o erro de identificador inválido da API do Bitbucket. 268 testes, cobertura 88%, Ruff, Mypy, MkDocs estrito e auditoria da esteira 100% aprovados.
+- **Feature 0034 implementada e validada:** seleção de projeto Bitbucket por workspace; 271 testes, cobertura 87,69%, Ruff, Mypy, documentação estrita e auditoria aprovados.
+- **Feature 0033 implementada e validada:** `0033-refactor-git-repo-create`; criação remota, clone e push inicial, branch principal e instrução `cd`; 259 testes, cobertura 87,44%, Ruff, Mypy, documentação estrita e auditoria aprovados. Próximo passo: review/PR e anexar cobertura; complexidade e SAST continuam sem comandos configurados.
+- **Feature 0032 implementada e validada:** `0032-apresentacao-configuracoes-git`; painel Git com estados e cores, JSON preservado; 255 testes, cobertura 87,44%, Ruff, Mypy, documentação estrita e auditoria aprovados. Próximo passo: review/PR e anexar cobertura; complexidade e SAST continuam sem comandos configurados.
+- **Comando `neo git config show` implementado:** exibe as configurações Git, incluindo JSON e proteção de credenciais; `neo git config list` foi removido a pedido do mantenedor.
 - **Feature 0031 implementada:** `0031-modularizacao-comandos-provedores`; comandos modularizados e contratos de providers Git e tarefas implementados. Gates: 250 testes, cobertura 87,41%, Ruff, Mypy, documentação estrita e auditoria aprovados. Próximo passo: review/PR e anexar cobertura; complexidade e SAST continuam sem comandos configurados.
 - **Feature 0030 concluída:** `0030-refactor-git-config-set-workspace`; `neo git config set workspace` recupera a lista de workspaces da API do provedor ativo (GitHub/Bitbucket) e apresenta seleção interativa numerada `[1..N]` quando o valor não for informado, ou valida a existência do workspace na API quando passado diretamente como argumento. 240 testes verdes e 86% de cobertura.
 - **Feature 0029 concluída:** `0029-refactor-git-config-provider-api-key`; `neo git config set provider` reseta a seção `[git]` em `config.toml` mantendo apenas o novo provedor selecionado (`github` ou `bitbucket`). `neo git config set api-key` recebe a chave via prompt oculto sem solicitar e-mail para o Bitbucket (autenticação Bearer Rest API), testa a conexão e emite "Conexão efetuada" no sucesso ou "Conexão recusada" (código 3) na falha. 233 testes verdes e 86% de cobertura.
@@ -24,6 +30,7 @@ alwaysApply: true
 - **Próximo passo concreto:** Review e merge da branch `feature/0022-refactor-config-show`; anexar o relatório de cobertura ao PR.
 
 ## Decisões recentes
+- 2026-11-22: Painel web em Next.js (`web/`) com autenticação delegada ao Clerk; cadastro aberto aceito só enquanto o painel exibir dados de exemplo; GitHub fora dos métodos de entrada; `web/` fora da auditoria da esteira — [ADR-0010](architecture/adr/0010-painel-web-nextjs-com-clerk.md) (`0036-login-painel-web`).
 - 2026-10-30: Refatoração completa da saída do comando `neo config show` em 4 tabelas dedicadas (`Git`, `Tasks`, `Agents` e `Serviços configurados`), com resolução de contexto da task ativa (com progresso de checklist), formatação multilinhas das colunas To-Do-List e filtro estrito de serviços com credencial (`0022-refactor-config-show`).
 - 2026-10-30: Criação de tarefas (`neo tasks create`), gerenciamento de checklist (`neo tasks check add`, `complete`/`done`, `uncomplete`/`undone`) e comentários (`neo tasks comment add`) implementados no módulo Shortcut (API v3), associando novas stories à iteração atual ativa por padrão, com visualização rica no `neo tasks show` e documentação com paridade 100% estrita (`0021-tasks-create-checklist-comment`).
 - 2026-10-30: Documentação institucional e guias práticos atualizados com o módulo `neo fin` (`README.md`, `docs/index.md`, `docs/getting-started.md`, matriz em `docs/cli/index.md`, novo guia em `docs/guias/gestao-financeira.md` e menu `mkdocs.yml`), com compilação estrita e auditoria da esteira 100% aprovadas (`0020-documentacao-modulo-financeiro`).
@@ -42,6 +49,7 @@ alwaysApply: true
 ## Ideias adiadas / backlog técnico
 - Criação de plugins dinâmicos via entry points Python: reconsiderar quando a Onda 2 (módulos de vida pessoal) for iniciada.
 - Integração com LLMs locais (Ollama): planejado para a Onda 3.
+- Painel web (pós-0036): restringir o cadastro (lista de permissão ou convite) antes de conectar dados reais; instância de produção do Clerk e 2FA; vínculo da sessão do painel com a CLI (Keyring e `config.toml`); traduzir o restante da UI do template, que segue em inglês fora do fluxo de login.
 
 ## Todos soltos
 - [x] Adicionar dependências core no `pyproject.toml` (`typer`, `rich`, `keyring`, `httpx`, `pydantic`).
