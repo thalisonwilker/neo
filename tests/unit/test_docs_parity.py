@@ -122,6 +122,7 @@ def test_every_doc_page_corresponds_to_real_command_or_topic():
         "agent/status.md",
         "agent/setup.md",
         "agent/run.md",
+        "api/index.md",
         "fin/index.md",
         "fin/bank.md",
         "fin/category.md",

@@ -8,6 +8,7 @@ import typer
 from rich import print as rprint
 
 from neo.commands.agent import agent_app
+from neo.commands.api import api_app
 from neo.commands.config import config_app
 from neo.commands.fin import fin_app
 from neo.commands.git import git_app
@@ -40,6 +41,7 @@ app.add_typer(config_app, name="config")
 app.add_typer(git_app, name="git")
 app.add_typer(tasks_app, name="tasks")
 app.add_typer(agent_app, name="agent")
+app.add_typer(api_app, name="api")
 app.add_typer(fin_app, name="fin")
 
 

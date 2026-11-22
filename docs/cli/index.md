@@ -18,7 +18,7 @@ A invocação de comandos no Neo segue uma estrutura previsível:
 neo <módulo> [recurso] <ação> [argumentos] [--opções]
 ```
 
-- **Módulos disponíveis:** `neo git`, `neo tasks`, `neo agent`, `neo fin` e o utilitário `neo config`.
+- **Módulos disponíveis:** `neo git`, `neo tasks`, `neo agent`, `neo api`, `neo fin` e o utilitário `neo config`.
 - **Comandos em inglês, interface em português:** Nomes de módulos, recursos, ações e flags são em inglês; tabelas, painéis, confirmações e mensagens de erro são em português do Brasil.
 - **Ausência de atalhos em `neo git`:** Para evitar ambiguidades entre provedores, o módulo `neo git` **não utiliza atalhos de uma letra** (use `--provider`, `--workspace`, `--repo`, `--query`, `--limit`, `--author`, `--yes`). No módulo `neo tasks`, atalhos curtos ergonômicos são suportados (`-s`, `-i`, `-m`, `-a`, `-c`, `-l`, `-t`).
 - **Saída visual e estruturada:** Saída formatada com tabelas e caixas **Rich** por padrão para leitura humana no terminal; JSON puro emitido no `stdout` quando `--json` é utilizado.
@@ -111,6 +111,7 @@ Esta matriz resume todas as operações mapeadas no Neo, indicando disponibilida
 | | Comentários (`comment`) | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | `add` (✅) |
 | | Configuração (`config`) | ➖ | ➖ | ➖ | ➖ | ✅ | ➖ | ➖ | `delete` (✅), `columns` (✅) |
 | **`neo agent`** | Agente (`agent`) | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ✅ | `setup` (✅), `run` (✅) |
+| **`neo api`** | Lista de permissão (`api`) | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | ➖ | `permitir` (✅), `permissoes` (✅), `remover-permissao` (✅) |
 | **`neo fin`** | Contas (`bank`) | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (✅), `update` (✅), `delete` (✅) |
 | | Categorias (`category`) | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (✅), `delete` (✅) |
 | | Transações (`tx`) | ✅ | ✅ | ➖ | ➖ | ➖ | ➖ | ➖ | `create` (✅), `update` (✅), `delete` (✅) |

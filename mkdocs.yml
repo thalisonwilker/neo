@@ -161,6 +161,8 @@ nav:
           - status: cli/agent/status.md
           - setup: cli/agent/setup.md
           - run: cli/agent/run.md
+      - api:
+          - cli/api/index.md
       - fin:
           - cli/fin/index.md
           - bank: cli/fin/bank.md

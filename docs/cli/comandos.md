@@ -72,6 +72,10 @@ Os itens abaixo mostram os comandos disponíveis agrupados como são digitados n
     - [`status`](agent/status.md) — verifica o ambiente.
     - [`setup`](agent/setup.md) — prepara os arquivos de governança.
     - [`run`](agent/run.md) — inicia o agente.
+- **[`neo api`](api/index.md)** — lista de permissão da API:
+    - `permitir` — adiciona um e-mail autorizado.
+    - `permissoes` — lista os e-mails autorizados.
+    - `remover-permissao` — remove um e-mail da lista.
 - **[`neo fin`](fin/index.md)** — finanças pessoais:
     - **[`bank`](fin/bank.md)** — contas:
         - `create` — cria uma conta.
