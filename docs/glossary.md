@@ -42,6 +42,9 @@ alwaysApply: false
 | **Usuário** | Pessoa registrada no Neo, ligada a uma única identidade do Clerk | Conta do Clerk sem registro no Neo · Account financeira | `Identidade` |
 | **Lista de permissão** | E-mails autorizados a virar Usuário, editada por `neo api permitir` | Lista de permissão do Clerk (complementar, configurada à mão) | `Identidade` |
 | **Primeiro acesso** | Etapa única em que o Usuário informa o nome de exibição e cria o primeiro Espaço | Primeiro login no Clerk | `Identidade` |
-| **Espaço** | Agrupador da vida do Usuário no painel, de tipo `trabalho`, `estudos`, `hobbies` ou `pessoal` | **Workspace** do provedor Git | `Identidade` |
+| **Espaço** | Agrupador da vida do Usuário no painel, de tipo `trabalho`, `estudos`, `hobbies` ou `pessoal`, com nome (até 100 caracteres), Meta semanal e a preferência de Agentes sugeridos | **Workspace** do provedor Git | `Identidade` |
+| **Meta semanal** | Horas por semana (inteiro de 1 a 168) que o Usuário quer dedicar a um Espaço | Horas lançadas | `Identidade` |
+| **Meta sugerida** | Meta semanal proposta pelo tipo do Espaço: trabalho 30 h, estudos 10 h, hobbies 8 h, pessoal 8 h | Meta semanal escolhida | `Identidade` |
+| **Agentes sugeridos** | Preferência do Espaço: quer que o Neo crie os agentes e skills sugeridos para o tipo (por ora só guardada) | Agente de Codificação (CLI) | `Identidade` |
 | **Boas-vindas** | Tela mostrada uma vez, ao concluir o Primeiro acesso | Tela inicial do painel | `Identidade` |
 | **Destino pós-login** | Caminho interno para onde o usuário vai depois de entrar no painel | URL externa informada em parâmetro | `Painel Web (Acesso)` |
