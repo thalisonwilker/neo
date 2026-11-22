@@ -12,6 +12,7 @@ import pytest
 
 from neo.application.identidade import (
     ConcluirPrimeiroAcesso,
+    CriarEspaco,
     GerenciarListaDePermissao,
     ObterOuCriarUsuario,
 )
@@ -24,7 +25,9 @@ from neo.domain.identidade import (
     EmailAutorizadoNaoEncontradoError,
     Espaco,
     IdentidadeExterna,
+    MetaSemanal,
     PrimeiroAcessoJaConcluidoError,
+    PrimeiroAcessoPendenteError,
     TipoEspaco,
     Usuario,
 )
@@ -58,6 +61,13 @@ class RepoUsuariosEmMemoria:
         copia = deepcopy(usuario)
         self._por_clerk[chave] = copia
         return deepcopy(copia)
+
+    async def adicionar_espaco(self, espaco: Espaco) -> None:
+        for usuario in self._por_clerk.values():
+            if usuario.id == espaco.usuario_id:
+                usuario.espacos.append(deepcopy(espaco))
+                return
+        raise AssertionError("Usuario do Espaco precisa existir")
 
 
 class RepoListaEmMemoria:
@@ -252,3 +262,86 @@ async def test_AC_10_gerenciar_lista_permissao() -> None:
 
     with pytest.raises(EmailAutorizadoNaoEncontradoError):
         await gerenciar.remover("ana@example.com")
+
+
+# --- 0040: criar Espaco ---------------------------------------------------------------
+
+
+async def _montar_criar_espaco(
+    concluir_primeiro: bool = True,
+) -> tuple[CriarEspaco, RepoUsuariosEmMemoria, IdentidadeExterna]:
+    repo_usuarios = RepoUsuariosEmMemoria()
+    repo_lista = RepoListaEmMemoria()
+    await repo_lista.adicionar(Email("ok@example.com"))
+    leitor = LeitorEmailStub({"user_ok": "ok@example.com"})
+    obter_ou_criar = ObterOuCriarUsuario(repo_usuarios, repo_lista, leitor)
+    identidade = IdentidadeExterna("user_ok")
+    if concluir_primeiro:
+        concluir = ConcluirPrimeiroAcesso(repo_usuarios, obter_ou_criar)
+        await concluir.executar(identidade, "Thalyson", "Neo", "trabalho")
+    else:
+        await obter_ou_criar.executar(identidade)
+    return CriarEspaco(repo_usuarios, obter_ou_criar), repo_usuarios, identidade
+
+
+async def test_0040_AC_1_criar_espaco_persiste_e_registra_evento(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    criar, repo, identidade = await _montar_criar_espaco()
+    with caplog.at_level(logging.INFO, logger="neo.application.identidade"):
+        espaco = await criar.executar(identidade, "  Faculdade  ", "estudos", 12, True)
+    assert espaco.nome.valor == "Faculdade"
+    assert espaco.meta_semanal == MetaSemanal(12)
+    assert espaco.agentes_sugeridos is True
+
+    usuario = await repo.buscar_por_identidade(identidade)
+    assert usuario is not None
+    assert [e.nome.valor for e in usuario.espacos] == ["Neo", "Faculdade"]
+
+    log = caplog.text
+    assert "evento=EspacoCriado" in log and "tipo=estudos" in log
+    assert "Faculdade" not in log and "ok@example.com" not in log
+
+
+async def test_0040_AC_2_meta_e_agentes_omitidos() -> None:
+    criar, _, identidade = await _montar_criar_espaco()
+    espaco = await criar.executar(identidade, "Casa", "pessoal")
+    assert espaco.meta_semanal == MetaSemanal(8)
+    assert espaco.agentes_sugeridos is False
+
+
+@pytest.mark.parametrize(
+    ("nome", "tipo", "meta", "campo"),
+    [
+        ("   ", "trabalho", None, "nome"),
+        ("x" * 101, "trabalho", None, "nome"),
+        ("Ok", "lazer", None, "tipo"),
+        ("Ok", "trabalho", 0, "meta_semanal"),
+        ("Ok", "trabalho", 169, "meta_semanal"),
+    ],
+)
+async def test_0040_AC_3_dados_invalidos_nao_gravam(
+    nome: str, tipo: str, meta: int | None, campo: str
+) -> None:
+    criar, repo, identidade = await _montar_criar_espaco()
+    with pytest.raises(DadosInvalidosError) as exc_info:
+        await criar.executar(identidade, nome, tipo, meta)
+    assert exc_info.value.campo == campo
+    usuario = await repo.buscar_por_identidade(identidade)
+    assert usuario is not None and len(usuario.espacos) == 1
+
+
+async def test_0040_AC_4_primeiro_acesso_pendente() -> None:
+    criar, repo, identidade = await _montar_criar_espaco(concluir_primeiro=False)
+    with pytest.raises(PrimeiroAcessoPendenteError):
+        await criar.executar(identidade, "Neo", "trabalho")
+    usuario = await repo.buscar_por_identidade(identidade)
+    assert usuario is not None and usuario.espacos == []
+
+
+async def test_0040_AC_6_primeiro_acesso_cria_espaco_com_meta_sugerida() -> None:
+    _, repo, identidade = await _montar_criar_espaco()
+    usuario = await repo.buscar_por_identidade(identidade)
+    assert usuario is not None
+    assert usuario.espacos[0].meta_semanal == MetaSemanal(30)
+    assert usuario.espacos[0].agentes_sugeridos is False

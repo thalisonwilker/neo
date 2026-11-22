@@ -29,13 +29,15 @@ class LeitorDeEmailExterno(Protocol):
 
 
 class RepositorioDeUsuarios(Protocol):
-    """Porta de persistencia para o agregado Usuario e seu primeiro Espaco."""
+    """Porta de persistencia para o agregado Usuario e seus Espacos."""
 
     async def buscar_por_identidade(self, identidade: IdentidadeExterna) -> Usuario | None: ...
 
     async def criar_ou_obter_existente(self, usuario: Usuario) -> tuple[Usuario, bool]: ...
 
     async def salvar_primeiro_acesso(self, usuario: Usuario, espaco: Espaco) -> Usuario: ...
+
+    async def adicionar_espaco(self, espaco: Espaco) -> None: ...
 
 
 class RepositorioDeListaDePermissao(Protocol):
