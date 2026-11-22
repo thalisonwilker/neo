@@ -34,9 +34,10 @@ O painel web passa a ter um fluxo único de entrada, cadastro e saída com Clerk
 - **Quando** a entrada ou o cadastro termina,
 - **Então** o usuário vai para esse caminho.
 - **Dado** `redirect_url` ausente, **então** o destino é `/dashboard/overview`.
+- **Dado** uma URL absoluta da **mesma origem** (formato que o Clerk gera, ex.: `http://localhost:3100/dashboard/kanban?x=1`), **então** o destino é o caminho e a consulta dela (`/dashboard/kanban?x=1`).
 
 ### AC-4: Destino pós-login inválido é ignorado — Vitest
-- **Dado** um `redirect_url` como `https://evil.example`, `//evil.example`, `javascript:alert(1)`, vazio, ou que aponte para `/auth/sign-in` ou `/auth/sign-up`,
+- **Dado** um `redirect_url` como `https://evil.example`, `//evil.example`, `javascript:alert(1)`, `/\evil.example`, vazio, com caractere de controle (como tabulação), com mais de 2048 caracteres, de **outra origem**, ou que aponte para `/auth/sign-in` ou `/auth/sign-up` (inclusive suas etapas),
 - **Quando** o destino pós-login é calculado,
 - **Então** ele é descartado e o destino passa a ser `/dashboard/overview` (sem sair do painel e sem laço de redirecionamento).
 

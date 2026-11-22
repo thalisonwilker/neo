@@ -35,7 +35,8 @@ O estado de identidade vive no Clerk. O Neo modela só duas regras puras, sem pe
   - Valor: caminho interno.
   - **Invariantes:**
     - começa com um único `/` e é relativo à mesma origem;
-    - não começa com `//` nem contém esquema (`http:`, `javascript:`);
+    - não começa com `//` nem contém esquema (`http:`, `javascript:`), exceto uma URL absoluta da **mesma origem**, que é reduzida a caminho e consulta (o Clerk gera `redirect_url` absoluto);
+    - não contém barra invertida nem caractere de controle e tem no máximo 2048 caracteres;
     - não aponta para `/auth/sign-in` nem `/auth/sign-up` (evita laço);
     - se for inválido ou ausente, vale o padrão `/dashboard/overview`.
   - Existe para impedir redirecionamento aberto para fora do painel.
