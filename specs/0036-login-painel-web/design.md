@@ -32,7 +32,7 @@ Problema de produto: ver `./product.md`.
 ## Goals / Non-goals
 **Goals**
 - Um único fluxo de entrada, cadastro e saída, com as rotas `/auth/sign-in` e `/auth/sign-up`.
-- Métodos: Google, e-mail e senha, link mágico por e-mail e GitHub.
+- Métodos: Google, e-mail e senha e link mágico por e-mail (GitHub ficou fora do escopo em 22/11/2026).
 - Proteção de `/dashboard/*` e da API **no proxy e no layout** (defesa em profundidade), com retorno ao destino pedido.
 - Telas em **português do Brasil**, sem textos de exemplo, com a identidade NEO.
 - Um `ClerkProvider` só, e variáveis de ambiente coerentes com as rotas.
@@ -48,7 +48,7 @@ Problema de produto: ver `./product.md`.
 | **Painel** | Aplicação web do Neo em `web/`. Não é a CLI. |
 | **Sessão do painel** | Estado autenticado do usuário no painel, mantido pelo Clerk. |
 | **Rota protegida** | Rota que só responde com sessão válida; sem ela, redireciona para a entrada. |
-| **Método de entrada** | Forma de provar identidade: Google, e-mail e senha, link mágico ou GitHub. |
+| **Método de entrada** | Forma de provar identidade: Google, e-mail e senha ou link mágico. |
 | **Destino pós-login** | Página para onde o usuário vai depois de entrar: a pedida originalmente (`redirect_url`) ou `/dashboard/overview`. |
 | **Instância de desenvolvimento** | Aplicação Clerk "Neo" criada para desenvolvimento, com chaves `pk_test`/`sk_test` e limites de uso. |
 
@@ -65,7 +65,7 @@ Visitante ──► /dashboard/overview
                   ▼
          /auth/sign-in?redirect_url=/dashboard/overview
                   │  <SignIn/> (pt-BR, tema NEO)
-                  │  Google · e-mail+senha · link mágico · GitHub
+                  │  Google · e-mail+senha · link mágico
                   ▼
               Clerk (SaaS) ── sessão criada ──► redirect_url
                                                    │
@@ -101,13 +101,13 @@ Nova fronteira: **Painel (web)**, ainda sem relação com os contextos Python. O
 Nova fronteira "Painel (web)" no `context-map.md`, independente da CLI. A proteção fica na borda (`proxy.ts`) e se repete no layout. A lógica de decisão (qual rota é protegida, como montar a URL de entrada com `redirect_url`) é extraída para funções puras em `web/src/features/auth/`, para poder ser testada sem o Clerk.
 
 ### 3. Infra
-- Sem recurso novo no repositório. Configuração **manual e fora do código** no painel do Clerk da aplicação "Neo": habilitar os quatro métodos, URLs de entrada/cadastro e destino; registrar o resultado no `uat.md`.
+- Sem recurso novo no repositório. Configuração **manual e fora do código** no painel do Clerk da aplicação "Neo": habilitar os três métodos, URLs de entrada/cadastro e destino; registrar o resultado no `uat.md`.
 - Segredos só em `web/.env.local` (já ignorado pelo git). `env.example.txt` documenta os nomes.
 - **Reversão segura:** reverter o commit e restaurar as variáveis. Nenhum dado local é migrado.
 
 ### 4. Qualidade
 - **Vitest + Clerk simulado** cobre: decisão de rota protegida, montagem do redirecionamento, coerência das variáveis de ambiente exigidas, ausência de textos de exemplo e textos em pt-BR nas telas. Nenhuma chamada externa real (respeita `TESTING.md`).
-- **Roteiro de UAT manual** (`uat.md`) cobre o login real nos quatro métodos, saída e proteção, contra a instância de desenvolvimento.
+- **Roteiro de UAT manual** (`uat.md`) cobre o login real nos três métodos, saída e proteção, contra a instância de desenvolvimento.
 - **Nomes:** `AC-N` no nome de cada teste, como no restante do projeto.
 - **Gates do painel** (a registrar em `docs/engineering/TESTING.md`): `npm run typecheck`, `npx oxlint`, `npm run test`, `npx next build`. Os gates Python e `node scripts/audit-esteira.mjs .` continuam valendo.
 
@@ -119,7 +119,7 @@ Sem impacto novo. O template traz Sentry (desligável por variável), fora do es
 | Dependência | Tipo | Descrição | Principais pontos |
 |---|---|---|---|
 | Clerk (SaaS) | serviço externo | Identidade, sessão e telas de entrada | `<SignIn/>`, `<SignUp/>`, `clerkMiddleware`, `createRouteMatcher`, `auth.protect()`, saída de sessão |
-| Google e GitHub via Clerk | OAuth | Entrada social | Em desenvolvimento usam credenciais compartilhadas do Clerk |
+| Google via Clerk | OAuth | Entrada social | Em desenvolvimento usa credenciais compartilhadas do Clerk |
 | E-mail via Clerk | e-mail | Link mágico | Habilitado no painel do Clerk |
 | `@clerk/localizations` | biblioteca | Textos em pt-BR | `ptBR` |
 | Next.js `proxy.ts` | framework | Interceptação antes do render | `config.matcher` |
@@ -135,7 +135,7 @@ Sem impacto novo. O template traz Sentry (desligável por variável), fora do es
 | 4 | Proteção no proxy | `createRouteMatcher` + `auth.protect()`; layout como segunda camada | definido |
 | 5 | Telas de entrada e cadastro | Sem placeholders, marca NEO, pt-BR | definido |
 | 6 | Saída de sessão | Item "Sair" no menu do usuário da sidebar | definido |
-| 7 | Métodos no Clerk | Habilitar Google, e-mail e senha, link mágico e GitHub | definido (manual) |
+| 7 | Métodos no Clerk | Habilitar Google, e-mail e senha e link mágico | definido (manual) |
 | 8 | Cadastro aberto | Decisão do mantenedor: qualquer pessoa pode se cadastrar; restringir antes de conectar dados reais | definido |
 | 9 | Testes e gates | Vitest, funções puras, `TESTING.md` | definido |
 | 10 | Documentação viva | ADR, context-map, glossário, STATE | definido |
@@ -144,7 +144,7 @@ Sem impacto novo. O template traz Sentry (desligável por variável), fora do es
 
 | Alternativa | Prós | Contras | Por que (não) escolhida |
 |---|---|---|---|
-| **A. Fechar o fluxo com Clerk (escolhida)** | Já instalado e funcionando; os quatro métodos sem código próprio; pouco risco de segurança caseiro | Dependência de SaaS; e-mails fora do controle local | Menor esforço e risco para o escopo pedido |
+| **A. Fechar o fluxo com Clerk (escolhida)** | Já instalado e funcionando; os três métodos sem código próprio; pouco risco de segurança caseiro | Dependência de SaaS; e-mails fora do controle local | Menor esforço e risco para o escopo pedido |
 | B. Autenticação própria, local-first (ex.: biblioteca de auth + banco local) | Alinhada a "controle do usuário"; sem terceiros | Muito mais código sensível (senhas, sessão, link mágico); reimplementa o que já existe | Fora do escopo escolhido; reavaliar se a dependência virar problema |
 | C. Clerk ligado à CLI | Uma identidade para painel e CLI | Mistura duas fronteiras antes de a primeira estar estável | Feature posterior |
 

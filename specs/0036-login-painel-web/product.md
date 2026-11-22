@@ -30,7 +30,7 @@ Evidência: sessão de 22/11/2026 (instalação do template, execução na porta
 - Baseline: login do template, com métodos não definidos, sem verificação ponta a ponta → Alvo: fluxo definido, testado e coerente com a identidade NEO.
 
 ## Goals
-- Entrar no painel por **Google, e-mail e senha, link mágico por e-mail e GitHub**.
+- Entrar no painel por **Google, e-mail e senha e link mágico por e-mail**.
 - **Cadastrar** uma conta e **sair** (encerrar a sessão) com retorno claro à tela de entrada.
 - **Proteger** todas as rotas do painel e, ao entrar, levar o usuário ao destino que ele pediu.
 - Telas de entrada e cadastro **sem textos de exemplo** e com o **visual NEO** (cores, fontes e vidro do tema).
@@ -39,13 +39,13 @@ Evidência: sessão de 22/11/2026 (instalação do template, execução na porta
 ## Non-goals
 - Organizações, papéis, permissões e cobrança do Clerk (RBAC multiusuário).
 - Ligar a sessão do painel à CLI Neo (tokens, `config.toml`, keyring): feature posterior.
-- Conectar GitHub, Bitbucket ou Shortcut ao painel como **fonte de dados** (aqui o GitHub é só forma de entrar).
+- Entrar com **GitHub** (retirado do escopo em 22/11/2026 por decisão do mantenedor) e conectar GitHub, Bitbucket ou Shortcut ao painel como **fonte de dados**.
 - Trocar o Clerk por autenticação própria.
 - Publicar o painel em produção e criar a instância de produção do Clerk.
 - Autenticação em dois fatores e recuperação avançada de conta.
 
 ## Riscos / premissas
-- **Premissa:** os quatro métodos podem ser habilitados na aplicação Clerk "Neo" pelo painel do Clerk, uma configuração **fora do repositório** que precisa ser feita à mão e registrada.
+- **Premissa:** os três métodos podem ser habilitados na aplicação Clerk "Neo" pelo painel do Clerk, uma configuração **fora do repositório** que precisa ser feita à mão e registrada.
 - **Risco:** o Clerk é um serviço de terceiros; e-mails e identidades ficam fora do controle local do usuário, o que tensiona o princípio de "preservar o controle do usuário" do `vision.md`. A decisão precisa virar ADR no `design.md`.
 - **Risco:** instâncias de desenvolvimento do Clerk têm limites de uso e não servem para produção.
 - **Risco de linguagem ubíqua:** "workspace" no Neo significa o workspace do provedor Git, enquanto o Clerk tem "Organizations" e o protótipo do painel usa "workspace" para Trabalho, Estudos, Hobbies e Pessoal. A feature não usa o conceito de organização do Clerk.

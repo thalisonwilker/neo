@@ -10,7 +10,7 @@ alwaysApply: true
 > Os critérios de aceite são (a) o contrato com o negócio, (b) o oráculo de teste, (c) o prompt para o agente de IA implementar.
 
 ## Resumo
-O painel web passa a ter um fluxo único de entrada, cadastro e saída com Clerk (Google, e-mail e senha, link mágico e GitHub), com todas as telas do `/dashboard` e da API protegidas no proxy e no layout, em português do Brasil e com a identidade NEO.
+O painel web passa a ter um fluxo único de entrada, cadastro e saída com Clerk (Google, e-mail e senha e link mágico), com todas as telas do `/dashboard` e da API protegidas no proxy e no layout, em português do Brasil e com a identidade NEO.
 
 ## Critérios de aceite
 
@@ -67,15 +67,15 @@ O painel web passa a ter um fluxo único de entrada, cadastro e saída com Clerk
 - **E** exibem a marca NEO e a frase "Compreenda seus sistemas. Seja dono das suas escolhas.",
 - **E** os títulos e textos próprios estão em português do Brasil.
 
-### AC-10: Quatro métodos de entrada — UAT
+### AC-10: Três métodos de entrada — UAT
 - **Dado** a aplicação Clerk "Neo" com os métodos habilitados,
 - **Quando** o usuário abre `/auth/sign-in`,
-- **Então** vê **Google, GitHub, e-mail e senha e link mágico por e-mail**,
+- **Então** vê **Google, e-mail e senha e link mágico por e-mail**,
 - **E** cada método, completado com sucesso, leva ao destino pós-login.
 
 ### AC-11: Cadastro aberto — UAT
 - **Dado** um visitante sem conta,
-- **Quando** conclui `/auth/sign-up` por qualquer um dos quatro métodos,
+- **Quando** conclui `/auth/sign-up` por qualquer um dos três métodos,
 - **Então** a conta é criada e ele chega a `/dashboard/overview`,
 - **E** não há restrição por e-mail (decisão registrada no ADR-0010).
 
@@ -127,6 +127,7 @@ O painel web passa a ter um fluxo único de entrada, cadastro e saída com Clerk
 - Vínculo da sessão do painel com a CLI Neo (Keyring, `config.toml`).
 - Conectar GitHub, Bitbucket ou Shortcut ao painel como fonte de dados.
 - Restringir o cadastro por e-mail ou convite.
+- Entrada com GitHub (retirada do escopo em 22/11/2026, por decisão do mantenedor).
 - Qualquer alteração no código Python da CLI.
 
 ## Rastreabilidade

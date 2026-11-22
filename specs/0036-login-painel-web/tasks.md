@@ -23,7 +23,7 @@ alwaysApply: false
 | 7  | Layout e raiz: manter `auth.protect()` em `dashboard/layout.tsx` e fazer `app/page.tsx` decidir pela sessão | AC-5, AC-6 | 3 | `cd web && npx vitest run -t "AC-5\|AC-6"` | done |
 | 8  | Telas de entrada e cadastro: remover "Logo" e o depoimento, aplicar marca NEO, a frase da visão e textos em pt-BR, ligar o destino pós-login validado (`forceRedirectUrl`) e completar as traduções pt-BR do Clerk `[P]` | AC-3, AC-4, AC-9, AC-13 | 5 | `cd web && npx vitest run -t "AC-3\|AC-4\|AC-9\|AC-13"` | done |
 | 9  | Saída da sessão: localizar o menu do usuário no template e configurar o retorno a `/auth/sign-in` `[P]` | AC-12 | 4 | `cd web && npx vitest run -t "AC-12"` | done |
-| 10 | Habilitar os quatro métodos na aplicação Clerk "Neo" (manual) e escrever `uat.md` com o roteiro e o resultado | AC-10, AC-11, AC-12, AC-13 | 4, 5, 6, 8, 9 | `uat.md` preenchido, com cada item marcado como passou ou falhou e a data | todo |
+| 10 | Habilitar os três métodos na aplicação Clerk "Neo" (manual) e escrever `uat.md` com o roteiro e o resultado | AC-10, AC-11, AC-12, AC-13 | 4, 5, 6, 8, 9 | `uat.md` preenchido, com cada item marcado como passou ou falhou e a data | done |
 | 11 | Documentação viva e gates finais: seção "Painel web" em `docs/engineering/TESTING.md`, `docs/STATE.md` e checagem completa | AC-14 | 1, 6, 7, 10 | `cd web && npm run typecheck && npx oxlint && npm run test && npx next build` e `uv run mkdocs build --strict` e `node scripts/audit-esteira.mjs .` | todo |
 
 > Uma task só vira `done` quando o **gate passa** (comandos em `docs/engineering/TESTING.md`), não por inspeção visual. Um commit por task.
@@ -40,7 +40,7 @@ alwaysApply: false
 - [ ] Task 8: aplicar `resolvePostLoginRedirect(redirect_url, origem)` nas páginas de entrada e cadastro (`forceRedirectUrl` do `<SignIn/>` e do `<SignUp/>`), porque o Clerk gera `redirect_url` absoluto. Não cabe no proxy, que só monta a URL de entrada.
 - [x] Task 9: qual componente do template faz a saída da sessão. **Resultado:** o item de saída de `NavUser` em `components/layout/app-sidebar.tsx` (menu do usuário na base da sidebar). O `UserNav` em `components/layout/user-nav.tsx` é código morto do template. O rótulo passou de "Sign out" para "Sair" e o retorno usa `/auth/sign-in` via `useSignOut`.
 - [x] Task 10: o link mágico do Clerk em desenvolvimento chega como link ou como código. **Resultado:** hoje é por código (`email_code`); GitHub também não está habilitado. Ambos são passos de configuração manual (C3 e C5 do `uat.md`).
-- [ ] Task 10: habilitar GitHub e o link mágico no Clerk (C3 e C5 do `uat.md`) e refazer U4 e U6. UAT parcial em 22/11/2026: 12 de 14 passos passaram; o AC-10 segue sem verificação completa.
+- [x] Task 10: UAT aprovado em 22/11/2026: 13 de 14 passos passaram e U4 (GitHub) é n/a, porque o GitHub saiu do escopo por decisão do mantenedor (spec, product e design atualizados). O link mágico foi habilitado no Clerk e passou (U6).
 
 ## Divergências (SPEC_DEVIATION)
 - Nenhuma divergência identificada.

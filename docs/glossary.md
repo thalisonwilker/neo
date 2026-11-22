@@ -38,5 +38,5 @@ alwaysApply: false
 | **Painel** | Aplicação web do Neo em `web/` | A CLI `neo` | `Painel Web (Acesso)` |
 | **Sessão do painel** | Estado autenticado do usuário no painel, mantido pelo Clerk | Sessão de terminal ou credencial da CLI no Keyring | `Painel Web (Acesso)` |
 | **Rota protegida** | Rota do painel que só responde com sessão válida | Rota pública de entrada ou cadastro | `Painel Web (Acesso)` |
-| **Método de entrada** | Forma de provar identidade no painel: Google, e-mail e senha, link mágico ou GitHub | Provedor Git do Neo (`github` e `bitbucket`) | `Painel Web (Acesso)` |
+| **Método de entrada** | Forma de provar identidade no painel: Google, e-mail e senha ou link mágico | Provedor Git do Neo (`github` e `bitbucket`) | `Painel Web (Acesso)` |
 | **Destino pós-login** | Caminho interno para onde o usuário vai depois de entrar no painel | URL externa informada em parâmetro | `Painel Web (Acesso)` |
