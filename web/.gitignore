@@ -49,3 +49,6 @@ next-env.d.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# O .gitignore da raiz do Neo ignora `lib/` (empacotamento Python), o que engolia src/lib do painel.
+!/src/lib/
