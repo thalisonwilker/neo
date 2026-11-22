@@ -6,8 +6,19 @@ import {
   SIGN_UP_PATH,
   buildSignInUrl,
   isProtectedPath,
-  resolvePostLoginRedirect
+  resolvePostLoginRedirect,
+  resolveRootDestination
 } from './access';
+
+describe('AC-5: a raiz decide pela sessão', () => {
+  it('AC-5: com sessão, vai direto ao painel', () => {
+    expect(resolveRootDestination(true)).toBe('/dashboard/overview');
+  });
+
+  it('AC-5: sem sessão, vai à entrada', () => {
+    expect(resolveRootDestination(false)).toBe('/auth/sign-in');
+  });
+});
 
 describe('AC-1: política de acesso por rota', () => {
   it.each(['/dashboard', '/dashboard/overview', '/dashboard/kanban/qualquer-coisa'])(

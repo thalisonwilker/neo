@@ -83,3 +83,8 @@ export function buildSignInUrl(pathname: string, search = ''): string {
   const safe = toSafeInternalPath(`${pathname}${search}`);
   return safe ? `${SIGN_IN_PATH}?redirect_url=${encodeURIComponent(safe)}` : SIGN_IN_PATH;
 }
+
+/** AC-5: para onde a raiz `/` (e o índice `/dashboard`) leva o visitante, conforme a sessão. */
+export function resolveRootDestination(isSignedIn: boolean): string {
+  return isSignedIn ? DEFAULT_POST_LOGIN_PATH : SIGN_IN_PATH;
+}

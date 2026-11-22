@@ -20,7 +20,7 @@ alwaysApply: false
 | 4  | Consolidar rotas e variáveis: remover `src/app/sign-in` e `src/app/sign-up`; ajustar `env.example.txt` e `.env.local` (`/auth/...` e `/dashboard/overview`) `[P]` | AC-7 | 2 | `cd web && npx vitest run -t "AC-7"` | done |
 | 5  | Provedor único e pt-BR: instalar `@clerk/localizations`, remover o `ClerkProvider` de `app/layout.tsx` e aplicar `ptBR` em `providers.tsx` `[P]` | AC-8 | 2 | `cd web && npx vitest run -t "AC-8"` | done |
 | 6  | Proxy protegido: `proxy.ts` decide com a política da task 3, redirecionando páginas e respondendo 401 na API, sem delegar ao `auth.protect()` | AC-1, AC-2 | 3 | `cd web && npx vitest run src/proxy -t "AC-1\|AC-2"` | done |
-| 7  | Layout e raiz: manter `auth.protect()` em `dashboard/layout.tsx` e fazer `app/page.tsx` decidir pela sessão | AC-5, AC-6 | 3 | `cd web && npx vitest run -t "AC-5\|AC-6"` | todo |
+| 7  | Layout e raiz: manter `auth.protect()` em `dashboard/layout.tsx` e fazer `app/page.tsx` decidir pela sessão | AC-5, AC-6 | 3 | `cd web && npx vitest run -t "AC-5\|AC-6"` | done |
 | 8  | Telas de entrada e cadastro: remover "Logo" e o depoimento, aplicar marca NEO, a frase da visão e textos em pt-BR, e ligar o destino pós-login validado (`forceRedirectUrl`) `[P]` | AC-3, AC-4, AC-9 | 5 | `cd web && npx vitest run -t "AC-3\|AC-4\|AC-9"` | todo |
 | 9  | Saída da sessão: localizar o menu do usuário no template e configurar o retorno a `/auth/sign-in` `[P]` | AC-12 | 4 | `cd web && npx vitest run -t "AC-12"` | todo |
 | 10 | Habilitar os quatro métodos na aplicação Clerk "Neo" (manual) e escrever `uat.md` com o roteiro e o resultado | AC-10, AC-11, AC-12, AC-13 | 4, 5, 6, 8, 9 | `uat.md` preenchido, com cada item marcado como passou ou falhou e a data | todo |
