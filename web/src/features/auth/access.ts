@@ -7,6 +7,8 @@
 
 export const SIGN_IN_PATH = '/auth/sign-in';
 export const SIGN_UP_PATH = '/auth/sign-up';
+export const PRIMEIRO_ACESSO_PATH = '/primeiro-acesso';
+export const BOAS_VINDAS_PATH = '/boas-vindas';
 export const DEFAULT_POST_LOGIN_PATH = '/dashboard/overview';
 
 const MAX_REDIRECT_LENGTH = 2048;
@@ -14,9 +16,17 @@ const MAX_REDIRECT_LENGTH = 2048;
 const isUnder = (pathname: string, base: string): boolean =>
   pathname === base || pathname.startsWith(`${base}/`);
 
-/** AC-1: tudo sob /dashboard e /api exige sessão; o restante (inclusive a entrada e o cadastro) é público. */
+/**
+ * 0036 AC-1 e 0037 AC-11: /dashboard, /api, /primeiro-acesso e /boas-vindas exigem sessão;
+ * o restante (inclusive entrada e cadastro) é público.
+ */
 export function isProtectedPath(pathname: string): boolean {
-  return isUnder(pathname, '/dashboard') || isUnder(pathname, '/api');
+  return (
+    isUnder(pathname, '/dashboard') ||
+    isUnder(pathname, '/api') ||
+    isUnder(pathname, PRIMEIRO_ACESSO_PATH) ||
+    isUnder(pathname, BOAS_VINDAS_PATH)
+  );
 }
 
 /** Rotas de entrada e cadastro, inclusive as etapas do Clerk (ex.: /auth/sign-in/factor-one). */

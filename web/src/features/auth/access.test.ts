@@ -65,6 +65,10 @@ describe('AC-1: política de acesso por rota', () => {
     expect(isProtectedPath(path)).toBe(true);
   });
 
+  it.each(['/primeiro-acesso', '/boas-vindas'])('AC-11: %s é protegida', (path) => {
+    expect(isProtectedPath(path)).toBe(true);
+  });
+
   it.each(['/auth/sign-in', '/auth/sign-up', '/auth/sign-in/factor-one', '/auth/sign-up/continue'])(
     'AC-1: %s é pública',
     (path) => {
