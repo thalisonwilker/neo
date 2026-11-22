@@ -13,6 +13,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -23,6 +24,11 @@ import {
 import { UserAvatarProfile } from '@/components/user-avatar-profile';
 import { MINHA_CONTA_PATH, navItems } from '@/config/nav-config';
 import { SIGN_OUT_LABEL, useSignOut } from '@/features/auth/use-sign-out';
+import { useCriarEspaco } from '@/features/espacos/components/criar-espaco-provider';
+import { IconeDoTipoEspaco } from '@/features/espacos/components/icone-do-tipo';
+import { rotaDoEspaco } from '@/features/espacos/perfis';
+import { ordenarEspacos } from '@/features/home/home-rules';
+import { useUsuarioNeo } from '@/features/onboarding/components/neo-access-guard';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -99,12 +105,74 @@ export default function AppSidebar() {
             })}
           </SidebarMenu>
         </SidebarGroup>
+        <GrupoEspacos
+          pathname={pathname}
+          aoNavegar={() => {
+            if (isMobile) setOpenMobile(false);
+          }}
+        />
       </SidebarContent>
       <SidebarFooter className={railPadding}>
         <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
+  );
+}
+
+/** 0040 AC-15: um atalho por Espaço (ordem de criação) e o item "Novo Espaço". */
+function GrupoEspacos({ pathname, aoNavegar }: { pathname: string; aoNavegar: () => void }) {
+  const espacos = useUsuarioNeo()?.usuario.espacos ?? [];
+  const criarEspaco = useCriarEspaco();
+
+  return (
+    <SidebarGroup className={railPadding}>
+      <SidebarGroupLabel className='group-data-[collapsible=icon]:pointer-events-none'>
+        Espaços
+      </SidebarGroupLabel>
+      <SidebarMenu className='gap-0.5' aria-label='Espaços'>
+        {ordenarEspacos(espacos).map((espaco) => {
+          const url = rotaDoEspaco(espaco.id);
+          const active = isActivePath(pathname, url);
+          return (
+            <SidebarMenuItem key={espaco.id} data-tipo={espaco.tipo}>
+              <SidebarMenuButton
+                tooltip={espaco.nome}
+                isActive={active}
+                className={itemClass}
+                render={
+                  <Link
+                    href={url}
+                    aria-label={espaco.nome}
+                    title={espaco.nome}
+                    aria-current={active ? 'page' : undefined}
+                  />
+                }
+                onClick={aoNavegar}
+              >
+                <IconeDoTipoEspaco tipo={espaco.tipo} size={16} />
+                <span className='truncate'>{espaco.nome}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
+        {criarEspaco ? (
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip='Novo Espaço'
+              className={itemClass}
+              onClick={() => {
+                aoNavegar();
+                criarEspaco.abrir();
+              }}
+            >
+              <Icons.add />
+              <span>Novo Espaço</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        ) : null}
+      </SidebarMenu>
+    </SidebarGroup>
   );
 }
 
