@@ -39,7 +39,7 @@ alwaysApply: false
 - [x] Task 6: o que `auth.protect()` devolve sem sessão. **Resultado** (código do Clerk instalado): página → redireciona para a entrada do Clerk; ação de servidor → 401; qualquer outra requisição (como a API) → **404**. Por isso o proxy não delega: responde 401 em JSON e redireciona no formato `redirect_url` da spec. Verificado em execução: `/api/products` e `/api/users` → 401; `/dashboard/kanban` → `/auth/sign-in?redirect_url=%2Fdashboard%2Fkanban`.
 - [ ] Task 8: aplicar `resolvePostLoginRedirect(redirect_url, origem)` nas páginas de entrada e cadastro (`forceRedirectUrl` do `<SignIn/>` e do `<SignUp/>`), porque o Clerk gera `redirect_url` absoluto. Não cabe no proxy, que só monta a URL de entrada.
 - [x] Task 9: qual componente do template faz a saída da sessão. **Resultado:** o item de saída de `NavUser` em `components/layout/app-sidebar.tsx` (menu do usuário na base da sidebar). O `UserNav` em `components/layout/user-nav.tsx` é código morto do template. O rótulo passou de "Sign out" para "Sair" e o retorno usa `/auth/sign-in` via `useSignOut`.
-- [ ] Task 10: o link mágico do Clerk em desenvolvimento chega como link ou como código.
+- [x] Task 10: o link mágico do Clerk em desenvolvimento chega como link ou como código. **Resultado:** hoje é por código (`email_code`); GitHub também não está habilitado. Ambos são passos de configuração manual (C3 e C5 do `uat.md`).
 
 ## Divergências (SPEC_DEVIATION)
 - Nenhuma divergência identificada.

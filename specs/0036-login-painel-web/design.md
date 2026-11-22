@@ -171,7 +171,7 @@ Ganhamos entrega rápida e um login completo. Aceitamos depender de um serviço 
 
 ## Questões em aberto
 - [x] **1. Quem pode se cadastrar?** Decidido em 22/11/2026: **aberto a qualquer pessoa**. Consequência registrada no ADR-0010: rever antes de o painel exibir dados reais.
-- [ ] 2. O link mágico do Clerk em desenvolvimento chega como link ou como código? Verificar no painel do Clerk (spike na implementação, tarefa 7).
+- [x] 2. O link mágico do Clerk em desenvolvimento chega como link ou como código? Verificado em 22/11/2026 (configuração pública da instância): hoje a verificação de e-mail é por **código**. Para o link, é preciso habilitar a verificação por link no painel do Clerk (passo C5 do `uat.md`).
 - [x] 3. Qual componente do template faz a saída de sessão? Resolvido na tarefa 9: o item de saída de `NavUser` em `components/layout/app-sidebar.tsx`. O `UserNav` (`components/layout/user-nav.tsx`) não é usado em lugar nenhum.
 
 > **ADR registrado:** [ADR-0010 — Painel web em Next.js com autenticação via Clerk](../../docs/architecture/adr/0010-painel-web-nextjs-com-clerk.md).
