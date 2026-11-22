@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt
 
 from neo.domain.identidade import Espaco, Usuario
 
@@ -17,6 +17,8 @@ class EspacoResponse(BaseModel):
     nome: str
     tipo: str
     criado_em: datetime
+    meta_semanal: int
+    agentes_sugeridos: bool
 
 
 class UsuarioResponse(BaseModel):
@@ -47,6 +49,20 @@ class PrimeiroAcessoRequest(BaseModel):
     espaco: EspacoInput
 
 
+class CriarEspacoRequest(BaseModel):
+    """Payload de `POST /v1/espacos` (0040); campos extras ignorados.
+
+    `meta_semanal` e estrita: decimais, texto e booleanos viram 422 no campo `meta_semanal`.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    nome: str
+    tipo: str
+    meta_semanal: StrictInt | None = None
+    agentes_sugeridos: StrictBool = False
+
+
 class HealthResponse(BaseModel):
     """Resposta da rota de saude `/health`."""
 
@@ -54,12 +70,15 @@ class HealthResponse(BaseModel):
     db: str
 
 
-def _espaco_para_response(espaco: Espaco) -> EspacoResponse:
+def espaco_para_response(espaco: Espaco) -> EspacoResponse:
+    """Converte a entidade Espaco em schema de resposta da API."""
     return EspacoResponse(
         id=espaco.id,
         nome=espaco.nome.valor,
         tipo=espaco.tipo.value,
         criado_em=espaco.criado_em,
+        meta_semanal=espaco.meta_semanal.valor,
+        agentes_sugeridos=espaco.agentes_sugeridos,
     )
 
 
@@ -70,5 +89,5 @@ def usuario_para_response(usuario: Usuario) -> UsuarioResponse:
         email=usuario.email.valor,
         nome_exibicao=usuario.nome_exibicao.valor if usuario.nome_exibicao else None,
         primeiro_acesso_concluido=usuario.primeiro_acesso_concluido,
-        espacos=[_espaco_para_response(e) for e in usuario.espacos],
+        espacos=[espaco_para_response(e) for e in usuario.espacos],
     )

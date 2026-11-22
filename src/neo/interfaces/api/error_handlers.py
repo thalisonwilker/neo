@@ -11,6 +11,7 @@ from neo.domain.identidade import (
     ClerkIndisponivelError,
     DadosInvalidosError,
     PrimeiroAcessoJaConcluidoError,
+    PrimeiroAcessoPendenteError,
     TokenInvalidoError,
 )
 
@@ -42,6 +43,12 @@ def registrar_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(PrimeiroAcessoJaConcluidoError)
     async def _tratar_primeiro_acesso_concluido(
         _: Request, exc: PrimeiroAcessoJaConcluidoError
+    ) -> JSONResponse:
+        return _json_erro(409, exc.codigo, exc.mensagem)
+
+    @app.exception_handler(PrimeiroAcessoPendenteError)
+    async def _tratar_primeiro_acesso_pendente(
+        _: Request, exc: PrimeiroAcessoPendenteError
     ) -> JSONResponse:
         return _json_erro(409, exc.codigo, exc.mensagem)
 

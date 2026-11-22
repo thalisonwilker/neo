@@ -8,7 +8,7 @@ from typing import Annotated, cast
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 
-from neo.application.identidade import ConcluirPrimeiroAcesso, ObterOuCriarUsuario
+from neo.application.identidade import ConcluirPrimeiroAcesso, CriarEspaco, ObterOuCriarUsuario
 from neo.domain.identidade import (
     IdentidadeExterna,
     LeitorDeEmailExterno,
@@ -17,9 +17,12 @@ from neo.domain.identidade import (
 )
 from neo.interfaces.api.deps import obter_identidade_autenticada
 from neo.interfaces.api.schemas import (
+    CriarEspacoRequest,
+    EspacoResponse,
     HealthResponse,
     PrimeiroAcessoRequest,
     UsuarioResponse,
+    espaco_para_response,
     usuario_para_response,
 )
 
@@ -83,3 +86,29 @@ async def concluir_primeiro_acesso(
         tipo_espaco_bruto=body.espaco.tipo,
     )
     return usuario_para_response(usuario)
+
+
+@router_v1.post(
+    "/espacos",
+    response_model=EspacoResponse,
+    status_code=201,
+    tags=["Identidade"],
+)
+async def criar_espaco(
+    request: Request,
+    body: CriarEspacoRequest,
+    identidade: Annotated[IdentidadeExterna, Depends(obter_identidade_autenticada)],
+) -> EspacoResponse:
+    """Cria um novo Espaco do Usuario que ja concluiu o Primeiro acesso (0040)."""
+    caso_de_uso = CriarEspaco(
+        usuarios=cast(RepositorioDeUsuarios, request.app.state.repo_usuarios),
+        obter_ou_criar=_criar_caso_obter_usuario(request),
+    )
+    espaco = await caso_de_uso.executar(
+        identidade=identidade,
+        nome_bruto=body.nome,
+        tipo_bruto=body.tipo,
+        meta_semanal_bruta=body.meta_semanal,
+        agentes_sugeridos=body.agentes_sugeridos,
+    )
+    return espaco_para_response(espaco)

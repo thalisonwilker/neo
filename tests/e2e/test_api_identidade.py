@@ -285,7 +285,8 @@ async def test_AC_6_AC_7_AC_8_primeiro_acesso_validacoes_e_repeticao(
             "espaco.nome",
         ),
         (
-            {"nome_exibicao": "Thalyson", "espaco": {"nome": "b" * 41, "tipo": "trabalho"}},
+            # Limite de 100 desde a 0040 (AC-6).
+            {"nome_exibicao": "Thalyson", "espaco": {"nome": "b" * 101, "tipo": "trabalho"}},
             "espaco.nome",
         ),
         (
