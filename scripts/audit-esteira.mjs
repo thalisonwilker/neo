@@ -14,6 +14,10 @@ const IGNORE_DIRS = new Set([
   ".agents", ".cursor", ".gemini", ".windsurf",
   ".venv", "venv", ".pytest_cache", ".ruff_cache", ".mypy_cache",
 ]);
+// Caminhos (relativos à raiz) fora da auditoria: `web/` é o painel web, baseado em um template
+// de terceiros (ADR-0010) que segue as convenções do próprio projeto, não a esteira SDD.
+// As specs e docs do painel continuam em `specs/` e `docs/`, que seguem auditados.
+const IGNORE_PATHS = new Set(["web"]);
 const NO_FRONTMATTER_OK = new Set(["RELEASING.md", "CHANGELOG.md", "README.md"]);
 // Arquivos de instruções gerados (fora de um dir próprio) que também são views derivadas.
 const isGenerated = (f) => {
@@ -29,6 +33,7 @@ function walk(dir) {
   for (const name of readdirSync(dir)) {
     if (IGNORE_DIRS.has(name) || name.startsWith(".tmp")) continue;
     const full = join(dir, name);
+    if (IGNORE_PATHS.has(relative(ROOT, full).replace(/\\/g, "/"))) continue;
     if (statSync(full).isDirectory()) out.push(...walk(full));
     else if (extname(full) === ".md") out.push(full);
   }
