@@ -1,80 +1,38 @@
 import Providers from '@/components/layout/providers';
 import { Toaster } from '@/components/ui/sonner';
 import { fontVariables } from '@/components/themes/font.config';
-import { DEFAULT_THEME, THEMES } from '@/components/themes/theme.config';
 import ThemeProvider from '@/components/themes/theme-provider';
+import { BRAND_PHRASE } from '@/features/auth/components/auth-shell';
 import { cn } from '@/lib/utils';
 import type { Metadata, Viewport } from 'next';
-import { cookies } from 'next/headers';
 import NextTopLoader from 'nextjs-toploader';
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import '../styles/globals.css';
 
-const META_THEME_COLORS = {
-  light: '#ffffff',
-  dark: '#050816'
-};
+/** 0039 AC-5: cor de fundo do tema NEO escuro. */
+const NEO_BACKGROUND = '#050816';
 
 export const metadata: Metadata = {
   ...(process.env.NEXT_PUBLIC_APP_URL
     ? { metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL) }
     : {}),
+  // As páginas já definem o título completo no padrão "<página> | NEO".
   title: {
-    default: 'Shadcn Dashboard - Next.js Admin Dashboard Template',
-    template: '%s | Shadcn Dashboard'
+    default: 'NEO',
+    template: '%s'
   },
-  description:
-    'Free, open source admin dashboard starter built with Next.js 16, shadcn/ui, Tailwind CSS, and TypeScript.',
-  openGraph: {
-    title: 'Shadcn Dashboard - Next.js Admin Dashboard Template',
-    description:
-      'Free, open source admin dashboard starter built with Next.js 16, shadcn/ui, Tailwind CSS, and TypeScript.',
-    siteName: 'Shadcn Dashboard',
-    type: 'website',
-    images: [
-      {
-        url: '/shadcn-dashboard.png',
-        width: 3200,
-        height: 1600,
-        alt: 'Shadcn Dashboard overview page'
-      }
-    ]
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Shadcn Dashboard - Next.js Admin Dashboard Template',
-    description:
-      'Free, open source admin dashboard starter built with Next.js 16, shadcn/ui, Tailwind CSS, and TypeScript.',
-    images: ['/shadcn-dashboard.png']
-  }
+  description: BRAND_PHRASE,
+  applicationName: 'NEO'
 };
 
 export const viewport: Viewport = {
-  themeColor: META_THEME_COLORS.light
+  themeColor: NEO_BACKGROUND,
+  colorScheme: 'dark'
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const activeThemeValue = cookieStore.get('active_theme')?.value;
-  const isValidTheme = THEMES.some((t) => t.value === activeThemeValue);
-  const themeToApply = isValidTheme ? activeThemeValue! : DEFAULT_THEME;
-
+/** 0039 AC-5: tema único NEO, sempre escuro, em qualquer preferência do sistema. */
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='pt-BR' suppressHydrationWarning data-theme={themeToApply}>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                // Set meta theme color
-                if (localStorage.theme === 'dark' || ((!('theme' in localStorage) || localStorage.theme === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '${META_THEME_COLORS.dark}')
-                }
-              } catch (_) {}
-            `
-          }}
-        />
-      </head>
+    <html lang='pt-BR' suppressHydrationWarning data-theme='neo' className='dark'>
       <body
         className={cn(
           'bg-background overflow-x-hidden overscroll-none font-sans antialiased',
@@ -82,20 +40,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
       >
         <NextTopLoader color='var(--primary)' showSpinner={false} />
-        <NuqsAdapter>
-          <ThemeProvider
-            attribute='class'
-            defaultTheme='dark'
-            enableSystem
-            disableTransitionOnChange
-            enableColorScheme
-          >
-            <Providers activeThemeValue={themeToApply}>
-              <Toaster />
-              {children}
-            </Providers>
-          </ThemeProvider>
-        </NuqsAdapter>
+        <ThemeProvider attribute='class' forcedTheme='dark' disableTransitionOnChange>
+          <Providers>
+            <Toaster />
+            {children}
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );

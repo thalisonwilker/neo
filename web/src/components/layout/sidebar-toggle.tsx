@@ -13,7 +13,7 @@ export function SidebarToggle() {
       variant='ghost'
       size='icon'
       className='text-muted-foreground hover:text-foreground -ml-1'
-      aria-label='Toggle sidebar'
+      aria-label='Recolher ou abrir o menu'
       aria-expanded={sidebarOpen}
       onClick={toggleSidebar}
     >

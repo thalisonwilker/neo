@@ -45,7 +45,7 @@ describe('AC-8: provedor único e português do Brasil', () => {
 
   it('AC-8: o provedor aplica a localização ptBR', () => {
     render(
-      <Providers activeThemeValue='neo'>
+      <Providers>
         <p>conteúdo</p>
       </Providers>
     );

@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { HomeView } from '@/features/home/components/home-view';
 
 export const metadata: Metadata = {
-  title: 'Início · Neo'
+  title: 'Início | NEO'
 };
 
 /** Página inicial do painel (spec 0038), destino pós-login. */

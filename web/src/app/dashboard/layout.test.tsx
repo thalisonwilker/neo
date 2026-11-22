@@ -11,11 +11,8 @@ vi.mock('@clerk/nextjs/server', () => ({ auth: { protect: mocks.protect } }));
 vi.mock('next/headers', () => ({ cookies: mocks.cookies }));
 
 // Componentes visuais simulados: o teste cobre só a regra de acesso do layout.
-vi.mock('@/components/kbar', () => ({ default: () => null }));
 vi.mock('@/components/layout/app-sidebar', () => ({ default: () => null }));
 vi.mock('@/components/layout/header', () => ({ default: () => null }));
-vi.mock('@/components/layout/info-sidebar', () => ({ InfoSidebar: () => null }));
-vi.mock('@/components/ui/infobar', () => ({ InfobarProvider: () => null }));
 vi.mock('@/components/ui/sidebar', () => ({
   SidebarInset: () => null,
   SidebarProvider: () => null
