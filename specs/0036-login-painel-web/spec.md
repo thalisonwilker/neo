@@ -6,7 +6,7 @@ alwaysApply: true
 
 # Spec — Fluxo de login do painel web
 
-> **Fonte da verdade.** Status: em review · Tier: arquitetural.
+> **Fonte da verdade.** Status: implementado · Tier: arquitetural.
 > Os critérios de aceite são (a) o contrato com o negócio, (b) o oráculo de teste, (c) o prompt para o agente de IA implementar.
 
 ## Resumo

@@ -24,7 +24,7 @@ alwaysApply: false
 | 8  | Telas de entrada e cadastro: remover "Logo" e o depoimento, aplicar marca NEO, a frase da visão e textos em pt-BR, ligar o destino pós-login validado (`forceRedirectUrl`) e completar as traduções pt-BR do Clerk `[P]` | AC-3, AC-4, AC-9, AC-13 | 5 | `cd web && npx vitest run -t "AC-3\|AC-4\|AC-9\|AC-13"` | done |
 | 9  | Saída da sessão: localizar o menu do usuário no template e configurar o retorno a `/auth/sign-in` `[P]` | AC-12 | 4 | `cd web && npx vitest run -t "AC-12"` | done |
 | 10 | Habilitar os três métodos na aplicação Clerk "Neo" (manual) e escrever `uat.md` com o roteiro e o resultado | AC-10, AC-11, AC-12, AC-13 | 4, 5, 6, 8, 9 | `uat.md` preenchido, com cada item marcado como passou ou falhou e a data | done |
-| 11 | Documentação viva e gates finais: seção "Painel web" em `docs/engineering/TESTING.md`, `docs/STATE.md` e checagem completa | AC-14 | 1, 6, 7, 10 | `cd web && npm run typecheck && npx oxlint && npm run test && npx next build` e `uv run mkdocs build --strict` e `node scripts/audit-esteira.mjs .` | todo |
+| 11 | Documentação viva e gates finais: seção "Painel web" em `docs/engineering/TESTING.md`, `docs/STATE.md` e checagem completa | AC-14 | 1, 6, 7, 10 | `cd web && npm run typecheck && npx oxlint && npm run test && npx next build` e `uv run mkdocs build --strict` e `node scripts/audit-esteira.mjs .` | done |
 
 > Uma task só vira `done` quando o **gate passa** (comandos em `docs/engineering/TESTING.md`), não por inspeção visual. Um commit por task.
 > A task 10 é a única com gate manual; é uma exceção consciente, porque a entrada real depende do serviço do Clerk.
@@ -37,7 +37,7 @@ alwaysApply: false
 
 ## Spikes e verificações abertas
 - [x] Task 6: o que `auth.protect()` devolve sem sessão. **Resultado** (código do Clerk instalado): página → redireciona para a entrada do Clerk; ação de servidor → 401; qualquer outra requisição (como a API) → **404**. Por isso o proxy não delega: responde 401 em JSON e redireciona no formato `redirect_url` da spec. Verificado em execução: `/api/products` e `/api/users` → 401; `/dashboard/kanban` → `/auth/sign-in?redirect_url=%2Fdashboard%2Fkanban`.
-- [ ] Task 8: aplicar `resolvePostLoginRedirect(redirect_url, origem)` nas páginas de entrada e cadastro (`forceRedirectUrl` do `<SignIn/>` e do `<SignUp/>`), porque o Clerk gera `redirect_url` absoluto. Não cabe no proxy, que só monta a URL de entrada.
+- [x] Task 8 (feito): aplicar `resolvePostLoginRedirect(redirect_url, origem)` nas páginas de entrada e cadastro (`forceRedirectUrl` do `<SignIn/>` e do `<SignUp/>`), porque o Clerk gera `redirect_url` absoluto. Não cabe no proxy, que só monta a URL de entrada.
 - [x] Task 9: qual componente do template faz a saída da sessão. **Resultado:** o item de saída de `NavUser` em `components/layout/app-sidebar.tsx` (menu do usuário na base da sidebar). O `UserNav` em `components/layout/user-nav.tsx` é código morto do template. O rótulo passou de "Sign out" para "Sair" e o retorno usa `/auth/sign-in` via `useSignOut`.
 - [x] Task 10: o link mágico do Clerk em desenvolvimento chega como link ou como código. **Resultado:** hoje é por código (`email_code`); GitHub também não está habilitado. Ambos são passos de configuração manual (C3 e C5 do `uat.md`).
 - [x] Task 10: UAT aprovado em 22/11/2026: 13 de 14 passos passaram e U4 (GitHub) é n/a, porque o GitHub saiu do escopo por decisão do mantenedor (spec, product e design atualizados). O link mágico foi habilitado no Clerk e passou (U6).
@@ -46,10 +46,10 @@ alwaysApply: false
 - Nenhuma divergência identificada.
 
 ## Checklist de Definition of Done
-- [ ] Todos os AC verdes **pelo gate executável** (os de UAT, pelo `uat.md`)
-- [ ] Nenhum `SPEC_DEVIATION` pendente
-- [ ] ADR-0010 registrado (feito) e revisto se o cadastro for restringido
-- [ ] Glossário e context-map atualizados (feito)
-- [ ] Spec reflete o que foi construído
-- [ ] `docs/STATE.md` atualizado (próximo passo e decisões)
-- [ ] Cobertura mínima do projeto Python mantida (`uv run pytest --cov=neo --cov-fail-under=80`), pois a feature não altera o Python
+- [x] Todos os AC verdes **pelo gate executável** (os de UAT, pelo `uat.md`)
+- [x] Nenhum `SPEC_DEVIATION` pendente
+- [x] ADR-0010 registrado (feito) e revisto se o cadastro for restringido
+- [x] Glossário e context-map atualizados (feito)
+- [x] Spec reflete o que foi construído
+- [x] `docs/STATE.md` atualizado (próximo passo e decisões); edição feita, mas o commit fica com o mantenedor, pois o arquivo já tinha alterações dele preparadas
+- [x] Cobertura mínima do projeto Python mantida (`uv run pytest --cov=neo --cov-fail-under=80`), pois a feature não altera o Python (87,61% em 22/11/2026, 272 testes)

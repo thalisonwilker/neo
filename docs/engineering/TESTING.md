@@ -38,3 +38,31 @@ alwaysApply: false
   5. Cobertura mínima de 80% atingida.
   6. `uv run mkdocs build --strict` compila sem erros nem advertências.
   7. `node scripts/audit-esteira.mjs .` valida a integridade de frontmatter, links e specs.
+  8. Se a feature toca o painel web (`web/`), os gates da seção abaixo também passam.
+
+## Painel web (`web/`)
+
+> Stack: Next.js + TypeScript, com autenticação via Clerk ([ADR-0010](../architecture/adr/0010-painel-web-nextjs-com-clerk.md)). Os comandos rodam **dentro de `web/`**.
+
+| Nível | Comando | Quando |
+|---|---|---|
+| **Tipos** | `npm run typecheck` | Sempre durante o desenvolvimento |
+| **Lint** | `npx oxlint` | Pré-commit / CI. Os avisos que já vêm do template são aceitos; **erros não** |
+| **Formatação** | `npx oxfmt --check src vitest.config.mts vitest.setup.ts` | Pré-commit / CI (`npx oxfmt --write ...` corrige) |
+| **Testes** | `npm run test` | Sempre (Vitest + jsdom + Testing Library). `npm run test:watch` em desenvolvimento |
+| **Um critério** | `npx vitest run -t "AC-3"` | Gate de uma task: roda só os testes com o ID do critério |
+| **Build** | `npx next build` | Ao fechar uma feature do painel |
+| **Dependências** | `npm audit` | Ao instalar ou atualizar pacotes (alvo: 0 vulnerabilidades) |
+
+### Convenções do painel
+- **Um teste por `AC-N`**, com o ID no nome (`AC-3: ...`), ao lado do código (`*.test.ts` e `*.test.tsx`), como no Python.
+- **Zero chamadas externas reais:** o Clerk e os cabeçalhos do Next são simulados com `vi.mock`. Rotas e componentes de servidor rodam com `// @vitest-environment node`.
+- **Regra de negócio em funções puras**, sem Clerk e sem Next, dentro de `features/<área>/` (ex.: `features/auth/access.ts`). A borda (proxy, layout, páginas) só as chama.
+- **Exceção documentada:** o login real contra o Clerk **não** é automatizado. Ele é verificado por um roteiro manual de UAT (`specs/NNNN-*/uat.md`), porque depende de um serviço externo e de credenciais.
+- **Escreva o teste antes** e confira que ele falha pelo motivo certo.
+- `web/` fica **fora** da auditoria da esteira (`scripts/audit-esteira.mjs`): é um template de terceiros. As specs e os docs do painel continuam em `specs/` e `docs/`.
+
+### Armadilhas conhecidas
+- O `.gitignore` da raiz ignora qualquer pasta `lib/`. `web/src/lib/` só é versionada por causa da exceção `!/src/lib/` em `web/.gitignore`. Confira com `git check-ignore -v <caminho>` antes de criar pastas novas em `web/`.
+- `web/.env.local` (chaves do Clerk) nunca entra no git. Os nomes das variáveis ficam em `web/env.example.txt`.
+- Depois de remover uma rota, o `tsc` pode acusar erro em `.next/dev/types/validator.ts` (cache gerado pelo `next dev`). Apague esse arquivo; o `next dev` o recria.
