@@ -2,7 +2,7 @@
  * Regras puras da página inicial (spec 0038). Sem React e sem Next:
  * os componentes da home consomem estas funções, e os testes as exercitam diretamente.
  */
-import type { EspacoDTO, TipoEspaco } from '@/lib/api';
+import type { EspacoDTO } from '@/lib/api';
 
 const DIAS_ABREVIADOS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const;
 const MESES_ABREVIADOS = [
@@ -102,22 +102,6 @@ export function gradeDoMes(mesCalendario: MesDoCalendario, hoje: Date): DiaDoCal
   }
   return semanas;
 }
-
-export type IconeDoTipo = 'pasta' | 'livro' | 'brilho' | 'coracao';
-
-export interface PerfilDoTipo {
-  rotulo: string;
-  cor: string;
-  icone: IconeDoTipo;
-}
-
-/** AC-5: rótulo, cor e ícone de cada Tipo de espaço (paleta do protótipo NEO). */
-export const PERFIS_DE_TIPO: Record<TipoEspaco, PerfilDoTipo> = {
-  trabalho: { rotulo: 'Trabalho', cor: '#00FFB2', icone: 'pasta' },
-  estudos: { rotulo: 'Estudos', cor: '#38BDF8', icone: 'livro' },
-  hobbies: { rotulo: 'Hobbies', cor: '#A78BFA', icone: 'brilho' },
-  pessoal: { rotulo: 'Pessoal', cor: '#F472B6', icone: 'coracao' }
-};
 
 /** AC-5: Espaços na ordem de criação (mais antigo primeiro), sem alterar a lista original. */
 export function ordenarEspacos(espacos: readonly EspacoDTO[]): EspacoDTO[] {

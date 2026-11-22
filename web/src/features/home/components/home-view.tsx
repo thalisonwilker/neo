@@ -1,43 +1,31 @@
 'use client';
 
 import {
-  IconBook,
   IconBox,
   IconChevronLeft,
   IconChevronRight,
   IconClock,
-  IconFolder,
-  IconHeart,
   IconListCheck,
-  IconSparkles
+  IconPlus
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import type { ComponentType, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
+import { IconeDoTipoEspaco } from '@/features/espacos/components/icone-do-tipo';
+import { useCriarEspaco } from '@/features/espacos/components/criar-espaco-provider';
+import { PERFIS_DE_TIPO } from '@/features/espacos/perfis';
 import { useUsuarioNeo } from '@/features/onboarding/components/neo-access-guard';
 import type { EspacoDTO } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import {
   DIAS_DA_SEMANA,
-  PERFIS_DE_TIPO,
   formatarDataDeHoje,
   gradeDoMes,
   mesDe,
   mesVizinho,
   ordenarEspacos,
-  tituloDoMes,
-  type IconeDoTipo
+  tituloDoMes
 } from '../home-rules';
-
-const ICONES_DO_TIPO: Record<
-  IconeDoTipo,
-  ComponentType<{ size?: number; 'aria-hidden'?: boolean }>
-> = {
-  pasta: IconFolder,
-  livro: IconBook,
-  brilho: IconSparkles,
-  coracao: IconHeart
-};
 
 const CONTADORES = ['Hoje', 'Esta semana', 'Este mês', 'Este ano'] as const;
 
@@ -199,11 +187,24 @@ function CalendarioDoMes({ hoje }: { hoje: Date }) {
 /** AC-5: Espaços reais do Usuário, com cor e ícone do Tipo de espaço. */
 function CartaoDeEspacos({ espacos }: { espacos: readonly EspacoDTO[] }) {
   const ordenados = ordenarEspacos(espacos);
+  const criarEspaco = useCriarEspaco();
   return (
     <Cartao>
       <div className='mb-3 flex items-center gap-3'>
         <IconBox size={20} className='text-primary' aria-hidden />
         <h2 className={cn(fonteDisplay, 'text-base font-semibold')}>Espaços</h2>
+        {criarEspaco ? (
+          // 0040 AC-7: abre o modal "Criar Espaço".
+          <button
+            type='button'
+            aria-label='Novo Espaço'
+            title='Novo Espaço'
+            onClick={criarEspaco.abrir}
+            className='border-primary/50 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground focus-visible:ring-ring ml-auto grid size-9 place-items-center rounded-[11px] border transition-colors hover:shadow-[0_0_20px_rgba(0,255,178,.55)] focus-visible:ring-2 focus-visible:outline-none'
+          >
+            <IconPlus size={20} aria-hidden />
+          </button>
+        ) : null}
       </div>
       {ordenados.length === 0 ? (
         <p className='text-muted-foreground text-[13px]'>Nenhum Espaço ainda.</p>
@@ -211,7 +212,6 @@ function CartaoDeEspacos({ espacos }: { espacos: readonly EspacoDTO[] }) {
         <ul className='flex max-h-64 flex-col overflow-y-auto'>
           {ordenados.map((espaco) => {
             const perfil = PERFIS_DE_TIPO[espaco.tipo];
-            const Icone = ICONES_DO_TIPO[perfil.icone];
             return (
               <li
                 key={espaco.id}
@@ -222,7 +222,7 @@ function CartaoDeEspacos({ espacos }: { espacos: readonly EspacoDTO[] }) {
                   className='grid size-10 flex-none place-items-center rounded-xl border'
                   style={{ color: perfil.cor, borderColor: `${perfil.cor}55` }}
                 >
-                  <Icone size={18} aria-hidden />
+                  <IconeDoTipoEspaco tipo={espaco.tipo} />
                 </span>
                 <div className='min-w-0'>
                   <p className='truncate font-medium' title={espaco.nome}>

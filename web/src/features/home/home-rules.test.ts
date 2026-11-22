@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  PERFIS_DE_TIPO,
   formatarDataDeHoje,
   gradeDoMes,
   mesVizinho,
@@ -65,20 +64,25 @@ describe('0038 AC-4: navegação de mês', () => {
   });
 });
 
-describe('0038 AC-5: perfil e ordem dos Espaços', () => {
-  it('cada Tipo de espaço tem rótulo, cor e ícone da tabela da spec', () => {
-    expect(PERFIS_DE_TIPO).toEqual({
-      trabalho: { rotulo: 'Trabalho', cor: '#00FFB2', icone: 'pasta' },
-      estudos: { rotulo: 'Estudos', cor: '#38BDF8', icone: 'livro' },
-      hobbies: { rotulo: 'Hobbies', cor: '#A78BFA', icone: 'brilho' },
-      pessoal: { rotulo: 'Pessoal', cor: '#F472B6', icone: 'coracao' }
-    });
-  });
-
+describe('0038 AC-5: ordem dos Espaços', () => {
   it('ordena por data de criação sem mudar a lista original', () => {
     const original = [
-      { id: 'b', nome: 'Faculdade', tipo: 'estudos' as const, criado_em: '2026-11-22T13:00:00Z' },
-      { id: 'a', nome: 'Neo', tipo: 'trabalho' as const, criado_em: '2026-11-22T12:00:00Z' }
+      {
+        id: 'b',
+        nome: 'Faculdade',
+        tipo: 'estudos' as const,
+        criado_em: '2026-11-22T13:00:00Z',
+        meta_semanal: 10,
+        agentes_sugeridos: false
+      },
+      {
+        id: 'a',
+        nome: 'Neo',
+        tipo: 'trabalho' as const,
+        criado_em: '2026-11-22T12:00:00Z',
+        meta_semanal: 30,
+        agentes_sugeridos: false
+      }
     ];
     expect(ordenarEspacos(original).map((e) => e.id)).toEqual(['a', 'b']);
     expect(original[0].id).toBe('b');

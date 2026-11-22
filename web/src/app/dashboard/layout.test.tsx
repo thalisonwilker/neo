@@ -13,6 +13,9 @@ vi.mock('next/headers', () => ({ cookies: mocks.cookies }));
 // Componentes visuais simulados: o teste cobre só a regra de acesso do layout.
 vi.mock('@/components/layout/app-sidebar', () => ({ default: () => null }));
 vi.mock('@/components/layout/header', () => ({ default: () => null }));
+vi.mock('@/features/espacos/components/criar-espaco-provider', () => ({
+  CriarEspacoProvider: () => null
+}));
 vi.mock('@/components/ui/sidebar', () => ({
   SidebarInset: () => null,
   SidebarProvider: () => null
