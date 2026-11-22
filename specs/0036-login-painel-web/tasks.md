@@ -15,7 +15,7 @@ alwaysApply: false
 | #  | Task | Cobre AC | Depende de | Gate (comando) | Status |
 |----|------|----------|------------|----------------|--------|
 | 1  | Excluir o código do template em `web/` da auditoria da esteira, mantendo `specs/` e `docs/` auditados | AC-14 | — | `node scripts/audit-esteira.mjs .` | done |
-| 2  | Preparar testes no painel: instalar Vitest, jsdom e Testing Library, criar o script `test` e um teste de fumaça | AC-14 | — | `cd web && npm run test` | todo |
+| 2  | Preparar testes no painel: instalar Vitest, jsdom e Testing Library, criar o script `test` e um teste de fumaça | AC-14 | — | `cd web && npm run test` | done |
 | 3  | Funções puras de acesso em `features/auth`: política de rota, URL de entrada com `redirect_url` e destino pós-login (com a rejeição de destinos inválidos) | AC-1, AC-2, AC-3, AC-4 | 2 | `cd web && npx vitest run src/features/auth -t "AC-1\|AC-2\|AC-3\|AC-4"` | todo |
 | 4  | Consolidar rotas e variáveis: remover `src/app/sign-in` e `src/app/sign-up`; ajustar `env.example.txt` e `.env.local` (`/auth/...` e `/dashboard/overview`) `[P]` | AC-7 | 2 | `cd web && npx vitest run -t "AC-7"` | todo |
 | 5  | Provedor único e pt-BR: instalar `@clerk/localizations`, remover o `ClerkProvider` de `app/layout.tsx` e aplicar `ptBR` em `providers.tsx` `[P]` | AC-8 | 2 | `cd web && npx vitest run -t "AC-8"` | todo |
