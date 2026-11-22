@@ -5,7 +5,16 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, String, Uuid
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    SmallInteger,
+    String,
+    Uuid,
+    false,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from neo.infrastructure.db.base import Base
@@ -42,6 +51,9 @@ class EspacoORM(Base):
     """Tabela `espacos` mapeando os Espacos pertencentes a um Usuario."""
 
     __tablename__ = "espacos"
+    __table_args__ = (
+        CheckConstraint("meta_semanal BETWEEN 1 AND 168", name="ck_espacos_meta_semanal_faixa"),
+    )
 
     id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True)
     usuario_id: Mapped[UUID] = mapped_column(
@@ -50,9 +62,13 @@ class EspacoORM(Base):
         index=True,
         nullable=False,
     )
-    nome: Mapped[str] = mapped_column(String(40), nullable=False)
+    nome: Mapped[str] = mapped_column(String(100), nullable=False)
     tipo: Mapped[str] = mapped_column(String(20), nullable=False)
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    meta_semanal: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    agentes_sugeridos: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=false(), default=False
+    )
 
     usuario: Mapped[UsuarioORM] = relationship(back_populates="espacos")
 

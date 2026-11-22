@@ -21,6 +21,7 @@ from neo.domain.identidade import (
     Email,
     Espaco,
     IdentidadeExterna,
+    MetaSemanal,
     NomeDeExibicao,
     NomeDoEspaco,
     PrimeiroAcessoJaConcluidoError,
@@ -239,4 +240,110 @@ class EspacoFakeFactory:
             nome=NomeDoEspaco("Segundo"),
             tipo=TipoEspaco.ESTUDOS,
             criado_em=datetime.now(UTC),
+            meta_semanal=MetaSemanal(10),
         )
+
+
+# --- 0040: criar Espaco ---------------------------------------------------------------
+
+
+async def _usuario_com_primeiro_acesso(
+    repo: RepositorioDeUsuariosSQLAlchemy, clerk_id: str
+) -> Usuario:
+    usuario, _ = await repo.criar_ou_obter_existente(
+        Usuario.registrar(IdentidadeExterna(clerk_id), Email(f"{clerk_id}@neo.app"))
+    )
+    espaco = usuario.concluir_primeiro_acesso(
+        nome_exibicao=NomeDeExibicao("Thalyson"),
+        nome_espaco=NomeDoEspaco("Neo"),
+        tipo_espaco=TipoEspaco.TRABALHO,
+    )
+    return await repo.salvar_primeiro_acesso(usuario, espaco)
+
+
+async def test_0040_AC_1_adicionar_espaco_persiste_meta_e_agentes(
+    db_engine: tuple[str, AsyncEngine],
+) -> None:
+    _, engine = db_engine
+    repo = RepositorioDeUsuariosSQLAlchemy(criar_session_factory(engine))
+    usuario = await _usuario_com_primeiro_acesso(repo, "user_0040")
+    assert usuario.espacos[0].meta_semanal == MetaSemanal(30)
+    assert usuario.espacos[0].agentes_sugeridos is False
+
+    nome_longo = "F" * 100
+    novo = usuario.criar_espaco(
+        nome=NomeDoEspaco(nome_longo),
+        tipo=TipoEspaco.ESTUDOS,
+        meta_semanal=MetaSemanal(12),
+        agentes_sugeridos=True,
+    )
+    await repo.adicionar_espaco(novo)
+
+    recarregado = await repo.buscar_por_identidade(IdentidadeExterna("user_0040"))
+    assert recarregado is not None
+    assert [e.id for e in recarregado.espacos] == [usuario.espacos[0].id, novo.id]
+    gravado = recarregado.espacos[1]
+    assert gravado.nome.valor == nome_longo
+    assert gravado.meta_semanal == MetaSemanal(12)
+    assert gravado.agentes_sugeridos is True
+
+
+async def test_0040_check_recusa_meta_fora_da_faixa(
+    db_engine: tuple[str, AsyncEngine],
+) -> None:
+    _, engine = db_engine
+    repo = RepositorioDeUsuariosSQLAlchemy(criar_session_factory(engine))
+    usuario = await _usuario_com_primeiro_acesso(repo, "user_check")
+    async with engine.begin() as conn:
+        with pytest.raises(IntegrityError):
+            await conn.execute(
+                text("UPDATE espacos SET meta_semanal = 169 WHERE usuario_id = :u"),
+                {"u": usuario.id.hex if engine.dialect.name == "sqlite" else usuario.id},
+            )
+
+
+def test_0040_AC_5_migracao_preenche_meta_sugerida_e_volta(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """AC-5: Espacos criados na 0001 recebem a Meta sugerida do tipo e agentes desligados."""
+    import sqlite3
+
+    db_file = tmp_path / "migracao_0002.db"
+    monkeypatch.setenv("NEO_DATABASE_URL", f"sqlite+aiosqlite:///{db_file}")
+    cfg = _alembic_config()
+    command.upgrade(cfg, "0001_identidade_inicial")
+
+    con = sqlite3.connect(db_file)
+    con.execute(
+        "INSERT INTO usuarios (id, clerk_user_id, email, criado_em) "
+        "VALUES ('u1', 'user_mig', 'm@neo.app', '2026-11-22')"
+    )
+    for i, tipo in enumerate(["trabalho", "estudos", "hobbies", "pessoal"]):
+        con.execute(
+            "INSERT INTO espacos (id, usuario_id, nome, tipo, criado_em) "
+            f"VALUES ('e{i}', 'u1', 'Espaço {tipo}', '{tipo}', '2026-11-22')"
+        )
+    con.commit()
+    con.close()
+
+    command.upgrade(cfg, "head")
+    con = sqlite3.connect(db_file)
+    linhas = {
+        tipo: (meta, agentes)
+        for tipo, meta, agentes in con.execute(
+            "SELECT tipo, meta_semanal, agentes_sugeridos FROM espacos"
+        )
+    }
+    con.close()
+    assert linhas == {
+        "trabalho": (30, 0),
+        "estudos": (10, 0),
+        "hobbies": (8, 0),
+        "pessoal": (8, 0),
+    }
+
+    command.downgrade(cfg, "0001_identidade_inicial")
+    con = sqlite3.connect(db_file)
+    colunas = {linha[1] for linha in con.execute("PRAGMA table_info(espacos)")}
+    con.close()
+    assert "meta_semanal" not in colunas and "agentes_sugeridos" not in colunas

@@ -15,6 +15,7 @@ from neo.domain.identidade import (
     EmailAutorizado,
     Espaco,
     IdentidadeExterna,
+    MetaSemanal,
     NomeDeExibicao,
     NomeDoEspaco,
     PrimeiroAcessoJaConcluidoError,
@@ -35,6 +36,20 @@ def _espaco_para_dominio(orm: EspacoORM) -> Espaco:
         nome=NomeDoEspaco(orm.nome),
         tipo=TipoEspaco(orm.tipo),
         criado_em=_garantir_utc(orm.criado_em),
+        meta_semanal=MetaSemanal(orm.meta_semanal),
+        agentes_sugeridos=orm.agentes_sugeridos,
+    )
+
+
+def _espaco_para_orm(espaco: Espaco) -> EspacoORM:
+    return EspacoORM(
+        id=espaco.id,
+        usuario_id=espaco.usuario_id,
+        nome=espaco.nome.valor,
+        tipo=espaco.tipo.value,
+        criado_em=espaco.criado_em,
+        meta_semanal=espaco.meta_semanal.valor,
+        agentes_sugeridos=espaco.agentes_sugeridos,
     )
 
 
@@ -112,20 +127,17 @@ class RepositorioDeUsuariosSQLAlchemy:
             if (resultado.rowcount or 0) == 0:
                 raise PrimeiroAcessoJaConcluidoError()
 
-            session.add(
-                EspacoORM(
-                    id=espaco.id,
-                    usuario_id=usuario.id,
-                    nome=espaco.nome.valor,
-                    tipo=espaco.tipo.value,
-                    criado_em=espaco.criado_em,
-                )
-            )
+            session.add(_espaco_para_orm(espaco))
 
         atualizado = await self.buscar_por_identidade(usuario.identidade)
         if atualizado is None:
             raise RuntimeError("Usuario nao encontrado apos gravacao do primeiro acesso.")
         return atualizado
+
+    async def adicionar_espaco(self, espaco: Espaco) -> None:
+        """Grava um novo Espaco do Usuario numa transacao (0040)."""
+        async with self._session_factory() as session, session.begin():
+            session.add(_espaco_para_orm(espaco))
 
 
 class RepositorioDeListaDePermissaoSQLAlchemy:
